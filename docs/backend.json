@@ -1,0 +1,362 @@
+{
+  "entities": {
+    "Client": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Client",
+      "type": "object",
+      "description": "Represents a client using the transport services.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the client."
+        },
+        "ruc": {
+          "type": "string",
+          "description": "Client's RUC number."
+        },
+        "name": {
+          "type": "string",
+          "description": "Client's name."
+        },
+        "address": {
+          "type": "string",
+          "description": "Client's address."
+        },
+        "contactName": {
+          "type": "string",
+          "description": "Contact name for the client."
+        },
+        "contactPhone": {
+          "type": "string",
+          "description": "Contact phone number for the client."
+        },
+        "contactEmail": {
+          "type": "string",
+          "description": "Contact email for the client.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "ruc",
+        "name"
+      ]
+    },
+    "Driver": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Driver",
+      "type": "object",
+      "description": "Represents a driver employed by the transport service.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the driver."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "Driver's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Driver's last name."
+        },
+        "licenseNumber": {
+          "type": "string",
+          "description": "Driver's license number."
+        },
+        "contactPhone": {
+          "type": "string",
+          "description": "Driver's contact phone number."
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "licenseNumber"
+      ]
+    },
+    "Vehicle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vehicle",
+      "type": "object",
+      "description": "Represents a vehicle used for transport services.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the vehicle."
+        },
+        "driverId": {
+          "type": "string",
+          "description": "Reference to Driver. (Relationship: Driver 1:N Vehicle)"
+        },
+        "make": {
+          "type": "string",
+          "description": "Vehicle's make (e.g., Toyota)."
+        },
+        "model": {
+          "type": "string",
+          "description": "Vehicle's model (e.g., Camry)."
+        },
+        "licensePlate": {
+          "type": "string",
+          "description": "Vehicle's license plate number."
+        },
+        "vehicleType": {
+          "type": "string",
+          "description": "Vehicle's type (e.g., Sedan, Truck)."
+        }
+      },
+      "required": [
+        "id",
+        "make",
+        "model",
+        "licensePlate"
+      ]
+    },
+    "ServiceRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ServiceRequest",
+      "type": "object",
+      "description": "Represents a transport service request.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the service request."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to Client. (Relationship: Client 1:N ServiceRequest)"
+        },
+        "driverId": {
+          "type": "string",
+          "description": "Reference to Driver. (Relationship: Driver 1:N ServiceRequest)"
+        },
+        "vehicleId": {
+          "type": "string",
+          "description": "Reference to Vehicle. (Relationship: Vehicle 1:N ServiceRequest)"
+        },
+        "pickupLocation": {
+          "type": "string",
+          "description": "Pickup location for the service."
+        },
+        "destination": {
+          "type": "string",
+          "description": "Destination for the service."
+        },
+        "requestDate": {
+          "type": "string",
+          "description": "Date of the service request.",
+          "format": "date-time"
+        },
+        "serviceDate": {
+          "type": "string",
+          "description": "Date of the service.",
+          "format": "date-time"
+        },
+        "specialRequirements": {
+          "type": "string",
+          "description": "Any special requirements for the service."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the service request (e.g., Pending, Assigned, Completed)."
+        }
+      },
+      "required": [
+        "id",
+        "clientId",
+        "pickupLocation",
+        "destination",
+        "requestDate",
+        "status"
+      ]
+    },
+    "Route": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Route",
+      "type": "object",
+      "description": "Represents a route taken by a vehicle.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the route."
+        },
+        "serviceRequestId": {
+          "type": "string",
+          "description": "Reference to ServiceRequest. (Relationship: ServiceRequest 1:N Route)"
+        },
+        "startPoint": {
+          "type": "string",
+          "description": "Starting point of the route."
+        },
+        "endPoint": {
+          "type": "string",
+          "description": "Ending point of the route."
+        },
+        "distance": {
+          "type": "number",
+          "description": "Distance of the route in kilometers."
+        },
+        "estimatedTime": {
+          "type": "number",
+          "description": "Estimated time to complete the route in minutes."
+        }
+      },
+      "required": [
+        "id",
+        "serviceRequestId",
+        "startPoint",
+        "endPoint"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the system (administrator or assistant).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "username": {
+          "type": "string",
+          "description": "User's username."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role (e.g., administrator, assistant)."
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "role"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Accessible only by the user and admins.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Indicates admin role. Existence of document grants admin privileges.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the admin user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/clients/{clientId}",
+        "definition": {
+          "entityName": "Client",
+          "schema": {
+            "$ref": "#/backend/entities/Client"
+          },
+          "description": "Stores client information. Accessible by admins and associated users.",
+          "params": [
+            {
+              "name": "clientId",
+              "description": "The unique identifier of the client."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/drivers/{driverId}",
+        "definition": {
+          "entityName": "Driver",
+          "schema": {
+            "$ref": "#/backend/entities/Driver"
+          },
+          "description": "Stores driver information. Accessible by admins.",
+          "params": [
+            {
+              "name": "driverId",
+              "description": "The unique identifier of the driver."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/vehicles/{vehicleId}",
+        "definition": {
+          "entityName": "Vehicle",
+          "schema": {
+            "$ref": "#/backend/entities/Vehicle"
+          },
+          "description": "Stores vehicle information. Accessible by admins.",
+          "params": [
+            {
+              "name": "vehicleId",
+              "description": "The unique identifier of the vehicle."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/serviceRequests/{serviceRequestId}",
+        "definition": {
+          "entityName": "ServiceRequest",
+          "schema": {
+            "$ref": "#/backend/entities/ServiceRequest"
+          },
+          "description": "Stores transport service requests. Accessible by admins and the client who created it.",
+          "params": [
+            {
+              "name": "serviceRequestId",
+              "description": "The unique identifier of the service request."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/routes/{routeId}",
+        "definition": {
+          "entityName": "Route",
+          "schema": {
+            "$ref": "#/backend/entities/Route"
+          },
+          "description": "Stores route information. Accessible by admins.",
+          "params": [
+            {
+              "name": "routeId",
+              "description": "The unique identifier of the route."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the core features of the Mewing Transport Manager application, focusing on security, scalability, and ease of querying. It incorporates denormalization where needed to avoid complex queries and ensure authorization independence. Here's a breakdown:\n\n*   **Authorization Independence**: The structure avoids using `get()` calls in security rules by denormalizing authorization data. For example, if access to routes depended on a service request's attributes, those attributes would be copied into the Route document.\n*   **Structural Segregation**: Collections are segregated based on their security requirements. User-specific data is stored under `/users/{userId}`, ensuring that only the user and admins can access it. Shared or global data resides in top-level collections.\n*   **Access Modeling**: Path-based ownership is used for user-specific data. The Membership Map pattern would be employed for collaborative entities if there were any.  Since there are no collaborative features, this isn't needed. Roles are managed via document existence in `/roles_admin/{uid}`. Vehicle ownership is implicit via driverId.\n*   **Data Clarity and Predictability**: The `status` field in `ServiceRequest` explicitly models the state of the service. Schema follows a predictable structure, and naming conventions are consistently applied.\n*   **Report Generation**:  The structure supports report generation by allowing efficient queries on the `clients`, `drivers`, `vehicles`, and `serviceRequests` collections.\n\n**QAPs Support**\n\n*   The segregated structure allows for simple and secure `list` operations. For instance, listing all service requests for a specific client is done by querying `/clients/{clientId}/serviceRequests`.  This avoids the need for complex filtering in rules, thus enforcing the principle that 'Rules are not Filters'.\n*   Admin access is controlled via the existence of a document in the `/roles_admin/{uid}` collection. Admin roles aren't stored on the user document to prevent privilege escalation.\n\nThe structure adheres to the principles of Authorization Independence, Structural Segregation, Access Modeling, and Data Clarity to facilitate simple, robust, and easily debuggable security rules."
+  }
+}
