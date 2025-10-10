@@ -109,7 +109,7 @@ service cloud.firestore {
       }
       allow get: if isAdmin() || (request.auth.uid == resource.data.clientId);
       allow list: if isAdmin();
-      allow create: if isAdmin();
+      allow create: if isAdmin() || (request.auth.uid == request.resource.data.clientId);
       allow update: if isAdmin() || (request.auth.uid == resource.data.clientId);
       allow delete: if isAdmin() || (request.auth.uid == resource.data.clientId);
     }
