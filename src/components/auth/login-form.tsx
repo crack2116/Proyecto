@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useAuth } from "@/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +31,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,13 +41,38 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Mock login logic
-    toast({
-      title: "Inicio de Sesión Exitoso",
-      description: "¡Bienvenido de nuevo!",
-    });
-    router.push("/dashboard");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      toast({
+        title: "Inicio de Sesión Exitoso",
+        description: "¡Bienvenido de nuevo!",
+      });
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Firebase Auth Error:", error);
+      let errorMessage = "Ocurrió un error al intentar iniciar sesión.";
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          errorMessage = 'El correo electrónico o la contraseña son incorrectos.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'El formato del correo electrónico no es válido.';
+          break;
+        case 'auth/invalid-credential':
+            errorMessage = 'Las credenciales proporcionadas son inválidas.';
+            break;
+        default:
+          errorMessage = 'Error de autenticación. Por favor, intenta de nuevo.';
+          break;
+      }
+      toast({
+        variant: "destructive",
+        title: "Error de Inicio de Sesión",
+        description: errorMessage,
+      });
+    }
   }
 
   return (
@@ -57,7 +85,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Correo Electrónico</FormLabel>
               <FormControl>
-                <Input placeholder="gerente@mewing.com" {...field} />
+                <Input placeholder="admin@mewing.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,8 +104,8 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          Iniciar Sesión
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Iniciando Sesión..." : "Iniciar Sesión"}
         </Button>
       </form>
     </Form>

@@ -12,9 +12,11 @@ import {
   import { Header } from "./header";
   import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
   import { PlaceHolderImages } from "@/lib/placeholder-images";
+  import { useUser } from "@/firebase";
   
   export function AppShell({ children }: { children: React.ReactNode }) {
     const userAvatar = PlaceHolderImages.find((p) => p.id === 'user-avatar-1');
+    const { user } = useUser();
   
     return (
       <SidebarProvider>
@@ -31,14 +33,14 @@ import {
           <SidebarFooter>
             <div className="flex items-center gap-3 p-2 rounded-lg bg-sidebar-accent">
                 <Avatar className="h-10 w-10">
-                    {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="User Avatar" data-ai-hint={userAvatar.imageHint} />}
+                    <AvatarImage src={user?.photoURL ?? userAvatar?.imageUrl} alt="User Avatar" />
                     <AvatarFallback>
                         <User />
                     </AvatarFallback>
                 </Avatar>
                 <div>
-                    <p className="font-semibold text-sidebar-accent-foreground">Admin User</p>
-                    <p className="text-xs text-sidebar-foreground/70">admin@mewing.com</p>
+                    <p className="font-semibold text-sidebar-accent-foreground">{user?.displayName ?? "Usuario"}</p>
+                    <p className="text-xs text-sidebar-foreground/70">{user?.email}</p>
                 </div>
             </div>
           </SidebarFooter>

@@ -27,10 +27,20 @@ import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Link from 'next/link';
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useAuth, useUser } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 export function Header() {
-    const userAvatar = PlaceHolderImages.find((p) => p.id === 'user-avatar-1');
+    const { user } = useUser();
+    const auth = useAuth();
+    const router = useRouter();
+
+    const handleSignOut = async () => {
+        await signOut(auth);
+        router.push('/');
+    };
+
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
       <SidebarTrigger className="md:hidden" />
@@ -66,7 +76,7 @@ export function Header() {
             className="overflow-hidden rounded-full"
           >
              <Avatar className="h-8 w-8">
-                {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="User Avatar" data-ai-hint={userAvatar.imageHint} />}
+                <AvatarImage src={user?.photoURL ?? undefined} alt="User Avatar" />
                 <AvatarFallback><User /></AvatarFallback>
             </Avatar>
           </Button>
@@ -77,8 +87,8 @@ export function Header() {
           <DropdownMenuItem><User className="mr-2 h-4 w-4" />Perfil</DropdownMenuItem>
           <DropdownMenuItem><Bell className="mr-2 h-4 w-4" />Notificaciones</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/"><LogOut className="mr-2 h-4 w-4" />Cerrar Sesión</Link>
+          <DropdownMenuItem onClick={handleSignOut}>
+            <LogOut className="mr-2 h-4 w-4" />Cerrar Sesión
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
