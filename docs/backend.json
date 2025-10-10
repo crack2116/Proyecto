@@ -239,124 +239,52 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles. Accessible only by the user and admins.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
-        }
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
       },
-      {
-        "path": "/roles_admin/{userId}",
-        "definition": {
-          "entityName": "AdminRole",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Indicates admin role. Existence of document grants admin privileges.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the admin user."
-            }
-          ]
-        }
+      "description": "Stores user profiles. Accessible only by the user and admins."
+    },
+    "/roles_admin/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
       },
-      {
-        "path": "/clients/{clientId}",
-        "definition": {
-          "entityName": "Client",
-          "schema": {
-            "$ref": "#/backend/entities/Client"
-          },
-          "description": "Stores client information. Accessible by admins and associated users.",
-          "params": [
-            {
-              "name": "clientId",
-              "description": "The unique identifier of the client."
-            }
-          ]
-        }
+      "description": "Indicates admin role. Existence of document grants admin privileges."
+    },
+    "/clients/{clientId}": {
+      "schema": {
+        "$ref": "#/entities/Client"
       },
-      {
-        "path": "/drivers/{driverId}",
-        "definition": {
-          "entityName": "Driver",
-          "schema": {
-            "$ref": "#/backend/entities/Driver"
-          },
-          "description": "Stores driver information. Accessible by admins.",
-          "params": [
-            {
-              "name": "driverId",
-              "description": "The unique identifier of the driver."
-            }
-          ]
-        }
+      "description": "Stores client information. Accessible by admins and associated users."
+    },
+    "/drivers/{driverId}": {
+      "schema": {
+        "$ref": "#/entities/Driver"
       },
-      {
-        "path": "/vehicles/{vehicleId}",
-        "definition": {
-          "entityName": "Vehicle",
-          "schema": {
-            "$ref": "#/backend/entities/Vehicle"
-          },
-          "description": "Stores vehicle information. Accessible by admins.",
-          "params": [
-            {
-              "name": "vehicleId",
-              "description": "The unique identifier of the vehicle."
-            }
-          ]
-        }
+      "description": "Stores driver information. Accessible by admins."
+    },
+    "/vehicles/{vehicleId}": {
+      "schema": {
+        "$ref": "#/entities/Vehicle"
       },
-      {
-        "path": "/serviceRequests/{serviceRequestId}",
-        "definition": {
-          "entityName": "ServiceRequest",
-          "schema": {
-            "$ref": "#/backend/entities/ServiceRequest"
-          },
-          "description": "Stores transport service requests. Accessible by admins and the client who created it.",
-          "params": [
-            {
-              "name": "serviceRequestId",
-              "description": "The unique identifier of the service request."
-            }
-          ]
-        }
+      "description": "Stores vehicle information. Accessible by admins."
+    },
+    "/serviceRequests/{serviceRequestId}": {
+      "schema": {
+        "$ref": "#/entities/ServiceRequest"
       },
-      {
-        "path": "/routes/{routeId}",
-        "definition": {
-          "entityName": "Route",
-          "schema": {
-            "$ref": "#/backend/entities/Route"
-          },
-          "description": "Stores route information. Accessible by admins.",
-          "params": [
-            {
-              "name": "routeId",
-              "description": "The unique identifier of the route."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore data structure is designed to support the core features of the Mewing Transport Manager application, focusing on security, scalability, and ease of querying. It incorporates denormalization where needed to avoid complex queries and ensure authorization independence. Here's a breakdown:\n\n*   **Authorization Independence**: The structure avoids using `get()` calls in security rules by denormalizing authorization data. For example, if access to routes depended on a service request's attributes, those attributes would be copied into the Route document.\n*   **Structural Segregation**: Collections are segregated based on their security requirements. User-specific data is stored under `/users/{userId}`, ensuring that only the user and admins can access it. Shared or global data resides in top-level collections.\n*   **Access Modeling**: Path-based ownership is used for user-specific data. The Membership Map pattern would be employed for collaborative entities if there were any.  Since there are no collaborative features, this isn't needed. Roles are managed via document existence in `/roles_admin/{uid}`. Vehicle ownership is implicit via driverId.\n*   **Data Clarity and Predictability**: The `status` field in `ServiceRequest` explicitly models the state of the service. Schema follows a predictable structure, and naming conventions are consistently applied.\n*   **Report Generation**:  The structure supports report generation by allowing efficient queries on the `clients`, `drivers`, `vehicles`, and `serviceRequests` collections.\n\n**QAPs Support**\n\n*   The segregated structure allows for simple and secure `list` operations. For instance, listing all service requests for a specific client is done by querying `/clients/{clientId}/serviceRequests`.  This avoids the need for complex filtering in rules, thus enforcing the principle that 'Rules are not Filters'.\n*   Admin access is controlled via the existence of a document in the `/roles_admin/{uid}` collection. Admin roles aren't stored on the user document to prevent privilege escalation.\n\nThe structure adheres to the principles of Authorization Independence, Structural Segregation, Access Modeling, and Data Clarity to facilitate simple, robust, and easily debuggable security rules."
+      "description": "Stores transport service requests. Accessible by admins and the client who created it."
+    },
+    "/routes/{routeId}": {
+      "schema": {
+        "$ref": "#/entities/Route"
+      },
+      "description": "Stores route information. Accessible by admins."
+    }
   }
 }
