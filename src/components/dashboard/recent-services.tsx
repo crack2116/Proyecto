@@ -1,3 +1,4 @@
+"use client";
 import {
     Table,
     TableBody,
@@ -7,15 +8,30 @@ import {
     TableRow,
   } from "@/components/ui/table";
   import { Badge } from "@/components/ui/badge";
-  import { serviceRequests } from "@/lib/data";
   import { cn } from "@/lib/utils";
+  import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+  import { collection, query, limit } from "firebase/firestore";
+  import type { ServiceRequest } from "@/lib/types";
+import { Loader2 } from "lucide-react";
   
   export function RecentServices() {
+    const firestore = useFirestore();
+    const serviceRequestsQuery = useMemoFirebase(() => query(collection(firestore, "serviceRequests"), limit(5)), [firestore]);
+    const { data: serviceRequests, isLoading } = useCollection<ServiceRequest>(serviceRequestsQuery);
+
     const statusTranslations: { [key: string]: string } = {
         "Completed": "Completado",
         "In Progress": "En Progreso",
         "Pending": "Pendiente",
         "Cancelled": "Cancelado"
+    }
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-48">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        )
     }
 
     return (
@@ -28,10 +44,10 @@ import {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {serviceRequests.slice(0, 5).map((request) => (
+          {serviceRequests && serviceRequests.map((request) => (
             <TableRow key={request.id}>
               <TableCell>
-                <div className="font-medium">{request.client}</div>
+                <div className="font-medium">{request.clientId}</div>
                 <div className="hidden text-sm text-muted-foreground md:inline">
                   {request.destination}
                 </div>
@@ -49,7 +65,7 @@ import {
                   {statusTranslations[request.status]}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right">{request.date}</TableCell>
+              <TableCell className="text-right">{new Date(request.serviceDate).toLocaleDateString()}</TableCell>
             </TableRow>
           ))}
         </TableBody>

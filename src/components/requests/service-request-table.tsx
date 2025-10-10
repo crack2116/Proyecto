@@ -1,3 +1,4 @@
+"use client";
 import {
     Table,
     TableBody,
@@ -7,7 +8,6 @@ import {
     TableRow,
   } from "@/components/ui/table";
   import { Badge } from "@/components/ui/badge";
-  import { serviceRequests } from "@/lib/data";
   import { cn } from "@/lib/utils";
   import { Card, CardContent } from "../ui/card";
   import {
@@ -18,14 +18,29 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
-  import { MoreHorizontal } from "lucide-react";
+  import { MoreHorizontal, Loader2 } from "lucide-react";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query } from "firebase/firestore";
+import type { ServiceRequest } from "@/lib/types";
   
   export function ServiceRequestTable() {
+    const firestore = useFirestore();
+    const serviceRequestsQuery = useMemoFirebase(() => query(collection(firestore, "serviceRequests")), [firestore]);
+    const { data: serviceRequests, isLoading } = useCollection<ServiceRequest>(serviceRequestsQuery);
+
     const statusTranslations: { [key: string]: string } = {
         "Completed": "Completado",
         "In Progress": "En Progreso",
         "Pending": "Pendiente",
         "Cancelled": "Cancelado"
+    }
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        )
     }
 
     return (
@@ -45,12 +60,12 @@ import {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {serviceRequests.map((request) => (
+                    {serviceRequests && serviceRequests.map((request) => (
                         <TableRow key={request.id}>
-                            <TableCell className="font-medium">{request.id}</TableCell>
-                            <TableCell>{request.client}</TableCell>
+                            <TableCell className="font-medium">{request.id.substring(0,7)}</TableCell>
+                            <TableCell>{request.clientId}</TableCell>
                             <TableCell>
-                                <div className="font-medium">{request.pickup}</div>
+                                <div className="font-medium">{request.pickupLocation}</div>
                                 <div className="text-sm text-muted-foreground">a {request.destination}</div>
                             </TableCell>
                             <TableCell>
@@ -68,7 +83,7 @@ import {
                                     {statusTranslations[request.status]}
                                 </Badge>
                             </TableCell>
-                            <TableCell>{request.driver === 'Not Assigned' ? 'No Asignado' : request.driver}</TableCell>
+                            <TableCell>{request.driverId ?? 'No Asignado'}</TableCell>
                             <TableCell>
                                 <DropdownMenu>
                                 <DropdownMenuTrigger asChild>

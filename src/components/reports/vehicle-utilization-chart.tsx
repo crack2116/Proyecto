@@ -1,8 +1,17 @@
 "use client"
 
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { vehicleUtilizationData } from "@/lib/data"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
+
+const vehicleUtilizationData = [
+    { date: '2024-06-01', utilization: 75 },
+    { date: '2024-06-02', utilization: 78 },
+    { date: '2024-06-03', utilization: 80 },
+    { date: '2024-06-04', utilization: 82 },
+    { date: '2024-06-05', utilization: 79 },
+    { date: '2024-06-06', utilization: 85 },
+    { date: '2024-06-07', utilization: 88 },
+];
 
 export function VehicleUtilizationChart() {
     const chartConfig = {

@@ -8,6 +8,7 @@ import {
   Map,
   BarChart3,
   LifeBuoy,
+  Users,
 } from "lucide-react";
 
 import {
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Panel de Control" },
   { href: "/dashboard/requests", icon: Truck, label: "Solicitudes de Servicio" },
+  { href: "/dashboard/management", icon: Users, label: "Gestión" },
   { href: "/dashboard/tracking", icon: Map, label: "Seguimiento en Tiempo Real" },
   { href: "/dashboard/reports", icon: BarChart3, label: "Reportes" },
   { href: "/dashboard/support", icon: LifeBuoy, label: "Soporte" },
@@ -34,10 +36,10 @@ export function Nav() {
         <SidebarMenuItem key={item.href}>
           <Link href={item.href}>
             <SidebarMenuButton
-              isActive={pathname === item.href}
+              isActive={pathname.startsWith(item.href)}
               tooltip={item.label}
               className={cn(
-                pathname === item.href
+                pathname.startsWith(item.href)
                   ? "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground"
                   : "text-sidebar-foreground/80 hover:text-sidebar-foreground"
               )}

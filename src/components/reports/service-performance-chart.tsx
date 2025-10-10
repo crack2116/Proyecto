@@ -1,8 +1,17 @@
 "use client"
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { servicePerformanceData } from "@/lib/data"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
+
+const servicePerformanceData = [
+    { month: 'Ene', onTime: 80, delayed: 20 },
+    { month: 'Feb', onTime: 85, delayed: 15 },
+    { month: 'Mar', onTime: 90, delayed: 10 },
+    { month: 'Abr', onTime: 88, delayed: 12 },
+    { month: 'May', onTime: 92, delayed: 8 },
+    { month: 'Jun', onTime: 95, delayed: 5 },
+];
+
 
 export function ServicePerformanceChart() {
     const chartConfig = {
