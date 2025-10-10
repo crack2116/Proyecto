@@ -20,6 +20,15 @@ import {
   import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
   import { collection, query } from "firebase/firestore";
   import type { Vehicle } from "@/lib/types";
+  import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog";
+  import { VehicleForm } from "./vehicle-form";
   
   export function VehiclesTable() {
     const firestore = useFirestore();
@@ -33,10 +42,23 @@ import {
                     <CardTitle>Vehículos</CardTitle>
                     <CardDescription>Lista de todos los vehículos registrados.</CardDescription>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Agregar Vehículo
-                </Button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Agregar Vehículo
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[525px]">
+                        <DialogHeader>
+                            <DialogTitle className="font-headline text-2xl">Agregar Nuevo Vehículo</DialogTitle>
+                            <DialogDescription>
+                                Completa los detalles para registrar un nuevo vehículo.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <VehicleForm />
+                    </DialogContent>
+                </Dialog>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -87,4 +109,4 @@ import {
         </Card>
     );
   }
-  
+    

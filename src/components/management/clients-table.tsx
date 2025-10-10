@@ -20,6 +20,15 @@ import {
   import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
   import { collection, query } from "firebase/firestore";
   import type { Client } from "@/lib/types";
+  import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog"
+import { ClientForm } from "./client-form";
 
   
   export function ClientsTable() {
@@ -34,10 +43,23 @@ import {
                     <CardTitle>Clientes</CardTitle>
                     <CardDescription>Lista de todos los clientes registrados.</CardDescription>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Agregar Cliente
-                </Button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Agregar Cliente
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[625px]">
+                        <DialogHeader>
+                            <DialogTitle className="font-headline text-2xl">Agregar Nuevo Cliente</DialogTitle>
+                            <DialogDescription>
+                                Completa los detalles para registrar un nuevo cliente.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <ClientForm />
+                    </DialogContent>
+                </Dialog>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -91,4 +113,4 @@ import {
         </Card>
     );
   }
-  
+    

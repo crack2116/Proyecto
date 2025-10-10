@@ -20,6 +20,15 @@ import {
   import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
   import { collection, query } from "firebase/firestore";
   import type { Driver } from "@/lib/types";
+  import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog"
+  import { DriverForm } from "./driver-form";
   
   export function DriversTable() {
     const firestore = useFirestore();
@@ -33,10 +42,23 @@ import {
                     <CardTitle>Conductores</CardTitle>
                     <CardDescription>Lista de todos los conductores registrados.</CardDescription>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Agregar Conductor
-                </Button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Agregar Conductor
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[525px]">
+                        <DialogHeader>
+                            <DialogTitle className="font-headline text-2xl">Agregar Nuevo Conductor</DialogTitle>
+                            <DialogDescription>
+                                Completa los detalles para registrar un nuevo conductor.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DriverForm />
+                    </DialogContent>
+                </Dialog>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -85,4 +107,4 @@ import {
         </Card>
     );
   }
-  
+    
