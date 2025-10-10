@@ -18,11 +18,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/requests", icon: Truck, label: "Service Requests" },
-  { href: "/dashboard/tracking", icon: Map, label: "Real-Time Tracking" },
-  { href: "/dashboard/reports", icon: BarChart3, label: "Reports" },
-  { href: "/dashboard/support", icon: LifeBuoy, label: "Support" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Panel de Control" },
+  { href: "/dashboard/requests", icon: Truck, label: "Solicitudes de Servicio" },
+  { href: "/dashboard/tracking", icon: Map, label: "Seguimiento en Tiempo Real" },
+  { href: "/dashboard/reports", icon: BarChart3, label: "Reportes" },
+  { href: "/dashboard/support", icon: LifeBuoy, label: "Soporte" },
 ];
 
 export function Nav() {

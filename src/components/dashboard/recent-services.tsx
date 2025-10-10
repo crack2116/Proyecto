@@ -11,13 +11,20 @@ import {
   import { cn } from "@/lib/utils";
   
   export function RecentServices() {
+    const statusTranslations: { [key: string]: string } = {
+        "Completed": "Completado",
+        "In Progress": "En Progreso",
+        "Pending": "Pendiente",
+        "Cancelled": "Cancelado"
+    }
+
     return (
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Client</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Date</TableHead>
+            <TableHead>Cliente</TableHead>
+            <TableHead>Estado</TableHead>
+            <TableHead className="text-right">Fecha</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -39,7 +46,7 @@ import {
                     "border-none"
                   )}
                 >
-                  {request.status}
+                  {statusTranslations[request.status]}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">{request.date}</TableCell>

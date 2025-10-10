@@ -7,14 +7,14 @@ export default function SupportPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-headline font-bold tracking-tight">Support</h1>
-        <p className="text-muted-foreground">Find answers to your questions and get assistance.</p>
+        <h1 className="text-3xl font-headline font-bold tracking-tight">Soporte</h1>
+        <p className="text-muted-foreground">Encuentra respuestas a tus preguntas y obtén asistencia.</p>
       </div>
 
       <Tabs defaultValue="assistant" className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="assistant">Virtual Assistant</TabsTrigger>
-          <TabsTrigger value="faq">FAQ</TabsTrigger>
+          <TabsTrigger value="assistant">Asistente Virtual</TabsTrigger>
+          <TabsTrigger value="faq">Preguntas Frecuentes</TabsTrigger>
         </TabsList>
         <TabsContent value="assistant">
           <Card>

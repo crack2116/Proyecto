@@ -40,7 +40,7 @@ export function Header() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/dashboard">Dashboard</Link>
+              <Link href="/dashboard">Panel de Control</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -50,13 +50,13 @@ export function Header() {
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search..."
+          placeholder="Buscar..."
           className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[320px]"
         />
       </div>
       <Button variant="ghost" size="icon" className="rounded-full">
           <Bell className="h-5 w-5"/>
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">Notificaciones</span>
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -72,13 +72,13 @@ export function Header() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem><User className="mr-2 h-4 w-4" />Profile</DropdownMenuItem>
-          <DropdownMenuItem><Bell className="mr-2 h-4 w-4" />Notifications</DropdownMenuItem>
+          <DropdownMenuItem><User className="mr-2 h-4 w-4" />Perfil</DropdownMenuItem>
+          <DropdownMenuItem><Bell className="mr-2 h-4 w-4" />Notificaciones</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href="/"><LogOut className="mr-2 h-4 w-4" />Logout</Link>
+            <Link href="/"><LogOut className="mr-2 h-4 w-4" />Cerrar Sesión</Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

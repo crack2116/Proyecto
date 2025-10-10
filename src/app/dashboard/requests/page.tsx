@@ -17,21 +17,21 @@ export default function ServiceRequestsPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-            <h1 className="text-3xl font-headline font-bold tracking-tight">Service Requests</h1>
-            <p className="text-muted-foreground">Manage and assign all transport requests.</p>
+            <h1 className="text-3xl font-headline font-bold tracking-tight">Solicitudes de Servicio</h1>
+            <p className="text-muted-foreground">Gestiona y asigna todas las solicitudes de transporte.</p>
         </div>
         <Dialog>
             <DialogTrigger asChild>
-                <Button className="bg-accent hover:bg-accent/90">
+                <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Create New Request
+                    Crear Nueva Solicitud
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
-                    <DialogTitle className="font-headline text-2xl">New Service Request</DialogTitle>
+                    <DialogTitle className="font-headline text-2xl">Nueva Solicitud de Servicio</DialogTitle>
                     <DialogDescription>
-                        Fill in the details below to create a new transport service request.
+                        Completa los detalles a continuación para crear una nueva solicitud de servicio de transporte.
                     </DialogDescription>
                 </DialogHeader>
                 <RequestForm />

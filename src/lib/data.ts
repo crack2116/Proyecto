@@ -47,17 +47,17 @@ export const serviceRequests = [
 ];
 
 export const vehicles = [
-    { id: 'V01', driver: 'Carlos Rodriguez', lat: -5.178, lng: -80.652, status: 'On-trip' },
-    { id: 'V02', driver: 'Maria Garcia', lat: -5.194, lng: -80.632, status: 'On-trip' },
-    { id: 'V03', driver: 'Luis Hernandez', lat: -5.210, lng: -80.615, status: 'Available' },
-    { id: 'V04', driver: 'Ana Martinez', lat: -5.185, lng: -80.640, status: 'On-break' },
+    { id: 'V01', driver: 'Carlos Rodriguez', lat: -5.178, lng: -80.652, status: 'En viaje' },
+    { id: 'V02', driver: 'Maria Garcia', lat: -5.194, lng: -80.632, status: 'En viaje' },
+    { id: 'V03', driver: 'Luis Hernandez', lat: -5.210, lng: -80.615, status: 'Disponible' },
+    { id: 'V04', driver: 'Ana Martinez', lat: -5.185, lng: -80.640, status: 'En descanso' },
 ];
 
 export const servicePerformanceData = [
-    { month: 'Jan', onTime: 80, delayed: 20 },
+    { month: 'Ene', onTime: 80, delayed: 20 },
     { month: 'Feb', onTime: 85, delayed: 15 },
     { month: 'Mar', onTime: 90, delayed: 10 },
-    { month: 'Apr', onTime: 88, delayed: 12 },
+    { month: 'Abr', onTime: 88, delayed: 12 },
     { month: 'May', onTime: 92, delayed: 8 },
     { month: 'Jun', onTime: 95, delayed: 5 },
 ];
@@ -74,19 +74,19 @@ export const vehicleUtilizationData = [
 
 export const faqs = [
   {
-    question: "How do I request a new transport service?",
-    answer: "You can request a new service by navigating to the 'Service Requests' page and clicking the 'Create New Request' button. Fill out the required details such as pickup location, destination, date, and time, and submit the form."
+    question: "¿Cómo solicito un nuevo servicio de transporte?",
+    answer: "Puede solicitar un nuevo servicio navegando a la página 'Solicitudes de Servicio' y haciendo clic en el botón 'Crear Nueva Solicitud'. Complete los detalles requeridos, como la ubicación de recogida, el destino, la fecha y la hora, y envíe el formulario."
   },
   {
-    question: "Can I track my shipment in real-time?",
-    answer: "Yes, once a driver is assigned and the service is in progress, you can monitor the vehicle's location in real-time on the 'Real-Time Tracking' page."
+    question: "¿Puedo rastrear mi envío en tiempo real?",
+    answer: "Sí, una vez que se asigna un conductor y el servicio está en progreso, puede monitorear la ubicación del vehículo en tiempo real en la página de 'Seguimiento en Tiempo Real'."
   },
   {
-    question: "How are drivers assigned to requests?",
-    answer: "Administrators assign drivers based on their availability, the type of vehicle required for the service, and the optimal route. You will be notified once a driver is assigned."
+    question: "¿Cómo se asignan los conductores a las solicitudes?",
+    answer: "Los administradores asignan conductores según su disponibilidad, el tipo de vehículo requerido para el servicio y la ruta óptima. Se le notificará una vez que se asigne un conductor."
   },
   {
-    question: "What happens if a service is delayed?",
-    answer: "You will receive an automated notification via email or SMS if there are any significant delays. The real-time tracking map will also reflect the updated ETA."
+    question: "¿Qué sucede si un servicio se retrasa?",
+    answer: "Recibirá una notificación automática por correo electrónico o SMS si hay retrasos significativos. El mapa de seguimiento en tiempo real también reflejará la hora estimada de llegada actualizada."
   }
 ];

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,10 +24,10 @@ import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
-  pickup: z.string().min(1, "Pickup location is required"),
-  destination: z.string().min(1, "Destination is required"),
-  date: z.date({ required_error: "A date is required." }),
-  time: z.string().min(1, "Time is required"),
+  pickup: z.string().min(1, "La ubicación de recogida es obligatoria"),
+  destination: z.string().min(1, "El destino es obligatorio"),
+  date: z.date({ required_error: "Se requiere una fecha." }),
+  time: z.string().min(1, "La hora es obligatoria"),
   specialRequirements: z.string().optional(),
 });
 
@@ -46,8 +47,8 @@ export function RequestForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     toast({
-      title: "Request Submitted",
-      description: "Your new service request has been created successfully.",
+      title: "Solicitud Enviada",
+      description: "Tu nueva solicitud de servicio ha sido creada exitosamente.",
     });
     // Here you would typically close the dialog and refresh data
   }
@@ -61,9 +62,9 @@ export function RequestForm() {
             name="pickup"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Pickup Location</FormLabel>
+                <FormLabel>Ubicación de Recogida</FormLabel>
                 <FormControl>
-                    <Input placeholder="e.g., 123 Main St, Piura" {...field} />
+                    <Input placeholder="ej., Calle Principal 123, Piura" {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
@@ -74,9 +75,9 @@ export function RequestForm() {
             name="destination"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Destination</FormLabel>
+                <FormLabel>Destino</FormLabel>
                 <FormControl>
-                    <Input placeholder="e.g., 456 Market Ave, Sullana" {...field} />
+                    <Input placeholder="ej., Av. Mercado 456, Sullana" {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
@@ -89,7 +90,7 @@ export function RequestForm() {
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
+              <FormLabel>Fecha</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -101,9 +102,9 @@ export function RequestForm() {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "PPP")
+                        format(field.value, "PPP", { locale: es })
                       ) : (
-                        <span>Pick a date</span>
+                        <span>Elige una fecha</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -118,6 +119,7 @@ export function RequestForm() {
                       date < new Date() || date < new Date("1900-01-01")
                     }
                     initialFocus
+                    locale={es}
                   />
                 </PopoverContent>
               </Popover>
@@ -130,7 +132,7 @@ export function RequestForm() {
             name="time"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Time</FormLabel>
+                <FormLabel>Hora</FormLabel>
                 <FormControl>
                     <Input type="time" {...field} />
                 </FormControl>
@@ -144,16 +146,16 @@ export function RequestForm() {
             name="specialRequirements"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Special Requirements</FormLabel>
+                <FormLabel>Requerimientos Especiales</FormLabel>
                 <FormControl>
-                    <Textarea placeholder="e.g., Fragile items, requires refrigeration" {...field} />
+                    <Textarea placeholder="ej., Artículos frágiles, requiere refrigeración" {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
             )}
         />
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 mt-4">
-          Submit Request
+          Enviar Solicitud
         </Button>
       </form>
     </Form>

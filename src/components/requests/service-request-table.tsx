@@ -9,7 +9,7 @@ import {
   import { Badge } from "@/components/ui/badge";
   import { serviceRequests } from "@/lib/data";
   import { cn } from "@/lib/utils";
-  import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+  import { Card, CardContent } from "../ui/card";
   import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,19 +21,26 @@ import {
   import { MoreHorizontal } from "lucide-react";
   
   export function ServiceRequestTable() {
+    const statusTranslations: { [key: string]: string } = {
+        "Completed": "Completado",
+        "In Progress": "En Progreso",
+        "Pending": "Pendiente",
+        "Cancelled": "Cancelado"
+    }
+
     return (
         <Card>
             <CardContent className="pt-6">
                 <Table>
                     <TableHeader>
                     <TableRow>
-                        <TableHead>Request ID</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Details</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Driver</TableHead>
+                        <TableHead>ID de Solicitud</TableHead>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Detalles</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Conductor</TableHead>
                         <TableHead>
-                        <span className="sr-only">Actions</span>
+                        <span className="sr-only">Acciones</span>
                         </TableHead>
                     </TableRow>
                     </TableHeader>
@@ -44,7 +51,7 @@ import {
                             <TableCell>{request.client}</TableCell>
                             <TableCell>
                                 <div className="font-medium">{request.pickup}</div>
-                                <div className="text-sm text-muted-foreground">to {request.destination}</div>
+                                <div className="text-sm text-muted-foreground">a {request.destination}</div>
                             </TableCell>
                             <TableCell>
                                 <Badge
@@ -58,10 +65,10 @@ import {
                                     )}
                                     variant="outline"
                                 >
-                                    {request.status}
+                                    {statusTranslations[request.status]}
                                 </Badge>
                             </TableCell>
-                            <TableCell>{request.driver}</TableCell>
+                            <TableCell>{request.driver === 'Not Assigned' ? 'No Asignado' : request.driver}</TableCell>
                             <TableCell>
                                 <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -71,10 +78,10 @@ import {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem>Assign Driver</DropdownMenuItem>
-                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                    <DropdownMenuItem className="text-destructive">Cancel</DropdownMenuItem>
+                                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                                    <DropdownMenuItem>Asignar Conductor</DropdownMenuItem>
+                                    <DropdownMenuItem>Editar</DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive">Cancelar</DropdownMenuItem>
                                 </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>

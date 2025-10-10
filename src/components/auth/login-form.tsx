@@ -19,10 +19,10 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: "Por favor, introduce una dirección de correo electrónico válida.",
   }),
   password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
+    message: "La contraseña debe tener al menos 6 caracteres.",
   }),
 });
 
@@ -41,8 +41,8 @@ export function LoginForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Mock login logic
     toast({
-      title: "Login Successful",
-      description: "Welcome back!",
+      title: "Inicio de Sesión Exitoso",
+      description: "¡Bienvenido de nuevo!",
     });
     router.push("/dashboard");
   }
@@ -55,9 +55,9 @@ export function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Correo Electrónico</FormLabel>
               <FormControl>
-                <Input placeholder="manager@mewing.com" {...field} />
+                <Input placeholder="gerente@mewing.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,7 +68,7 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Contraseña</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
@@ -76,8 +76,8 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-          Login
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+          Iniciar Sesión
         </Button>
       </form>
     </Form>

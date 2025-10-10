@@ -3,16 +3,15 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { servicePerformanceData } from "@/lib/data"
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 
 export function ServicePerformanceChart() {
     const chartConfig = {
         onTime: {
-          label: "On-Time",
+          label: "A Tiempo",
           color: "hsl(var(--primary))",
         },
         delayed: {
-          label: "Delayed",
+          label: "Retrasado",
           color: "hsl(var(--accent))",
         },
       }

@@ -7,7 +7,7 @@ import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 export function VehicleUtilizationChart() {
     const chartConfig = {
         utilization: {
-          label: "Utilization (%)",
+          label: "Utilización (%)",
           color: "hsl(var(--primary))",
         },
       }
@@ -19,7 +19,7 @@ export function VehicleUtilizationChart() {
                 <CartesianGrid vertical={false} />
                 <XAxis
                     dataKey="date"
-                    tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { day: 'numeric', month: 'short'})}
+                    tickFormatter={(value) => new Date(value).toLocaleDateString('es-ES', { day: 'numeric', month: 'short'})}
                     tickLine={false}
                     tickMargin={10}
                     axisLine={false}

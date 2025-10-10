@@ -6,14 +6,14 @@ export default function ReportsPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-headline font-bold tracking-tight">Reports & Analytics</h1>
-        <p className="text-muted-foreground">Analyze performance and optimize your operations.</p>
+        <h1 className="text-3xl font-headline font-bold tracking-tight">Reportes y Analíticas</h1>
+        <p className="text-muted-foreground">Analiza el rendimiento y optimiza tus operaciones.</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
             <CardHeader>
-                <CardTitle>Service Performance</CardTitle>
-                <CardDescription>On-Time vs. Delayed Services (Last 6 Months)</CardDescription>
+                <CardTitle>Rendimiento del Servicio</CardTitle>
+                <CardDescription>Servicios a Tiempo vs. Retrasados (Últimos 6 Meses)</CardDescription>
             </CardHeader>
             <CardContent>
                 <ServicePerformanceChart />
@@ -21,8 +21,8 @@ export default function ReportsPage() {
         </Card>
         <Card>
             <CardHeader>
-                <CardTitle>Vehicle Utilization</CardTitle>
-                <CardDescription>Weekly Vehicle Usage Percentage</CardDescription>
+                <CardTitle>Utilización de Vehículos</CardTitle>
+                <CardDescription>Porcentaje de Uso Semanal de Vehículos</CardDescription>
             </CardHeader>
             <CardContent>
                 <VehicleUtilizationChart />

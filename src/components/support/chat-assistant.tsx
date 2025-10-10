@@ -97,13 +97,13 @@ export function ChatAssistant() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about our services..."
+            placeholder="Pregunta sobre nuestros servicios..."
             disabled={isLoading}
             autoComplete="off"
           />
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="bg-accent hover:bg-accent/90">
+          <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
             <SendHorizonal size={20} />
-            <span className="sr-only">Send</span>
+            <span className="sr-only">Enviar</span>
           </Button>
         </form>
       </div>

@@ -16,7 +16,7 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold font-headline">Mewing Transport</h1>
             </div>
             <p className="text-balance text-muted-foreground">
-              Enter your credentials to access the transport manager
+              Ingresa tus credenciales para acceder al gestor de transporte
             </p>
           </div>
           <LoginForm />
@@ -34,8 +34,8 @@ export default function LoginPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-10 left-10 text-white">
-            <h2 className="font-headline text-4xl font-bold">Reliable. Efficient. On Time.</h2>
-            <p className="mt-2 text-lg">Your complete transport management solution.</p>
+            <h2 className="font-headline text-4xl font-bold">Confiable. Eficiente. a Tiempo.</h2>
+            <p className="mt-2 text-lg">Tu solución completa de gestión de transporte.</p>
         </div>
       </div>
     </div>

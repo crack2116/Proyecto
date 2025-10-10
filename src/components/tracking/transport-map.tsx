@@ -17,7 +17,7 @@ export function TransportMap() {
     return (
       <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">
         <p className="text-destructive-foreground bg-destructive p-4 rounded-md">
-          Google Maps API Key is missing.
+          Falta la clave de API de Google Maps.
         </p>
       </div>
     );
@@ -26,7 +26,7 @@ export function TransportMap() {
   const position = { lat: -5.19449, lng: -80.63282 }; // Center of Piura
 
   return (
-    <APIProvider apiKey={apiKey}>
+    <APIProvider apiKey={apiKey} language="es">
       <TooltipProvider>
         <Map
           defaultCenter={position}
@@ -45,9 +45,9 @@ export function TransportMap() {
                 </AdvancedMarker>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="font-bold">Vehicle: {vehicle.id}</p>
-                <p>Driver: {vehicle.driver}</p>
-                <p>Status: {vehicle.status}</p>
+                <p className="font-bold">Vehículo: {vehicle.id}</p>
+                <p>Conductor: {vehicle.driver}</p>
+                <p>Estado: {vehicle.status}</p>
               </TooltipContent>
             </Tooltip>
           ))}
