@@ -154,7 +154,7 @@ export function VehicleForm({ setOpen, editingVehicle }: VehicleFormProps) {
         />
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 mt-4" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? "Guardando..." : "Guardar Vehículo"}
-        Button>
+        </Button>
       </form>
     </Form>
   );
