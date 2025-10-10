@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase";
+import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Vehicle } from "@/lib/types";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   licensePlate: z.string().min(6, "La placa es obligatoria.").max(7, "La placa no debe exceder los 7 caracteres."),
@@ -25,13 +28,23 @@ const formSchema = z.object({
   vehicleType: z.string().min(3, "El tipo de vehículo es obligatorio."),
 });
 
-export function VehicleForm() {
+type VehicleFormProps = {
+    setOpen: (open: boolean) => void;
+    editingVehicle: Vehicle | null;
+}
+
+export function VehicleForm({ setOpen, editingVehicle }: VehicleFormProps) {
   const { toast } = useToast();
   const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: editingVehicle ? {
+        licensePlate: editingVehicle.licensePlate,
+        make: editingVehicle.make,
+        model: editingVehicle.model,
+        vehicleType: editingVehicle.vehicleType,
+    } : {
       licensePlate: "",
       make: "",
       model: "",
@@ -39,17 +52,39 @@ export function VehicleForm() {
     },
   });
 
+  useEffect(() => {
+    form.reset(editingVehicle ? {
+        licensePlate: editingVehicle.licensePlate,
+        make: editingVehicle.make,
+        model: editingVehicle.model,
+        vehicleType: editingVehicle.vehicleType,
+    } : {
+      licensePlate: "",
+      make: "",
+      model: "",
+      vehicleType: "",
+    });
+  }, [editingVehicle, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-        const vehiclesCollection = collection(firestore, "vehicles");
-        await addDoc(vehiclesCollection, { ...values, driverId: null });
-        
-        toast({
-            title: "Vehículo Agregado",
-            description: "El nuevo vehículo ha sido registrado exitosamente.",
-        });
+        if (editingVehicle) {
+            const vehicleDocRef = doc(firestore, "vehicles", editingVehicle.id);
+            setDocumentNonBlocking(vehicleDocRef, values, { merge: true });
+            toast({
+                title: "Vehículo Actualizado",
+                description: "Los datos del vehículo han sido actualizados.",
+            });
+        } else {
+            const vehiclesCollection = collection(firestore, "vehicles");
+            addDocumentNonBlocking(vehiclesCollection, { ...values, driverId: null });
+            toast({
+                title: "Vehículo Agregado",
+                description: "El nuevo vehículo ha sido registrado exitosamente.",
+            });
+        }
         form.reset();
-        // TODO: Close dialog after submission
+        setOpen(false);
     } catch(error) {
         console.error("Error adding vehicle: ", error);
         toast({
@@ -118,10 +153,9 @@ export function VehicleForm() {
             )}
         />
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 mt-4" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Agregando..." : "Agregar Vehículo"}
-        </Button>
+            {form.formState.isSubmitting ? "Guardando..." : "Guardar Vehículo"}
+        Button>
       </form>
     </Form>
   );
 }
-    

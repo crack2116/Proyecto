@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase";
+import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Driver } from "@/lib/types";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "El nombre es obligatorio."),
@@ -25,13 +28,18 @@ const formSchema = z.object({
   contactPhone: z.string().min(9, "El teléfono de contacto es obligatorio."),
 });
 
-export function DriverForm() {
+type DriverFormProps = {
+    setOpen: (open: boolean) => void;
+    editingDriver: Driver | null;
+}
+
+export function DriverForm({ setOpen, editingDriver }: DriverFormProps) {
   const { toast } = useToast();
   const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: editingDriver || {
       firstName: "",
       lastName: "",
       licenseNumber: "",
@@ -39,23 +47,40 @@ export function DriverForm() {
     },
   });
 
+  useEffect(() => {
+    form.reset(editingDriver || {
+        firstName: "",
+        lastName: "",
+        licenseNumber: "",
+        contactPhone: "",
+    });
+  }, [editingDriver, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-        const driversCollection = collection(firestore, "drivers");
-        await addDoc(driversCollection, values);
-        
-        toast({
-            title: "Conductor Agregado",
-            description: "El nuevo conductor ha sido registrado exitosamente.",
-        });
+        if (editingDriver) {
+            const driverDocRef = doc(firestore, "drivers", editingDriver.id);
+            setDocumentNonBlocking(driverDocRef, values, { merge: true });
+            toast({
+                title: "Conductor Actualizado",
+                description: "Los datos del conductor han sido actualizados.",
+            });
+        } else {
+            const driversCollection = collection(firestore, "drivers");
+            addDocumentNonBlocking(driversCollection, values);
+            toast({
+                title: "Conductor Agregado",
+                description: "El nuevo conductor ha sido registrado exitosamente.",
+            });
+        }
         form.reset();
-        // TODO: Close dialog after submission
+        setOpen(false);
     } catch(error) {
-        console.error("Error adding driver: ", error);
+        console.error("Error saving driver: ", error);
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Ocurrió un error al agregar el conductor.",
+            description: "Ocurrió un error al guardar el conductor.",
           });
     }
   }
@@ -118,10 +143,9 @@ export function DriverForm() {
             )}
         />
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 mt-4" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Agregando..." : "Agregar Conductor"}
+            {form.formState.isSubmitting ? "Guardando..." : "Guardar Conductor"}
         </Button>
       </form>
     </Form>
   );
 }
-    

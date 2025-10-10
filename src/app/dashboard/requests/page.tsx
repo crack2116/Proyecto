@@ -1,3 +1,6 @@
+"use client";
+
+import React from "react";
 import { ServiceRequestTable } from "@/components/requests/service-request-table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -13,6 +16,8 @@ import { RequestForm } from "@/components/requests/request-form";
   
 
 export default function ServiceRequestsPage() {
+  const [open, setOpen] = React.useState(false);
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
@@ -20,7 +25,7 @@ export default function ServiceRequestsPage() {
             <h1 className="text-3xl font-headline font-bold tracking-tight">Solicitudes de Servicio</h1>
             <p className="text-muted-foreground">Gestiona y asigna todas las solicitudes de transporte.</p>
         </div>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -34,7 +39,7 @@ export default function ServiceRequestsPage() {
                         Completa los detalles a continuación para crear una nueva solicitud de servicio de transporte.
                     </DialogDescription>
                 </DialogHeader>
-                <RequestForm />
+                <RequestForm setOpen={setOpen} />
             </DialogContent>
         </Dialog>
       </div>

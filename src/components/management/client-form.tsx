@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Client } from "@/lib/types";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre es obligatorio."),
@@ -28,13 +30,18 @@ const formSchema = z.object({
   contactEmail: z.string().email("El correo electrónico no es válido."),
 });
 
-export function ClientForm() {
+type ClientFormProps = {
+    setOpen: (open: boolean) => void;
+    editingClient: Client | null;
+}
+
+export function ClientForm({ setOpen, editingClient }: ClientFormProps) {
   const { toast } = useToast();
   const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: editingClient || {
       name: "",
       ruc: "",
       address: "",
@@ -44,23 +51,45 @@ export function ClientForm() {
     },
   });
 
+  useEffect(() => {
+    form.reset(editingClient || {
+        name: "",
+        ruc: "",
+        address: "",
+        contactName: "",
+        contactPhone: "",
+        contactEmail: "",
+    });
+  }, [editingClient, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-        const clientsCollection = collection(firestore, "clients");
-        await addDoc(clientsCollection, values);
+        if (editingClient) {
+            // Update existing client
+            const clientDocRef = doc(firestore, "clients", editingClient.id);
+            setDocumentNonBlocking(clientDocRef, values, { merge: true });
+            toast({
+                title: "Cliente Actualizado",
+                description: "Los datos del cliente han sido actualizados.",
+            });
+        } else {
+            // Add new client
+            const clientsCollection = collection(firestore, "clients");
+            addDocumentNonBlocking(clientsCollection, values);
+            toast({
+                title: "Cliente Agregado",
+                description: "El nuevo cliente ha sido registrado exitosamente.",
+            });
+        }
         
-        toast({
-            title: "Cliente Agregado",
-            description: "El nuevo cliente ha sido registrado exitosamente.",
-        });
         form.reset();
-        // TODO: Close dialog after submission
+        setOpen(false);
     } catch(error) {
-        console.error("Error adding client: ", error);
+        console.error("Error saving client: ", error);
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Ocurrió un error al agregar el cliente.",
+            description: "Ocurrió un error al guardar el cliente.",
           });
     }
   }
@@ -151,10 +180,9 @@ export function ClientForm() {
             )}
             />
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 mt-4" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Agregando..." : "Agregar Cliente"}
+          {form.formState.isSubmitting ? "Guardando..." : "Guardar Cliente"}
         </Button>
       </form>
     </Form>
   );
 }
-    

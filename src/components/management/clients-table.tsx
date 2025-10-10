@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
     Table,
     TableBody,
@@ -18,7 +19,7 @@ import {
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
   import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-  import { collection, query } from "firebase/firestore";
+  import { collection, query, doc } from "firebase/firestore";
   import type { Client } from "@/lib/types";
   import {
     Dialog,
@@ -29,12 +30,38 @@ import {
     DialogTrigger,
   } from "@/components/ui/dialog"
 import { ClientForm } from "./client-form";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { useToast } from "@/hooks/use-toast";
 
   
   export function ClientsTable() {
     const firestore = useFirestore();
+    const { toast } = useToast();
     const clientsQuery = useMemoFirebase(() => query(collection(firestore, "clients")), [firestore]);
     const { data: clients, isLoading } = useCollection<Client>(clientsQuery);
+    
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [editingClient, setEditingClient] = React.useState<Client | null>(null);
+
+    const handleEdit = (client: Client) => {
+        setEditingClient(client);
+        setDialogOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingClient(null);
+        setDialogOpen(true);
+    };
+
+    const handleDelete = (clientId: string) => {
+        const docRef = doc(firestore, "clients", clientId);
+        deleteDocumentNonBlocking(docRef);
+        toast({
+            title: "Cliente Eliminado",
+            description: "El cliente ha sido eliminado exitosamente.",
+        });
+    }
 
     return (
         <Card>
@@ -43,23 +70,10 @@ import { ClientForm } from "./client-form";
                     <CardTitle>Clientes</CardTitle>
                     <CardDescription>Lista de todos los clientes registrados.</CardDescription>
                 </div>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Agregar Cliente
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[625px]">
-                        <DialogHeader>
-                            <DialogTitle className="font-headline text-2xl">Agregar Nuevo Cliente</DialogTitle>
-                            <DialogDescription>
-                                Completa los detalles para registrar un nuevo cliente.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <ClientForm />
-                    </DialogContent>
-                </Dialog>
+                <Button onClick={handleAddNew}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Agregar Cliente
+                </Button>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -99,8 +113,24 @@ import { ClientForm } from "./client-form";
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                    <DropdownMenuItem>Editar</DropdownMenuItem>
-                                    <DropdownMenuItem className="text-destructive">Eliminar</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleEdit(client)}>Editar</DropdownMenuItem>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Eliminar</DropdownMenuItem>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Esta acción no se puede deshacer. Esto eliminará permanentemente al cliente.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(client.id)} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
@@ -110,7 +140,17 @@ import { ClientForm } from "./client-form";
                 </Table>
                 )}
             </CardContent>
+             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="sm:max-w-[625px]">
+                    <DialogHeader>
+                        <DialogTitle className="font-headline text-2xl">{editingClient ? "Editar Cliente" : "Agregar Nuevo Cliente"}</DialogTitle>
+                        <DialogDescription>
+                            {editingClient ? "Actualiza los detalles del cliente." : "Completa los detalles para registrar un nuevo cliente."}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <ClientForm setOpen={setDialogOpen} editingClient={editingClient} />
+                </DialogContent>
+            </Dialog>
         </Card>
     );
   }
-    

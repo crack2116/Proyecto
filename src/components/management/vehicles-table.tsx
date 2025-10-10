@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
     Table,
     TableBody,
@@ -18,7 +19,7 @@ import {
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
   import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-  import { collection, query } from "firebase/firestore";
+  import { collection, query, doc } from "firebase/firestore";
   import type { Vehicle } from "@/lib/types";
   import {
     Dialog,
@@ -26,14 +27,39 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
   } from "@/components/ui/dialog";
   import { VehicleForm } from "./vehicle-form";
+  import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+  import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+  import { useToast } from "@/hooks/use-toast";
   
   export function VehiclesTable() {
     const firestore = useFirestore();
+    const { toast } = useToast();
     const vehiclesQuery = useMemoFirebase(() => query(collection(firestore, "vehicles")), [firestore]);
     const { data: vehicles, isLoading } = useCollection<Vehicle>(vehiclesQuery);
+
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [editingVehicle, setEditingVehicle] = React.useState<Vehicle | null>(null);
+
+    const handleEdit = (vehicle: Vehicle) => {
+        setEditingVehicle(vehicle);
+        setDialogOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingVehicle(null);
+        setDialogOpen(true);
+    };
+
+    const handleDelete = (vehicleId: string) => {
+        const docRef = doc(firestore, "vehicles", vehicleId);
+        deleteDocumentNonBlocking(docRef);
+        toast({
+            title: "Vehículo Eliminado",
+            description: "El vehículo ha sido eliminado exitosamente.",
+        });
+    }
 
     return (
         <Card>
@@ -42,23 +68,10 @@ import {
                     <CardTitle>Vehículos</CardTitle>
                     <CardDescription>Lista de todos los vehículos registrados.</CardDescription>
                 </div>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Agregar Vehículo
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[525px]">
-                        <DialogHeader>
-                            <DialogTitle className="font-headline text-2xl">Agregar Nuevo Vehículo</DialogTitle>
-                            <DialogDescription>
-                                Completa los detalles para registrar un nuevo vehículo.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <VehicleForm />
-                    </DialogContent>
-                </Dialog>
+                <Button onClick={handleAddNew}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Agregar Vehículo
+                </Button>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -95,8 +108,24 @@ import {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                    <DropdownMenuItem>Editar</DropdownMenuItem>
-                                    <DropdownMenuItem className="text-destructive">Eliminar</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleEdit(vehicle)}>Editar</DropdownMenuItem>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Eliminar</DropdownMenuItem>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Esta acción no se puede deshacer. Esto eliminará permanentemente el vehículo.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(vehicle.id)} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
@@ -106,7 +135,17 @@ import {
                 </Table>
                 )}
             </CardContent>
+             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="sm:max-w-[525px]">
+                    <DialogHeader>
+                        <DialogTitle className="font-headline text-2xl">{editingVehicle ? "Editar Vehículo" : "Agregar Nuevo Vehículo"}</DialogTitle>
+                        <DialogDescription>
+                           {editingVehicle ? "Actualiza los detalles del vehículo." : "Completa los detalles para registrar un nuevo vehículo."}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <VehicleForm setOpen={setDialogOpen} editingVehicle={editingVehicle} />
+                </DialogContent>
+            </Dialog>
         </Card>
     );
   }
-    

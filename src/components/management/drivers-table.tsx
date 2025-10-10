@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
     Table,
     TableBody,
@@ -18,7 +19,7 @@ import {
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
   import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-  import { collection, query } from "firebase/firestore";
+  import { collection, query, doc } from "firebase/firestore";
   import type { Driver } from "@/lib/types";
   import {
     Dialog,
@@ -26,14 +27,39 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
   } from "@/components/ui/dialog"
   import { DriverForm } from "./driver-form";
+  import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+  import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+  import { useToast } from "@/hooks/use-toast";
   
   export function DriversTable() {
     const firestore = useFirestore();
+    const { toast } = useToast();
     const driversQuery = useMemoFirebase(() => query(collection(firestore, "drivers")), [firestore]);
     const { data: drivers, isLoading } = useCollection<Driver>(driversQuery);
+
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [editingDriver, setEditingDriver] = React.useState<Driver | null>(null);
+
+    const handleEdit = (driver: Driver) => {
+        setEditingDriver(driver);
+        setDialogOpen(true);
+    };
+
+    const handleAddNew = () => {
+        setEditingDriver(null);
+        setDialogOpen(true);
+    };
+
+    const handleDelete = (driverId: string) => {
+        const docRef = doc(firestore, "drivers", driverId);
+        deleteDocumentNonBlocking(docRef);
+        toast({
+            title: "Conductor Eliminado",
+            description: "El conductor ha sido eliminado exitosamente.",
+        });
+    }
 
     return (
         <Card>
@@ -42,23 +68,10 @@ import {
                     <CardTitle>Conductores</CardTitle>
                     <CardDescription>Lista de todos los conductores registrados.</CardDescription>
                 </div>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Agregar Conductor
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[525px]">
-                        <DialogHeader>
-                            <DialogTitle className="font-headline text-2xl">Agregar Nuevo Conductor</DialogTitle>
-                            <DialogDescription>
-                                Completa los detalles para registrar un nuevo conductor.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DriverForm />
-                    </DialogContent>
-                </Dialog>
+                <Button onClick={handleAddNew}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Agregar Conductor
+                </Button>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -93,8 +106,24 @@ import {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                        <DropdownMenuItem>Editar</DropdownMenuItem>
-                                        <DropdownMenuItem className="text-destructive">Eliminar</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleEdit(driver)}>Editar</DropdownMenuItem>
+                                        <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Eliminar</DropdownMenuItem>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Esta acción no se puede deshacer. Esto eliminará permanentemente al conductor.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(driver.id)} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                     </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
@@ -104,7 +133,17 @@ import {
                     </Table>
                 )}
             </CardContent>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="sm:max-w-[525px]">
+                    <DialogHeader>
+                        <DialogTitle className="font-headline text-2xl">{editingDriver ? "Editar Conductor" : "Agregar Nuevo Conductor"}</DialogTitle>
+                        <DialogDescription>
+                            {editingDriver ? "Actualiza los detalles del conductor." : "Completa los detalles para registrar un nuevo conductor."}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DriverForm setOpen={setDialogOpen} editingDriver={editingDriver} />
+                </DialogContent>
+            </Dialog>
         </Card>
     );
   }
-    
