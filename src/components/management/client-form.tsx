@@ -75,23 +75,35 @@ export function ClientForm({ setOpen, editingClient }: ClientFormProps) {
         });
         return;
     }
+    
     setIsSearching(true);
-    const result = await getSunatData(ruc);
-    setIsSearching(false);
-
-    if (result.success && result.data) {
-        form.setValue("name", result.data.razonSocial, { shouldValidate: true });
-        form.setValue("address", result.data.direccion, { shouldValidate: true });
-        toast({
-            title: "Cliente Encontrado",
-            description: result.data.razonSocial,
-        });
-    } else {
+    
+    try {
+        const result = await getSunatData(ruc);
+        
+        if (result.success && result.data) {
+            form.setValue("name", result.data.razonSocial, { shouldValidate: true });
+            form.setValue("address", result.data.direccion, { shouldValidate: true });
+            toast({
+                title: "✅ Cliente Encontrado",
+                description: `${result.data.razonSocial} - ${result.data.estado}`,
+            });
+        } else {
+            toast({
+                variant: "destructive",
+                title: "⚠️ Error en la Búsqueda",
+                description: result.message || "No se pudo encontrar información del RUC. Verifica que sea correcto.",
+            });
+        }
+    } catch (error) {
+        console.error("Error en búsqueda RUC:", error);
         toast({
             variant: "destructive",
-            title: "Error en la Búsqueda",
-            description: result.message,
+            title: "❌ Error de Conexión",
+            description: "Error de conexión. Por favor, intenta de nuevo o ingresa los datos manualmente.",
         });
+    } finally {
+        setIsSearching(false);
     }
   }
 

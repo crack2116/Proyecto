@@ -38,25 +38,76 @@ export async function getSunatData(ruc: string): Promise<SunatData> {
     return { success: false, message: "El RUC debe tener 11 dígitos." };
   }
 
-  try {
-    const response = await fetch(`https://api.sunat.dev/ruc/${ruc}`);
-    if (!response.ok) {
-      const errorData = await response.json();
-      return { success: false, message: errorData.message || 'No se encontró el RUC.' };
-    }
-    const data = await response.json();
-    return { 
-      success: true, 
-      data: {
-        ruc: data.ruc,
-        razonSocial: data.razon_social,
-        direccion: data.direccion,
-        estado: data.estado,
-        condicion: data.condicion,
+  // Lista de APIs de respaldo para consulta RUC
+  const apis = [
+    `https://api.sunat.dev/ruc/${ruc}`,
+    `https://api.apis.net.pe/v1/ruc?numero=${ruc}`,
+    `https://ruc.com.pe/api/v1/ruc/${ruc}`,
+  ];
+
+  for (const apiUrl of apis) {
+    try {
+      console.log(`Intentando con API: ${apiUrl}`);
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+        // Timeout de 10 segundos
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!response.ok) {
+        console.log(`API ${apiUrl} falló con status: ${response.status}`);
+        continue; // Intentar siguiente API
       }
-    };
-  } catch (error) {
-    console.error("Error fetching SUNAT data:", error);
-    return { success: false, message: "Error al conectar con el servicio de consulta RUC." };
+
+      const data = await response.json();
+      
+      // Procesar respuesta según el formato de cada API
+      if (apiUrl.includes('api.sunat.dev')) {
+        return { 
+          success: true, 
+          data: {
+            ruc: data.ruc,
+            razonSocial: data.razon_social,
+            direccion: data.direccion,
+            estado: data.estado,
+            condicion: data.condicion,
+          }
+        };
+      } else if (apiUrl.includes('apis.net.pe')) {
+        return { 
+          success: true, 
+          data: {
+            ruc: data.numeroDocumento,
+            razonSocial: data.razonSocial,
+            direccion: data.direccion,
+            estado: data.estado,
+            condicion: data.condicion,
+          }
+        };
+      } else if (apiUrl.includes('ruc.com.pe')) {
+        return { 
+          success: true, 
+          data: {
+            ruc: data.ruc,
+            razonSocial: data.razon_social,
+            direccion: data.direccion,
+            estado: data.estado,
+            condicion: data.condicion,
+          }
+        };
+      }
+    } catch (error) {
+      console.log(`Error con API ${apiUrl}:`, error);
+      continue; // Intentar siguiente API
+    }
   }
+
+  // Si todas las APIs fallan, devolver error
+  return { 
+    success: false, 
+    message: "Todas las APIs de consulta RUC están temporalmente no disponibles. Por favor, ingresa los datos manualmente." 
+  };
 }
