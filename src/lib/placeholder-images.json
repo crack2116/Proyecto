@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "login-background",
-      "description": "A modern truck on an open highway, representing transportation and logistics.",
-      "imageUrl": "https://picsum.photos/seed/101/1200/1800",
-      "imageHint": "truck highway"
+      "description": "Heavy-duty cargo truck representing strength, capacity and professional transportation services.",
+      "imageUrl": "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=1800&q=80",
+      "imageHint": "heavy truck cargo transportation"
     },
     {
       "id": "user-avatar-1",
