@@ -406,40 +406,50 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
   }
 ];
 
-// Función para generar IDs únicos más realistas
-export function generateId(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 9; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+// Función para generar IDs únicos con prefijos específicos
+export function generateId(prefix: string, startNumber: number = 1): string {
+  return `${prefix}${startNumber.toString().padStart(4, '0')}`;
+}
+
+// Función para generar múltiples IDs secuenciales
+export function generateSequentialIds(prefix: string, count: number): string[] {
+  const ids: string[] = [];
+  for (let i = 1; i <= count; i++) {
+    ids.push(generateId(prefix, i));
   }
-  return result;
+  return ids;
 }
 
 // Función para crear datos completos con IDs
 export function createSampleData() {
-  const clients = sampleClients.map(client => ({
+  // Generar IDs secuenciales para cada tipo
+  const clientIds = generateSequentialIds('UI', sampleClients.length);
+  const driverIds = generateSequentialIds('C', sampleDrivers.length);
+  const vehicleIds = generateSequentialIds('V', sampleVehicles.length);
+  const serviceIds = generateSequentialIds('S', sampleServiceRequests.length);
+
+  const clients = sampleClients.map((client, index) => ({
     ...client,
-    id: generateId()
+    id: clientIds[index]
   }));
 
-  const drivers = sampleDrivers.map(driver => ({
+  const drivers = sampleDrivers.map((driver, index) => ({
     ...driver,
-    id: generateId()
+    id: driverIds[index]
   }));
 
   const vehicles = sampleVehicles.map((vehicle, index) => ({
     ...vehicle,
-    id: generateId(),
-    driverId: drivers[index % drivers.length].id // Asignar conductor
+    id: vehicleIds[index],
+    driverId: driverIds[index % driverIds.length] // Asignar conductor
   }));
 
   const serviceRequests = sampleServiceRequests.map((request, index) => ({
     ...request,
-    id: generateId(),
-    clientId: clients[index % clients.length].id, // Asignar cliente
-    driverId: drivers[index % drivers.length].id, // Asignar conductor
-    vehicleId: vehicles[index % vehicles.length].id // Asignar vehículo
+    id: serviceIds[index],
+    clientId: clientIds[index % clientIds.length], // Asignar cliente
+    driverId: driverIds[index % driverIds.length], // Asignar conductor
+    vehicleId: vehicleIds[index % vehicleIds.length] // Asignar vehículo
   }));
 
   return {
