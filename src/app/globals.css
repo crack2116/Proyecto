@@ -8,110 +8,110 @@ body {
 
 @layer base {
   :root {
-    /* Colores principales - Vibrante y moderno */
+    /* Colores principales - Azul y blanco elegante */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 222 84% 5%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 84% 5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 222 84% 5%;
     
-    /* Primary - Púrpura vibrante */
-    --primary: 262 83% 58%;
+    /* Primary - Azul elegante */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary - Rosa suave */
-    --secondary: 330 81% 60%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Azul claro */
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 222 84% 5%;
     
     /* Muted - Grises suaves */
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
     
-    /* Accent - Verde lima vibrante */
-    --accent: 84 81% 44%;
+    /* Accent - Azul más intenso */
+    --accent: 221 83% 60%;
     --accent-foreground: 0 0% 100%;
     
-    /* Destructive - Rojo coral */
-    --destructive: 0 72% 51%;
+    /* Destructive - Rojo elegante */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
     
     /* Borders e inputs */
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262 83% 58%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
     
-    /* Charts - Paleta vibrante */
-    --chart-1: 262 83% 58%;
-    --chart-2: 84 81% 44%;
-    --chart-3: 330 81% 60%;
-    --chart-4: 38 92% 50%;
-    --chart-5: 0 72% 51%;
+    /* Charts - Paleta azul */
+    --chart-1: 221 83% 53%;
+    --chart-2: 200 70% 50%;
+    --chart-3: 180 50% 45%;
+    --chart-4: 210 100% 40%;
+    --chart-5: 0 84% 60%;
     
     /* Radius */
     --radius: 0.75rem;
     
-    /* Sidebar - Diseño vibrante */
-    --sidebar-background: 240 6% 10%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 262 83% 58%;
+    /* Sidebar - Diseño azul */
+    --sidebar-background: 222 84% 5%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 6% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 6% 15%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-accent: 222 84% 8%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 84% 8%;
+    --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
-    /* Tema oscuro vibrante */
-    --background: 240 6% 10%;
-    --foreground: 0 0% 98%;
-    --card: 240 6% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 6% 10%;
-    --popover-foreground: 0 0% 98%;
+    /* Tema oscuro azul elegante */
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 84% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 84% 8%;
+    --popover-foreground: 210 40% 98%;
     
-    /* Primary - Púrpura brillante para modo oscuro */
-    --primary: 262 83% 70%;
-    --primary-foreground: 240 6% 10%;
+    /* Primary - Azul brillante para modo oscuro */
+    --primary: 221 83% 60%;
+    --primary-foreground: 222 84% 5%;
     
-    /* Secondary - Rosa brillante */
-    --secondary: 330 81% 70%;
-    --secondary-foreground: 240 6% 10%;
+    /* Secondary - Azul oscuro */
+    --secondary: 222 84% 8%;
+    --secondary-foreground: 210 40% 98%;
     
     /* Muted - Grises oscuros */
-    --muted: 240 6% 15%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 222 84% 8%;
+    --muted-foreground: 215 16% 65%;
     
-    /* Accent - Verde lima brillante */
-    --accent: 84 81% 60%;
-    --accent-foreground: 240 6% 10%;
+    /* Accent - Azul más brillante */
+    --accent: 221 83% 70%;
+    --accent-foreground: 222 84% 5%;
     
-    /* Destructive - Rojo coral brillante */
-    --destructive: 0 72% 70%;
-    --destructive-foreground: 240 6% 10%;
+    /* Destructive - Rojo brillante */
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 222 84% 5%;
     
     /* Borders e inputs */
-    --border: 240 6% 15%;
-    --input: 240 6% 15%;
-    --ring: 262 83% 70%;
+    --border: 222 84% 8%;
+    --input: 222 84% 8%;
+    --ring: 221 83% 60%;
     
-    /* Charts - Paleta brillante para modo oscuro */
-    --chart-1: 262 83% 70%;
-    --chart-2: 84 81% 60%;
-    --chart-3: 330 81% 70%;
-    --chart-4: 38 92% 70%;
-    --chart-5: 0 72% 70%;
+    /* Charts - Paleta azul brillante para modo oscuro */
+    --chart-1: 221 83% 60%;
+    --chart-2: 200 70% 60%;
+    --chart-3: 180 50% 55%;
+    --chart-4: 210 100% 50%;
+    --chart-5: 0 84% 70%;
     
     /* Sidebar - Mantener consistencia */
-    --sidebar-background: 240 6% 10%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 262 83% 70%;
-    --sidebar-primary-foreground: 240 6% 10%;
-    --sidebar-accent: 240 6% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 6% 15%;
-    --sidebar-ring: 262 83% 70%;
+    --sidebar-background: 222 84% 5%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 60%;
+    --sidebar-primary-foreground: 222 84% 5%;
+    --sidebar-accent: 222 84% 8%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 84% 8%;
+    --sidebar-ring: 221 83% 60%;
   }
 }
 
@@ -128,19 +128,19 @@ body {
 @layer components {
   /* Gradientes personalizados */
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(330 81% 60%) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(221 83% 40%) 100%);
   }
   
   .gradient-accent {
-    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(84 81% 35%) 100%);
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(221 83% 35%) 100%);
   }
   
   .gradient-card {
     background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
   }
   
-  .gradient-vibrant {
-    background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(330 81% 60%) 50%, hsl(84 81% 44%) 100%);
+  .gradient-blue {
+    background: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(200 70% 50%) 50%, hsl(180 50% 45%) 100%);
   }
   
   /* Sombras modernas */
