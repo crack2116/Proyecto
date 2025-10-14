@@ -65,38 +65,47 @@ export async function getSunatData(ruc: string): Promise<SunatData> {
       const data = await response.json();
       console.log(`Datos recibidos de ${apiUrl}:`, data); // Log para debugging
       
-      // Procesar respuesta según el formato de cada API con mapeo robusto
-      if (apiUrl.includes('api.sunat.dev')) {
+      // Función helper para extraer datos de manera inteligente
+      const extractField = (obj: any, possibleKeys: string[]): string => {
+        for (const key of possibleKeys) {
+          if (obj[key] && obj[key] !== '' && obj[key] !== null && obj[key] !== undefined) {
+            return String(obj[key]).trim();
+          }
+        }
+        return '';
+      };
+
+      // Extraer datos usando múltiples nombres de campos posibles
+      const razonSocial = extractField(data, [
+        'razon_social', 'razonSocial', 'nombreRazonSocial', 'nombre', 
+        'razon_social_contribuyente', 'nombre_completo', 'denominacion'
+      ]);
+      
+      const direccion = extractField(data, [
+        'direccion', 'domicilio_fiscal', 'direccionCompleta', 'domicilio',
+        'direccion_completa', 'direccion_fiscal', 'ubicacion'
+      ]);
+      
+      const estado = extractField(data, [
+        'estado', 'estadoContribuyente', 'estado_contribuyente', 
+        'situacion', 'situacion_contribuyente'
+      ]);
+      
+      const condicion = extractField(data, [
+        'condicion', 'condicionContribuyente', 'condicion_contribuyente',
+        'tipo_contribuyente'
+      ]);
+
+      // Solo devolver éxito si tenemos al menos la razón social
+      if (razonSocial) {
         return { 
           success: true, 
           data: {
             ruc: data.ruc || data.numeroDocumento || ruc,
-            razonSocial: data.razon_social || data.razonSocial || data.nombreRazonSocial || data.nombre || 'N/A',
-            direccion: data.direccion || data.domicilio_fiscal || data.direccionCompleta || 'N/A',
-            estado: data.estado || data.estadoContribuyente || 'N/A',
-            condicion: data.condicion || data.condicionContribuyente || 'N/A',
-          }
-        };
-      } else if (apiUrl.includes('apis.net.pe')) {
-        return { 
-          success: true, 
-          data: {
-            ruc: data.numeroDocumento || data.ruc || ruc,
-            razonSocial: data.nombreRazonSocial || data.razonSocial || data.razon_social || 'N/A',
-            direccion: data.direccionCompleta || data.direccion || data.domicilio_fiscal || 'N/A',
-            estado: data.estado || data.estadoContribuyente || 'N/A',
-            condicion: data.condicion || data.condicionContribuyente || 'N/A',
-          }
-        };
-      } else if (apiUrl.includes('ruc.com.pe')) {
-        return { 
-          success: true, 
-          data: {
-            ruc: data.ruc || data.numeroDocumento || ruc,
-            razonSocial: data.razon_social || data.razonSocial || data.nombreRazonSocial || 'N/A',
-            direccion: data.domicilio_fiscal || data.direccion || data.direccionCompleta || 'N/A',
-            estado: data.estado || data.estadoContribuyente || 'N/A',
-            condicion: data.condicion || data.condicionContribuyente || 'N/A',
+            razonSocial: razonSocial,
+            direccion: direccion || 'Dirección no disponible',
+            estado: estado || 'Estado no disponible',
+            condicion: condicion || 'Condición no disponible',
           }
         };
       }
