@@ -41,6 +41,8 @@ type DniData = {
     apellidoPaterno: string;
     apellidoMaterno: string;
     nombresCompletos: string;
+    edad?: string;
+    direccion?: string;
   };
   message?: string;
 };
@@ -99,6 +101,16 @@ export async function getDniData(dni: string): Promise<DniData> {
         'apellido_materno', 'apellidoMaterno', 'materno', 'apellido_m', 'mother_last_name'
       ]);
 
+      // Extraer edad (si está disponible)
+      const edad = extractField(data, [
+        'edad', 'age', 'fecha_nacimiento', 'birth_date', 'fechaNacimiento'
+      ]);
+
+      // Extraer dirección (si está disponible)
+      const direccion = extractField(data, [
+        'direccion', 'address', 'domicilio', 'residencia', 'ubicacion', 'location'
+      ]);
+
       // Solo devolver éxito si tenemos al menos los nombres
       if (nombres) {
         const nombresCompletos = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.trim();
@@ -110,6 +122,8 @@ export async function getDniData(dni: string): Promise<DniData> {
             apellidoPaterno: apellidoPaterno || '',
             apellidoMaterno: apellidoMaterno || '',
             nombresCompletos: nombresCompletos,
+            edad: edad || undefined,
+            direccion: direccion || undefined,
           }
         };
       }

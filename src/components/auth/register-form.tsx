@@ -103,16 +103,34 @@ export function RegisterForm() {
     setIsSearchingDni(true);
     try {
       const result = await getDniData(dni);
-      if (result.success && result.data) {
-        form.setValue("nombres", result.data.nombres);
-        form.setValue("apellidoPaterno", result.data.apellidoPaterno);
-        form.setValue("apellidoMaterno", result.data.apellidoMaterno);
-        
-        toast({
-          title: "✅ Datos Encontrados",
-          description: `Datos cargados para: ${result.data.nombresCompletos}`,
-        });
-      } else {
+        if (result.success && result.data) {
+          form.setValue("nombres", result.data.nombres);
+          form.setValue("apellidoPaterno", result.data.apellidoPaterno);
+          form.setValue("apellidoMaterno", result.data.apellidoMaterno);
+          
+          // Llenar edad si está disponible
+          if (result.data.edad) {
+            form.setValue("edad", result.data.edad);
+          }
+          
+          // Llenar dirección si está disponible
+          if (result.data.direccion) {
+            form.setValue("direccion", result.data.direccion);
+          }
+          
+          const camposCompletados = [];
+          if (result.data.edad) camposCompletados.push("edad");
+          if (result.data.direccion) camposCompletados.push("dirección");
+          
+          const mensajeExtra = camposCompletados.length > 0 
+            ? ` También se completó: ${camposCompletados.join(", ")}.`
+            : "";
+          
+          toast({
+            title: "✅ Datos Encontrados",
+            description: `Datos cargados para: ${result.data.nombresCompletos}.${mensajeExtra}`,
+          });
+        } else {
         toast({
           variant: "destructive",
           title: "⚠️ Error en la Búsqueda",
