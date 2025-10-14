@@ -43,7 +43,10 @@ export function ChatAssistant() {
     if (result.success) {
       setMessages((prev) => [...prev, { role: "model", content: result.message }]);
     } else {
-        setMessages((prev) => [...prev, { role: "model", content: result.message }]);
+      setMessages((prev) => [...prev, { 
+        role: "model", 
+        content: "Lo siento, hubo un error al procesar tu consulta. Por favor, intenta de nuevo más tarde." 
+      }]);
     }
     setIsLoading(false);
   };
