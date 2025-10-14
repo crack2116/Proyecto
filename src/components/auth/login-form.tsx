@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "../ui/separator";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -127,17 +128,21 @@ export function LoginForm() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="space-y-6">
         <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Correo Electrónico</FormLabel>
+                <FormLabel className="text-sm font-medium">Correo Electrónico</FormLabel>
                 <FormControl>
-                    <Input placeholder="admin@mewing.com" {...field} />
+                    <Input 
+                      placeholder="admin@mewing.com" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
@@ -148,30 +153,52 @@ export function LoginForm() {
             name="password"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Contraseña</FormLabel>
+                <FormLabel className="text-sm font-medium">Contraseña</FormLabel>
                 <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <Input 
+                      type="password" 
+                      placeholder="••••••••" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
             )}
             />
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Iniciando Sesión..." : "Iniciar Sesión"}
+            <Button 
+              type="submit" 
+              className="w-full h-11 gradient-primary hover:opacity-90 text-primary-foreground font-medium transition-all duration-200 hover-lift" 
+              disabled={form.formState.isSubmitting}
+            >
+            {form.formState.isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Iniciando Sesión...</span>
+              </div>
+            ) : (
+              "Iniciar Sesión"
+            )}
             </Button>
         </form>
         </Form>
+        
         <div className="relative">
             <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-border/50" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">O continúa con</span>
+                <span className="bg-background px-3 text-muted-foreground font-medium">O continúa con</span>
             </div>
         </div>
-        <Button variant="outline" onClick={handleGoogleSignIn}>
+        
+        <Button 
+          variant="outline" 
+          onClick={handleGoogleSignIn}
+          className="w-full h-11 border-border/50 hover:bg-muted/50 transition-all duration-200 hover-lift"
+        >
             <GoogleIcon className="mr-2 h-4 w-4" />
-            Google
+            <span className="font-medium">Continuar con Google</span>
         </Button>
     </div>
   );

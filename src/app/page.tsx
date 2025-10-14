@@ -1,54 +1,130 @@
 import Image from 'next/image';
-import { Truck } from 'lucide-react';
+import { Truck, ArrowRight, Shield, Clock, Users } from 'lucide-react';
 import { LoginForm } from '@/components/auth/login-form';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RegisterForm } from '@/components/auth/register-form';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function LoginPage() {
   const loginImage = PlaceHolderImages.find(p => p.id === 'login-background');
 
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[400px] gap-6">
-          <div className="grid gap-2 text-center">
-            <div className="flex justify-center items-center gap-2 mb-4">
-              <Truck className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold font-headline">Mewing Transport</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+      
+      <div className="relative flex min-h-screen">
+        {/* Left Side - Login Form */}
+        <div className="flex w-full lg:w-1/2 items-center justify-center p-8">
+          <div className="w-full max-w-md space-y-8 animate-fade-in">
+            {/* Logo and Title */}
+            <div className="text-center space-y-4">
+              <div className="flex justify-center items-center gap-3 mb-6">
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+                  <Truck className="h-8 w-8 text-white" />
+                </div>
+                <div className="text-left">
+                  <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Mewing Transport
+                  </h1>
+                  <p className="text-sm text-muted-foreground font-medium">Gestión Inteligente</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold font-headline text-foreground">
+                  ¡Bienvenido de vuelta!
+                </h2>
+                <p className="text-muted-foreground">
+                  Accede a tu panel de control para gestionar tus servicios de transporte.
+                </p>
+              </div>
             </div>
-            <p className="text-balance text-muted-foreground">
-              Accede a tu cuenta o regístrate para gestionar tus servicios de transporte.
-            </p>
+
+            {/* Login/Register Tabs */}
+            <Card className="shadow-modern-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <Tabs defaultValue="login" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50">
+                    <TabsTrigger value="login" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      Iniciar Sesión
+                    </TabsTrigger>
+                    <TabsTrigger value="register" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      Crear Cuenta
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="login" className="space-y-4">
+                    <LoginForm />
+                  </TabsContent>
+                  
+                  <TabsContent value="register" className="space-y-4">
+                    <RegisterForm />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* Features */}
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="space-y-2">
+                <div className="w-10 h-10 mx-auto rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <p className="text-xs font-medium text-muted-foreground">Seguro</p>
+              </div>
+              <div className="space-y-2">
+                <div className="w-10 h-10 mx-auto rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <p className="text-xs font-medium text-muted-foreground">Tiempo Real</p>
+              </div>
+              <div className="space-y-2">
+                <div className="w-10 h-10 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <p className="text-xs font-medium text-muted-foreground">Colaborativo</p>
+              </div>
+            </div>
           </div>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
-              <TabsTrigger value="register">Crear Cuenta</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-                <LoginForm />
-            </TabsContent>
-            <TabsContent value="register">
-                <RegisterForm />
-            </TabsContent>
-          </Tabs>
         </div>
-      </div>
-      <div className="hidden bg-muted lg:block relative">
-        {loginImage && (
-             <Image
-                src={loginImage.imageUrl}
-                alt={loginImage.description}
-                fill
-                className="object-cover"
-                data-ai-hint={loginImage.imageHint}
-             />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-10 left-10 text-white">
-            <h2 className="font-headline text-4xl font-bold">Confiable. Eficiente. a Tiempo.</h2>
-            <p className="mt-2 text-lg">Tu solución completa de gestión de transporte.</p>
+
+        {/* Right Side - Hero Image */}
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-indigo-600/20 z-10"></div>
+          {loginImage && (
+            <Image
+              src={loginImage.imageUrl}
+              alt={loginImage.description}
+              fill
+              className="object-cover"
+              data-ai-hint={loginImage.imageHint}
+            />
+          )}
+          
+          {/* Overlay Content */}
+          <div className="relative z-20 flex flex-col justify-end p-12 text-white">
+            <div className="space-y-6 animate-slide-up">
+              <div className="space-y-4">
+                <h2 className="text-5xl font-bold font-headline leading-tight">
+                  Transporte
+                  <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-indigo-200">
+                    Inteligente
+                  </span>
+                </h2>
+                <p className="text-xl text-blue-100 leading-relaxed">
+                  Gestiona tu flota con tecnología de vanguardia y análisis en tiempo real.
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-2 text-blue-200">
+                <ArrowRight className="h-5 w-5" />
+                <span className="font-medium">Descubre todas las funcionalidades</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
