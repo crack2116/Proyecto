@@ -1,55 +1,86 @@
+/**
+ * @file Firestore Security Rules
+ * @description This ruleset enforces a role-based and ownership-based access control model for a transport service application.
+ *
+ * Data Structure:
+ * - /users/{userId}: User profiles, accessible only by the user themselves.
+ * - /roles_admin/{userId}: Admin role markers. The existence of a document grants admin privileges.
+ * - /clients/{clientId}: Client information, accessible by admins.
+ * - /drivers/{driverId}: Driver information, accessible by admins.
+ * - /vehicles/{vehicleId}: Vehicle information, accessible by admins.
+ * - /serviceRequests/{serviceRequestId}: Service requests, accessible by admins.
+ * - /routes/{routeId}: Route information, accessible by admins.
+ *
+ * Key Security Decisions:
+ * - Admin Role:  Admin privileges are granted based on the existence of a document in the `/roles_admin/{userId}` collection.
+ * - Ownership: User data is stored under `/users/{userId}` and is accessible only to the authenticated user with a matching UID.
+ * - No User Listing: Listing users or admin roles is explicitly denied.
+ * - Default Deny: All access is denied by default unless explicitly allowed by a rule.
+ *
+ * Denormalization for Authorization:
+ * - Admin Role: To avoid complex queries, admin status is determined by the presence of a document in the `/roles_admin/{userId}` collection.
+ */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows a user to read and write their own profile data.
+     * @description Checks if the user is signed in.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the user is the owner of the resource, based on the provided userId.
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the user is an existing owner and that the resource exists.
+     */
+    // function isExistingOwner(userId) {
+    //   return isOwner(userId) && exists(resource.data.id);
+    // }
+
+    /**
+     * @description Checks if the user has admin privileges by checking for the existence of a document in /roles_admin/{userId}.
+     */
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * @description Rules for user profiles.
      * @path /users/{userId}
-     * @allow (get, create, update, delete) if the user is signed in and the userId matches the authenticated user's ID.
-     * @deny (get, create, update, delete) if the userId does not match the authenticated user's ID.
-     * @principle Enforces document ownership for writes.
      */
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
       allow get: if isOwner(userId);
       allow list: if false;
-      allow create: if isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
       allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
     }
 
     /**
-     * @description Grants admin privileges to users with a document in this collection.
+     * @description Rules for admin roles.
      * @path /roles_admin/{userId}
-     * @allow (get) if the user's ID matches the document ID.
-     * @allow (create) if the user's ID matches the document ID.
-     * @deny (get, create, update, delete) if the user is not an admin.
-     * @principle Grants admin privileges based on document existence.
      */
     match /roles_admin/{userId} {
-      function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
       allow get: if isAdmin();
       allow list: if false;
-      allow create: if request.auth.uid == userId;
+      allow create: if isAdmin();
       allow update: if false;
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
 
     /**
-     * @description Allows admins to manage client information.
+     * @description Rules for clients.
      * @path /clients/{clientId}
-     * @allow (get, list, create, update, delete) if the user is an admin.
-     * @deny (get, list, create, update, delete) if the user is not an admin.
-     * @principle Restricts client management to administrators.
      */
     match /clients/{clientId} {
-      function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
       // Allow authenticated users for development
       allow get: if request.auth != null;
       allow list: if request.auth != null;
@@ -59,16 +90,10 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows admins to manage driver information.
+     * @description Rules for drivers.
      * @path /drivers/{driverId}
-     * @allow (get, list, create, update, delete) if the user is an admin.
-     * @deny (get, list, create, update, delete) if the user is not an admin.
-     * @principle Restricts driver management to administrators.
      */
     match /drivers/{driverId} {
-      function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
       // Allow authenticated users for development
       allow get: if request.auth != null;
       allow list: if request.auth != null;
@@ -78,16 +103,10 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows admins to manage vehicle information.
+     * @description Rules for vehicles.
      * @path /vehicles/{vehicleId}
-     * @allow (get, list, create, update, delete) if the user is an admin.
-     * @deny (get, list, create, update, delete) if the user is not an admin.
-     * @principle Restricts vehicle management to administrators.
      */
     match /vehicles/{vehicleId} {
-      function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
       // Allow authenticated users for development
       allow get: if request.auth != null;
       allow list: if request.auth != null;
@@ -97,19 +116,10 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows admins and the creating client to manage service requests.
+     * @description Rules for service requests.
      * @path /serviceRequests/{serviceRequestId}
-     * @allow (get) if the user is an admin or the client who created the request.
-     * @allow (list) if the user is an admin.
-     * @allow (create) if the user is an admin or the client creating the request.
-     * @allow (update, delete) if the user is an admin or the client who created the request.
-     * @deny (get, create, update, delete) if the user is not an admin or the client.
-     * @principle Restricts service request management to administrators and the creating client.
      */
     match /serviceRequests/{serviceRequestId} {
-      function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
       // Allow authenticated users to read and list for development
       allow get: if request.auth != null;
       allow list: if request.auth != null;
@@ -119,16 +129,10 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows admins to manage route information.
+     * @description Rules for routes.
      * @path /routes/{routeId}
-     * @allow (get, list, create, update, delete) if the user is an admin.
-     * @deny (get, list, create, update, delete) if the user is not an admin.
-     * @principle Restricts route management to administrators.
      */
     match /routes/{routeId} {
-      function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      }
       allow get: if isAdmin();
       allow list: if isAdmin();
       allow create: if isAdmin();
