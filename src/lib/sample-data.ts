@@ -133,7 +133,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q12345678",
     licenseStatus: "active",
     contactPhone: "987654321",
-    fechaRegistro: "2024-01-15T10:30:00.000Z"
+    fechaRegistro: "2025-01-15T10:30:00.000Z"
   },
   {
     dni: "23456789",
@@ -142,7 +142,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q23456789",
     licenseStatus: "active",
     contactPhone: "987654322",
-    fechaRegistro: "2024-01-16T11:15:00.000Z"
+    fechaRegistro: "2025-01-16T11:15:00.000Z"
   },
   {
     dni: "34567890",
@@ -151,7 +151,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q34567890",
     licenseStatus: "expired",
     contactPhone: "987654323",
-    fechaRegistro: "2024-01-17T09:45:00.000Z"
+    fechaRegistro: "2025-01-17T09:45:00.000Z"
   },
   {
     dni: "45678901",
@@ -160,7 +160,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q45678901",
     licenseStatus: "active",
     contactPhone: "987654324",
-    fechaRegistro: "2024-01-18T14:20:00.000Z"
+    fechaRegistro: "2025-01-18T14:20:00.000Z"
   },
   {
     dni: "56789012",
@@ -169,7 +169,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q56789012",
     licenseStatus: "suspended",
     contactPhone: "987654325",
-    fechaRegistro: "2024-01-19T16:10:00.000Z"
+    fechaRegistro: "2025-01-19T16:10:00.000Z"
   },
   {
     dni: "67890123",
@@ -178,7 +178,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q67890123",
     licenseStatus: "active",
     contactPhone: "987654326",
-    fechaRegistro: "2024-01-20T08:30:00.000Z"
+    fechaRegistro: "2025-01-20T08:30:00.000Z"
   },
   {
     dni: "78901234",
@@ -187,7 +187,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q78901234",
     licenseStatus: "active",
     contactPhone: "987654327",
-    fechaRegistro: "2024-01-21T12:45:00.000Z"
+    fechaRegistro: "2025-01-21T12:45:00.000Z"
   },
   {
     dni: "89012345",
@@ -196,7 +196,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q89012345",
     licenseStatus: "unknown",
     contactPhone: "987654328",
-    fechaRegistro: "2024-01-22T15:20:00.000Z"
+    fechaRegistro: "2025-01-22T15:20:00.000Z"
   },
   {
     dni: "90123456",
@@ -205,7 +205,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q90123456",
     licenseStatus: "active",
     contactPhone: "987654329",
-    fechaRegistro: "2024-01-23T10:15:00.000Z"
+    fechaRegistro: "2025-01-23T10:15:00.000Z"
   },
   {
     dni: "01234567",
@@ -214,7 +214,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
     licenseNumber: "Q01234567",
     licenseStatus: "active",
     contactPhone: "987654330",
-    fechaRegistro: "2024-01-24T13:30:00.000Z"
+    fechaRegistro: "2025-01-24T13:30:00.000Z"
   }
 ];
 
@@ -300,8 +300,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "", // Se asignará dinámicamente
     pickupLocation: "Puerto del Callao - Terminal Portuario",
     destination: "Distribuidora Lima Norte S.A.C. - Av. Túpac Amaru 1234, Independencia",
-    requestDate: "2024-01-15T08:00:00.000Z",
-    serviceDate: "2024-01-15T10:00:00.000Z",
+    requestDate: "2025-01-15T08:00:00.000Z",
+    serviceDate: "2025-01-15T10:00:00.000Z",
     specialRequirements: "Manejo cuidadoso de productos frágiles",
     status: "Completed"
   },
@@ -311,8 +311,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Aeropuerto Jorge Chávez - Terminal de Carga",
     destination: "Comercial San Miguel E.I.R.L. - Av. La Marina 567, San Miguel",
-    requestDate: "2024-01-16T09:30:00.000Z",
-    serviceDate: "2024-01-16T11:00:00.000Z",
+    requestDate: "2025-01-16T09:30:00.000Z",
+    serviceDate: "2025-01-16T11:00:00.000Z",
     specialRequirements: "Transporte refrigerado requerido",
     status: "In Progress"
   },
@@ -322,8 +322,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Terminal Portuario del Callao - Muelle 3",
     destination: "Importaciones del Pacífico S.A. - Jr. Ucayali 890, Callao",
-    requestDate: "2024-01-17T07:00:00.000Z",
-    serviceDate: "2024-01-17T09:30:00.000Z",
+    requestDate: "2025-01-17T07:00:00.000Z",
+    serviceDate: "2025-01-17T09:30:00.000Z",
     specialRequirements: "Documentación de importación incluida",
     status: "Assigned"
   },
@@ -333,8 +333,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Centro de Distribución Sur - Villa El Salvador",
     destination: "Exportaciones Andinas S.A.C. - Av. Javier Prado Este 2345, San Isidro",
-    requestDate: "2024-01-18T10:00:00.000Z",
-    serviceDate: "2024-01-18T14:00:00.000Z",
+    requestDate: "2025-01-18T10:00:00.000Z",
+    serviceDate: "2025-01-18T14:00:00.000Z",
     specialRequirements: "Embalaje especial para exportación",
     status: "Pending"
   },
@@ -344,8 +344,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Almacén Central - Av. Panamericana Sur Km 15",
     destination: "Logística Integral S.A. - Av. Panamericana Sur Km 15, Villa El Salvador",
-    requestDate: "2024-01-19T06:00:00.000Z",
-    serviceDate: "2024-01-19T08:00:00.000Z",
+    requestDate: "2025-01-19T06:00:00.000Z",
+    serviceDate: "2025-01-19T08:00:00.000Z",
     specialRequirements: "Carga urgente - Prioridad alta",
     status: "Completed"
   },
@@ -355,8 +355,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Zona Industrial - Lurín",
     destination: "Comercializadora Sur E.I.R.L. - Av. Los Héroes 123, San Juan de Miraflores",
-    requestDate: "2024-01-20T11:30:00.000Z",
-    serviceDate: "2024-01-20T15:00:00.000Z",
+    requestDate: "2025-01-20T11:30:00.000Z",
+    serviceDate: "2025-01-20T15:00:00.000Z",
     specialRequirements: "Transporte de productos químicos",
     status: "In Progress"
   },
@@ -366,8 +366,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Mercado Central - Lima Cercado",
     destination: "Distribuidora Central S.A.C. - Av. Abancay 456, Lima Cercado",
-    requestDate: "2024-01-21T05:00:00.000Z",
-    serviceDate: "2024-01-21T07:00:00.000Z",
+    requestDate: "2025-01-21T05:00:00.000Z",
+    serviceDate: "2025-01-21T07:00:00.000Z",
     specialRequirements: "Transporte de productos perecederos",
     status: "Assigned"
   },
@@ -377,8 +377,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Terminal Terrestre Norte - San Martín de Porres",
     destination: "Transportes del Norte S.A. - Av. Universitaria 789, San Martín de Porres",
-    requestDate: "2024-01-22T13:00:00.000Z",
-    serviceDate: "2024-01-22T16:00:00.000Z",
+    requestDate: "2025-01-22T13:00:00.000Z",
+    serviceDate: "2025-01-22T16:00:00.000Z",
     specialRequirements: "Carga de larga distancia",
     status: "Pending"
   },
@@ -388,8 +388,8 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Centro Logístico Este - Ate Vitarte",
     destination: "Comercial Este S.A.C. - Av. El Sol 321, Ate Vitarte",
-    requestDate: "2024-01-23T08:30:00.000Z",
-    serviceDate: "2024-01-23T12:00:00.000Z",
+    requestDate: "2025-01-23T08:30:00.000Z",
+    serviceDate: "2025-01-23T12:00:00.000Z",
     specialRequirements: "Manejo de carga pesada",
     status: "Completed"
   },
@@ -399,16 +399,21 @@ export const sampleServiceRequests: Omit<ServiceRequest, 'id'>[] = [
     vehicleId: "",
     pickupLocation: "Zona Franca - La Molina",
     destination: "Importaciones Globales S.A. - Av. República de Panamá 654, La Molina",
-    requestDate: "2024-01-24T09:00:00.000Z",
-    serviceDate: "2024-01-24T11:30:00.000Z",
+    requestDate: "2025-01-24T09:00:00.000Z",
+    serviceDate: "2025-01-24T11:30:00.000Z",
     specialRequirements: "Documentación aduanera completa",
     status: "Cancelled"
   }
 ];
 
-// Función para generar IDs únicos
+// Función para generar IDs únicos más realistas
 export function generateId(): string {
-  return Math.random().toString(36).substr(2, 9);
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 9; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }
 
 // Función para crear datos completos con IDs
