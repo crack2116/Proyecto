@@ -144,6 +144,74 @@ export async function getDniData(dni: string): Promise<DniData> {
   };
 }
 
+type LicenseStatus = {
+  success: boolean;
+  status?: 'active' | 'expired' | 'suspended' | 'unknown';
+  message?: string;
+  details?: {
+    licenseNumber: string;
+    expirationDate?: string;
+    status: string;
+    category?: string;
+  };
+};
+
+export async function verifyLicenseStatus(licenseNumber: string): Promise<LicenseStatus> {
+  if (!licenseNumber || licenseNumber.length < 5) {
+    return { 
+      success: false, 
+      message: "El número de licencia debe tener al menos 5 caracteres." 
+    };
+  }
+
+  // Simular verificación de licencia (en un caso real, esto sería una API oficial)
+  // Por ahora, simularemos diferentes estados basados en el número
+  
+  try {
+    console.log(`Verificando licencia: ${licenseNumber}`);
+    
+    // Simular delay de API
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Simular diferentes estados basados en patrones del número
+    const lastDigit = parseInt(licenseNumber.slice(-1));
+    let status: 'active' | 'expired' | 'suspended' | 'unknown';
+    let expirationDate: string;
+    
+    if (lastDigit % 4 === 0) {
+      status = 'expired';
+      expirationDate = '2023-12-31';
+    } else if (lastDigit % 4 === 1) {
+      status = 'suspended';
+      expirationDate = '2024-06-15';
+    } else if (lastDigit % 4 === 2) {
+      status = 'active';
+      expirationDate = '2025-12-31';
+    } else {
+      status = 'unknown';
+      expirationDate = '2024-12-31';
+    }
+    
+    return {
+      success: true,
+      status: status,
+      details: {
+        licenseNumber: licenseNumber,
+        expirationDate: expirationDate,
+        status: status,
+        category: 'A-II' // Categoría común para transporte
+      }
+    };
+    
+  } catch (error) {
+    console.error('Error verificando licencia:', error);
+    return {
+      success: false,
+      message: "Error al verificar el estado de la licencia. Intenta de nuevo."
+    };
+  }
+}
+
 export async function getSunatData(ruc: string): Promise<SunatData> {
   if (!ruc || ruc.length !== 11) {
     return { success: false, message: "El RUC debe tener 11 dígitos." };

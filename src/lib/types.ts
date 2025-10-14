@@ -10,10 +10,13 @@ export type Client = {
 
 export type Driver = {
     id: string;
+    dni: string;
     firstName: string;
     lastName: string;
     licenseNumber: string;
+    licenseStatus: 'active' | 'expired' | 'suspended' | 'unknown';
     contactPhone: string;
+    fechaRegistro: string;
 };
 
 export type Vehicle = {
