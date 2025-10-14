@@ -46,6 +46,17 @@ const formSchema = z.object({
   apellidoMaterno: z.string().min(2, {
     message: "El apellido materno es obligatorio.",
   }),
+  edad: z.string().min(1, {
+    message: "La edad es obligatoria.",
+  }).refine((val) => {
+    const age = parseInt(val);
+    return age >= 18 && age <= 100;
+  }, {
+    message: "La edad debe estar entre 18 y 100 años.",
+  }),
+  direccion: z.string().min(10, {
+    message: "La dirección debe tener al menos 10 caracteres.",
+  }),
   email: z.string().email({
     message: "Por favor, introduce una dirección de correo electrónico válida.",
   }),
@@ -71,6 +82,8 @@ export function RegisterForm() {
       nombres: "",
       apellidoPaterno: "",
       apellidoMaterno: "",
+      edad: "",
+      direccion: "",
       email: "",
       password: "",
     },
@@ -131,7 +144,10 @@ export function RegisterForm() {
         apellidoPaterno: values.apellidoPaterno,
         apellidoMaterno: values.apellidoMaterno,
         nombresCompletos: `${values.nombres} ${values.apellidoPaterno} ${values.apellidoMaterno}`.trim(),
+        edad: parseInt(values.edad),
+        direccion: values.direccion,
         role: values.role,
+        fechaRegistro: new Date().toISOString(),
       }, {});
 
       if (values.role === 'administrator') {
@@ -259,6 +275,47 @@ export function RegisterForm() {
                 <FormControl>
                     <Input 
                       placeholder="Ej. González" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            
+            {/* Edad Field */}
+            <FormField
+            control={form.control}
+            name="edad"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel className="text-sm font-medium">Edad</FormLabel>
+                <FormControl>
+                    <Input 
+                      type="number"
+                      placeholder="Ej. 25" 
+                      min="18"
+                      max="100"
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            
+            {/* Dirección Field */}
+            <FormField
+            control={form.control}
+            name="direccion"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel className="text-sm font-medium">Dirección</FormLabel>
+                <FormControl>
+                    <Input 
+                      placeholder="Ej. Av. Principal 123, Lima, Perú" 
                       className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
                       {...field} 
                     />

@@ -51,5 +51,13 @@ export type Route = {
 export type User = {
     id: string;
     username: string;
+    dni: string;
+    nombres: string;
+    apellidoPaterno: string;
+    apellidoMaterno: string;
+    nombresCompletos: string;
+    edad: number;
+    direccion: string;
     role: 'administrator' | 'assistant';
+    fechaRegistro: string;
 };
