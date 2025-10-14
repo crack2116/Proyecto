@@ -10,7 +10,7 @@ export default function LoginPage() {
   const loginImage = PlaceHolderImages.find(p => p.id === 'login-background');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-lime-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-pink-900/20">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-40" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -23,14 +23,14 @@ export default function LoginPage() {
             {/* Logo and Title */}
             <div className="text-center space-y-4">
               <div className="flex justify-center items-center gap-3 mb-6">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+                <div className="p-3 rounded-2xl gradient-vibrant shadow-lg">
                   <Truck className="h-8 w-8 text-white" />
                 </div>
                 <div className="text-left">
-                  <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  <h1 className="text-3xl font-bold font-headline gradient-vibrant bg-clip-text text-transparent">
                     Mewing Transport
                   </h1>
-                  <p className="text-sm text-muted-foreground font-medium">Gestión Inteligente</p>
+                  <p className="text-sm text-muted-foreground font-medium">Gestión Creativa</p>
                 </div>
               </div>
               
@@ -71,20 +71,20 @@ export default function LoginPage() {
             {/* Features */}
             <div className="grid grid-cols-3 gap-4 text-center">
               <div className="space-y-2">
-                <div className="w-10 h-10 mx-auto rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <div className="w-10 h-10 mx-auto rounded-full bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900/20 dark:to-green-900/20 flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-lime-600 dark:text-lime-400" />
                 </div>
                 <p className="text-xs font-medium text-muted-foreground">Seguro</p>
               </div>
               <div className="space-y-2">
-                <div className="w-10 h-10 mx-auto rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="w-10 h-10 mx-auto rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <p className="text-xs font-medium text-muted-foreground">Tiempo Real</p>
               </div>
               <div className="space-y-2">
-                <div className="w-10 h-10 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <div className="w-10 h-10 mx-auto rounded-full bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-pink-600 dark:text-pink-400" />
                 </div>
                 <p className="text-xs font-medium text-muted-foreground">Colaborativo</p>
               </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
         {/* Right Side - Hero Image */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-indigo-600/20 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 z-10"></div>
           {loginImage && (
             <Image
               src={loginImage.imageUrl}
@@ -112,16 +112,16 @@ export default function LoginPage() {
                 <h2 className="text-5xl font-bold font-headline leading-tight">
                   Transporte
                   <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-indigo-200">
-                    Inteligente
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200">
+                    Creativo
                   </span>
                 </h2>
-                <p className="text-xl text-blue-100 leading-relaxed">
-                  Gestiona tu flota con tecnología de vanguardia y análisis en tiempo real.
+                <p className="text-xl text-purple-100 leading-relaxed">
+                  Gestiona tu flota con diseño innovador y tecnología de vanguardia.
                 </p>
               </div>
               
-              <div className="flex items-center gap-2 text-blue-200">
+              <div className="flex items-center gap-2 text-purple-200">
                 <ArrowRight className="h-5 w-5" />
                 <span className="font-medium">Descubre todas las funcionalidades</span>
               </div>
