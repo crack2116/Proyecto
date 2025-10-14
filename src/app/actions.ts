@@ -63,39 +63,40 @@ export async function getSunatData(ruc: string): Promise<SunatData> {
       }
 
       const data = await response.json();
+      console.log(`Datos recibidos de ${apiUrl}:`, data); // Log para debugging
       
-      // Procesar respuesta según el formato de cada API
+      // Procesar respuesta según el formato de cada API con mapeo robusto
       if (apiUrl.includes('api.sunat.dev')) {
         return { 
           success: true, 
           data: {
-            ruc: data.ruc,
-            razonSocial: data.razon_social,
-            direccion: data.direccion,
-            estado: data.estado,
-            condicion: data.condicion,
+            ruc: data.ruc || data.numeroDocumento || ruc,
+            razonSocial: data.razon_social || data.razonSocial || data.nombreRazonSocial || data.nombre || 'N/A',
+            direccion: data.direccion || data.domicilio_fiscal || data.direccionCompleta || 'N/A',
+            estado: data.estado || data.estadoContribuyente || 'N/A',
+            condicion: data.condicion || data.condicionContribuyente || 'N/A',
           }
         };
       } else if (apiUrl.includes('apis.net.pe')) {
         return { 
           success: true, 
           data: {
-            ruc: data.numeroDocumento,
-            razonSocial: data.razonSocial,
-            direccion: data.direccion,
-            estado: data.estado,
-            condicion: data.condicion,
+            ruc: data.numeroDocumento || data.ruc || ruc,
+            razonSocial: data.nombreRazonSocial || data.razonSocial || data.razon_social || 'N/A',
+            direccion: data.direccionCompleta || data.direccion || data.domicilio_fiscal || 'N/A',
+            estado: data.estado || data.estadoContribuyente || 'N/A',
+            condicion: data.condicion || data.condicionContribuyente || 'N/A',
           }
         };
       } else if (apiUrl.includes('ruc.com.pe')) {
         return { 
           success: true, 
           data: {
-            ruc: data.ruc,
-            razonSocial: data.razon_social,
-            direccion: data.direccion,
-            estado: data.estado,
-            condicion: data.condicion,
+            ruc: data.ruc || data.numeroDocumento || ruc,
+            razonSocial: data.razon_social || data.razonSocial || data.nombreRazonSocial || 'N/A',
+            direccion: data.domicilio_fiscal || data.direccion || data.direccionCompleta || 'N/A',
+            estado: data.estado || data.estadoContribuyente || 'N/A',
+            condicion: data.condicion || data.condicionContribuyente || 'N/A',
           }
         };
       }
@@ -108,6 +109,6 @@ export async function getSunatData(ruc: string): Promise<SunatData> {
   // Si todas las APIs fallan, devolver error
   return { 
     success: false, 
-    message: "Todas las APIs de consulta RUC están temporalmente no disponibles. Por favor, ingresa los datos manualmente." 
+    message: "No se pudo obtener información del RUC. Verifica que sea correcto o ingresa los datos manualmente." 
   };
 }
