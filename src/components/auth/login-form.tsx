@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "../ui/separator";
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -63,6 +63,7 @@ export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,7 +88,7 @@ export function LoginForm() {
           errorMessage = 'Las credenciales proporcionadas son inválidas.';
           break;
       case 'auth/popup-closed-by-user':
-          errorMessage = 'Se cerró la ventana de inicio de sesión. Por favor, intenta de nuevo.';
+          errorMessage = 'Se cerró la ventana de inicio de sesión. Haz clic en "Continuar con Google" nuevamente para intentar de nuevo.';
           break;
       case 'auth/popup-blocked':
           errorMessage = 'El navegador bloqueó la ventana emergente. Por favor, permite ventanas emergentes para este sitio.';
@@ -124,6 +125,7 @@ export function LoginForm() {
 
   async function handleGoogleSignIn() {
     const provider = new GoogleAuthProvider();
+    setIsGoogleLoading(true);
     try {
         console.log('Iniciando autenticación con Google...');
         const result = await signInWithPopup(auth, provider);
@@ -136,6 +138,8 @@ export function LoginForm() {
     } catch (error: any) {
         console.error('Error en autenticación con Google:', error);
         handleAuthError(error);
+    } finally {
+        setIsGoogleLoading(false);
     }
   }
 
@@ -207,10 +211,20 @@ export function LoginForm() {
         <Button 
           variant="outline" 
           onClick={handleGoogleSignIn}
+          disabled={isGoogleLoading}
           className="w-full h-11 border-border/50 hover:bg-muted/50 transition-all duration-200 hover-lift"
         >
-            <GoogleIcon className="mr-2 h-4 w-4" />
-            <span className="font-medium">Continuar con Google</span>
+            {isGoogleLoading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span className="font-medium">Conectando con Google...</span>
+              </div>
+            ) : (
+              <>
+                <GoogleIcon className="mr-2 h-4 w-4" />
+                <span className="font-medium">Continuar con Google</span>
+              </>
+            )}
         </Button>
     </div>
   );
