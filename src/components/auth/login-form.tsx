@@ -89,6 +89,15 @@ export function LoginForm() {
       case 'auth/popup-closed-by-user':
           errorMessage = 'Se cerró la ventana de inicio de sesión. Por favor, intenta de nuevo.';
           break;
+      case 'auth/popup-blocked':
+          errorMessage = 'El navegador bloqueó la ventana emergente. Por favor, permite ventanas emergentes para este sitio.';
+          break;
+      case 'auth/operation-not-allowed':
+          errorMessage = 'La autenticación con Google no está habilitada. Contacta al administrador.';
+          break;
+      case 'auth/account-exists-with-different-credential':
+          errorMessage = 'Ya existe una cuenta con este correo electrónico usando otro método de autenticación.';
+          break;
       default:
         errorMessage = 'Error de autenticación. Por favor, intenta de nuevo.';
         break;
@@ -116,13 +125,16 @@ export function LoginForm() {
   async function handleGoogleSignIn() {
     const provider = new GoogleAuthProvider();
     try {
-        await signInWithPopup(auth, provider);
+        console.log('Iniciando autenticación con Google...');
+        const result = await signInWithPopup(auth, provider);
+        console.log('Autenticación exitosa:', result.user);
         toast({
-            title: "Inicio de Sesión Exitoso",
-            description: "¡Bienvenido!",
-          });
+            title: "✅ Inicio de Sesión Exitoso",
+            description: `¡Bienvenido ${result.user.displayName || result.user.email}!`,
+        });
         router.push('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
+        console.error('Error en autenticación con Google:', error);
         handleAuthError(error);
     }
   }
