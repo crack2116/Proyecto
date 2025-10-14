@@ -56,6 +56,7 @@ const formSchema = z.object({
   }, {
     message: "Debes ser mayor de 18 años y menor de 100 años.",
   }),
+  edad: z.number().optional(), 
   direccion: z.string().min(10, {
     message: "La dirección debe tener al menos 10 caracteres.",
   }),
@@ -113,6 +114,7 @@ export function RegisterForm() {
       direccion: "",
       email: "",
       password: "",
+      edad: undefined,
     },
   });
 
@@ -137,7 +139,8 @@ export function RegisterForm() {
           
           // Llenar edad si está disponible
           if (result.data.edad) {
-            form.setValue("edad", result.data.edad);
+            form.setValue("edad", Number(result.data.edad));
+
           }
           
           // Llenar dirección si está disponible
