@@ -33,6 +33,98 @@ type SunatData = {
   message?: string;
 };
 
+type DniData = {
+  success: boolean;
+  data?: {
+    dni: string;
+    nombres: string;
+    apellidoPaterno: string;
+    apellidoMaterno: string;
+    nombresCompletos: string;
+  };
+  message?: string;
+};
+
+export async function getDniData(dni: string): Promise<DniData> {
+  if (!dni || dni.length !== 8) {
+    return { success: false, message: "El DNI debe tener 8 dígitos." };
+  }
+
+  // Lista de APIs para consulta de DNI
+  const apis = [
+    `https://api.dni.xyz/dni/${dni}`,
+    `https://api.apis.net.pe/v1/dni?numero=${dni}`,
+    `https://dniruc.apisperu.com/api/v1/dni/${dni}`,
+  ];
+
+  for (const apiUrl of apis) {
+    try {
+      console.log(`Intentando consultar DNI con API: ${apiUrl}`);
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!response.ok) {
+        console.log(`API ${apiUrl} falló con status: ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      console.log(`Datos recibidos de ${apiUrl}:`, data);
+
+      // Función helper para extraer datos de manera inteligente
+      const extractField = (obj: any, possibleKeys: string[]): string => {
+        for (const key of possibleKeys) {
+          if (obj[key] && obj[key] !== '' && obj[key] !== null && obj[key] !== undefined) {
+            return String(obj[key]).trim();
+          }
+        }
+        return '';
+      };
+
+      // Extraer datos usando múltiples nombres de campos posibles
+      const nombres = extractField(data, [
+        'nombres', 'nombre', 'nombres_completos', 'primer_nombre', 'first_name'
+      ]);
+      
+      const apellidoPaterno = extractField(data, [
+        'apellido_paterno', 'apellidoPaterno', 'paterno', 'apellido_p', 'last_name'
+      ]);
+      
+      const apellidoMaterno = extractField(data, [
+        'apellido_materno', 'apellidoMaterno', 'materno', 'apellido_m', 'mother_last_name'
+      ]);
+
+      // Solo devolver éxito si tenemos al menos los nombres
+      if (nombres) {
+        const nombresCompletos = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.trim();
+        return { 
+          success: true, 
+          data: {
+            dni: dni,
+            nombres: nombres,
+            apellidoPaterno: apellidoPaterno || '',
+            apellidoMaterno: apellidoMaterno || '',
+            nombresCompletos: nombresCompletos,
+          }
+        };
+      }
+    } catch (error) {
+      console.log(`Error con API ${apiUrl}:`, error);
+      continue;
+    }
+  }
+
+  return { 
+    success: false, 
+    message: "No se pudo obtener información del DNI. Verifica que sea correcto o ingresa los datos manualmente." 
+  };
+}
+
 export async function getSunatData(ruc: string): Promise<SunatData> {
   if (!ruc || ruc.length !== 11) {
     return { success: false, message: "El RUC debe tener 11 dígitos." };

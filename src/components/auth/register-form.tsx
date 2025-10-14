@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useAuth, useFirestore } from "@/firebase";
+import { useState } from "react";
+import { Loader2, Search } from "lucide-react";
+import { getDniData } from "@/app/actions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +32,20 @@ import {
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const formSchema = z.object({
+  dni: z.string().min(8, {
+    message: "El DNI debe tener 8 dígitos.",
+  }).max(8, {
+    message: "El DNI debe tener exactamente 8 dígitos.",
+  }),
+  nombres: z.string().min(2, {
+    message: "Los nombres son obligatorios.",
+  }),
+  apellidoPaterno: z.string().min(2, {
+    message: "El apellido paterno es obligatorio.",
+  }),
+  apellidoMaterno: z.string().min(2, {
+    message: "El apellido materno es obligatorio.",
+  }),
   email: z.string().email({
     message: "Por favor, introduce una dirección de correo electrónico válida.",
   }),
@@ -45,14 +62,60 @@ export function RegisterForm() {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
+  const [isSearchingDni, setIsSearchingDni] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      dni: "",
+      nombres: "",
+      apellidoPaterno: "",
+      apellidoMaterno: "",
       email: "",
       password: "",
     },
   });
+
+  const handleDniSearch = async () => {
+    const dni = form.getValues("dni");
+    if (!dni || dni.length !== 8) {
+      toast({
+        variant: "destructive",
+        title: "⚠️ DNI Inválido",
+        description: "El DNI debe tener exactamente 8 dígitos.",
+      });
+      return;
+    }
+
+    setIsSearchingDni(true);
+    try {
+      const result = await getDniData(dni);
+      if (result.success && result.data) {
+        form.setValue("nombres", result.data.nombres);
+        form.setValue("apellidoPaterno", result.data.apellidoPaterno);
+        form.setValue("apellidoMaterno", result.data.apellidoMaterno);
+        
+        toast({
+          title: "✅ Datos Encontrados",
+          description: `Datos cargados para: ${result.data.nombresCompletos}`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "⚠️ Error en la Búsqueda",
+          description: result.message || "No se pudo encontrar información del DNI. Verifica que sea correcto.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "❌ Error de Conexión",
+        description: "Error de conexión. Por favor, intenta de nuevo o ingresa los datos manualmente.",
+      });
+    } finally {
+      setIsSearchingDni(false);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -63,6 +126,11 @@ export function RegisterForm() {
       setDocumentNonBlocking(userDocRef, {
         id: user.uid,
         username: user.email,
+        dni: values.dni,
+        nombres: values.nombres,
+        apellidoPaterno: values.apellidoPaterno,
+        apellidoMaterno: values.apellidoMaterno,
+        nombresCompletos: `${values.nombres} ${values.apellidoPaterno} ${values.apellidoMaterno}`.trim(),
         role: values.role,
       }, {});
 
@@ -107,44 +175,148 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="space-y-6">
         <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* DNI Field with Search Button */}
+            <FormField
+            control={form.control}
+            name="dni"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel className="text-sm font-medium">DNI</FormLabel>
+                <div className="flex gap-2">
+                    <FormControl>
+                        <Input 
+                          placeholder="12345678" 
+                          className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                          {...field} 
+                        />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      onClick={handleDniSearch}
+                      disabled={isSearchingDni || !field.value || field.value.length !== 8}
+                      className="h-11 px-4 gradient-primary hover:opacity-90 text-primary-foreground font-medium transition-all duration-200"
+                    >
+                        {isSearchingDni ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Search className="h-4 w-4" />
+                        )}
+                    </Button>
+                </div>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            
+            {/* Nombres Field */}
+            <FormField
+            control={form.control}
+            name="nombres"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel className="text-sm font-medium">Nombres</FormLabel>
+                <FormControl>
+                    <Input 
+                      placeholder="Ej. Juan Carlos" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            
+            {/* Apellido Paterno Field */}
+            <FormField
+            control={form.control}
+            name="apellidoPaterno"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel className="text-sm font-medium">Apellido Paterno</FormLabel>
+                <FormControl>
+                    <Input 
+                      placeholder="Ej. Pérez" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            
+            {/* Apellido Materno Field */}
+            <FormField
+            control={form.control}
+            name="apellidoMaterno"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel className="text-sm font-medium">Apellido Materno</FormLabel>
+                <FormControl>
+                    <Input 
+                      placeholder="Ej. González" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            
+            {/* Email Field */}
             <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Correo Electrónico</FormLabel>
+                <FormLabel className="text-sm font-medium">Correo Electrónico</FormLabel>
                 <FormControl>
-                    <Input placeholder="usuario@mewing.com" {...field} />
+                    <Input 
+                      placeholder="usuario@mewing.com" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
             )}
             />
+            
+            {/* Password Field */}
             <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Contraseña</FormLabel>
+                <FormLabel className="text-sm font-medium">Contraseña</FormLabel>
                 <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <Input 
+                      type="password" 
+                      placeholder="••••••••" 
+                      className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
+                      {...field} 
+                    />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
             )}
             />
+            
+            {/* Role Field */}
             <FormField
             control={form.control}
             name="role"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Rol</FormLabel>
+                <FormLabel className="text-sm font-medium">Rol</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors">
                         <SelectValue placeholder="Selecciona un rol" />
                     </SelectTrigger>
                     </FormControl>
@@ -157,8 +329,20 @@ export function RegisterForm() {
                 </FormItem>
             )}
             />
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-2" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Creando Cuenta..." : "Crear Cuenta"}
+            
+            <Button 
+              type="submit" 
+              className="w-full h-11 gradient-primary hover:opacity-90 text-primary-foreground font-medium transition-all duration-200 hover-lift" 
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Creando Cuenta...</span>
+                </div>
+              ) : (
+                "Crear Cuenta"
+              )}
             </Button>
         </form>
         </Form>
