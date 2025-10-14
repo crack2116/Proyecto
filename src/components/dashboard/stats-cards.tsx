@@ -6,7 +6,7 @@ import {
     CardHeader,
     CardTitle,
   } from "@/components/ui/card";
-  import { DollarSign, Truck, Users, CheckCircle, Clock, Loader2, AlertCircle } from "lucide-react";
+  import { DollarSign, Truck, Users, CheckCircle, Clock, Loader2, AlertCircle, TrendingUp } from "lucide-react";
   import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
   import { collection, query, where } from "firebase/firestore";
   import { useMemo } from "react";
