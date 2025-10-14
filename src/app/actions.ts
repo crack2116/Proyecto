@@ -101,15 +101,20 @@ export async function getDniData(dni: string): Promise<DniData> {
         'apellido_materno', 'apellidoMaterno', 'materno', 'apellido_m', 'mother_last_name'
       ]);
 
-      // Extraer edad (si está disponible)
+      // Extraer edad (si está disponible) - Las APIs públicas generalmente no tienen esta info
       const edad = extractField(data, [
-        'edad', 'age', 'fecha_nacimiento', 'birth_date', 'fechaNacimiento'
+        'edad', 'age', 'fecha_nacimiento', 'birth_date', 'fechaNacimiento', 'fecha_nac'
       ]);
 
-      // Extraer dirección (si está disponible)
+      // Extraer dirección (si está disponible) - Las APIs públicas generalmente no tienen esta info
       const direccion = extractField(data, [
-        'direccion', 'address', 'domicilio', 'residencia', 'ubicacion', 'location'
+        'direccion', 'address', 'domicilio', 'residencia', 'ubicacion', 'location', 'domicilio_legal'
       ]);
+
+      // Log para debugging - ver qué datos están disponibles
+      console.log('Datos disponibles en la respuesta:', Object.keys(data));
+      console.log('Edad encontrada:', edad);
+      console.log('Dirección encontrada:', direccion);
 
       // Solo devolver éxito si tenemos al menos los nombres
       if (nombres) {

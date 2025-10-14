@@ -46,13 +46,15 @@ const formSchema = z.object({
   apellidoMaterno: z.string().min(2, {
     message: "El apellido materno es obligatorio.",
   }),
-  edad: z.string().min(1, {
-    message: "La edad es obligatoria.",
+  fechaNacimiento: z.string().min(1, {
+    message: "La fecha de nacimiento es obligatoria.",
   }).refine((val) => {
-    const age = parseInt(val);
-    return age >= 18 && age <= 100;
+    const fecha = new Date(val);
+    const hoy = new Date();
+    const edad = hoy.getFullYear() - fecha.getFullYear();
+    return edad >= 18 && edad <= 100;
   }, {
-    message: "La edad debe estar entre 18 y 100 años.",
+    message: "Debes ser mayor de 18 años y menor de 100 años.",
   }),
   direccion: z.string().min(10, {
     message: "La dirección debe tener al menos 10 caracteres.",
@@ -74,6 +76,31 @@ export function RegisterForm() {
   const auth = useAuth();
   const firestore = useFirestore();
   const [isSearchingDni, setIsSearchingDni] = useState(false);
+  const [edadCalculada, setEdadCalculada] = useState<number | null>(null);
+
+  // Función para calcular edad desde fecha de nacimiento
+  const calcularEdad = (fechaNacimiento: string) => {
+    if (!fechaNacimiento) {
+      setEdadCalculada(null);
+      return;
+    }
+    
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    
+    // Ajustar si aún no ha cumplido años este año
+    const mesActual = hoy.getMonth();
+    const mesNacimiento = nacimiento.getMonth();
+    const diaActual = hoy.getDate();
+    const diaNacimiento = nacimiento.getDate();
+    
+    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && diaActual < diaNacimiento)) {
+      edad--;
+    }
+    
+    setEdadCalculada(edad);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,7 +109,7 @@ export function RegisterForm() {
       nombres: "",
       apellidoPaterno: "",
       apellidoMaterno: "",
-      edad: "",
+      fechaNacimiento: "",
       direccion: "",
       email: "",
       password: "",
@@ -124,7 +151,7 @@ export function RegisterForm() {
           
           const mensajeExtra = camposCompletados.length > 0 
             ? ` También se completó: ${camposCompletados.join(", ")}.`
-            : "";
+            : " Por favor, completa manualmente la edad y dirección.";
           
           toast({
             title: "✅ Datos Encontrados",
@@ -162,7 +189,8 @@ export function RegisterForm() {
         apellidoPaterno: values.apellidoPaterno,
         apellidoMaterno: values.apellidoMaterno,
         nombresCompletos: `${values.nombres} ${values.apellidoPaterno} ${values.apellidoMaterno}`.trim(),
-        edad: parseInt(values.edad),
+        fechaNacimiento: values.fechaNacimiento,
+        edad: new Date().getFullYear() - new Date(values.fechaNacimiento).getFullYear(),
         direccion: values.direccion,
         role: values.role,
         fechaRegistro: new Date().toISOString(),
@@ -302,23 +330,29 @@ export function RegisterForm() {
             )}
             />
             
-            {/* Edad Field */}
+            {/* Fecha de Nacimiento Field */}
             <FormField
             control={form.control}
-            name="edad"
+            name="fechaNacimiento"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel className="text-sm font-medium">Edad</FormLabel>
+                <FormLabel className="text-sm font-medium">Fecha de Nacimiento</FormLabel>
                 <FormControl>
                     <Input 
-                      type="number"
-                      placeholder="Ej. 25" 
-                      min="18"
-                      max="100"
+                      type="date"
                       className="h-11 bg-background/50 border-border/50 focus:border-primary transition-colors" 
-                      {...field} 
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        calcularEdad(e.target.value);
+                      }}
                     />
                 </FormControl>
+                {edadCalculada && (
+                  <p className="text-sm text-muted-foreground">
+                    Edad calculada: {edadCalculada} años
+                  </p>
+                )}
                 <FormMessage />
                 </FormItem>
             )}

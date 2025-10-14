@@ -56,6 +56,7 @@ export type User = {
     apellidoPaterno: string;
     apellidoMaterno: string;
     nombresCompletos: string;
+    fechaNacimiento: string;
     edad: number;
     direccion: string;
     role: 'administrator' | 'assistant';
