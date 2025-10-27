@@ -233,7 +233,10 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
 
   // Si usa Firebase, usar los datos de Firebase
   useEffect(() => {
+    console.log("[TRACKING] useFirebase:", useFirebase, "firebaseVehicles:", firebaseVehicles?.length || 0);
+    
     if (useFirebase && firebaseVehicles) {
+      console.log("[TRACKING] Convirtiendo datos de Firebase...");
       // Convertir datos de Firebase al formato esperado
       const convertedVehicles = firebaseVehicles.map((veh: any) => ({
         id: veh.id,
@@ -249,6 +252,7 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
         speed: veh.speed || 0,
         lastUpdate: new Date(),
       }));
+      console.log("[TRACKING] Vehículos convertidos:", convertedVehicles.length);
       setVehicles(convertedVehicles);
     }
   }, [useFirebase, firebaseVehicles]);

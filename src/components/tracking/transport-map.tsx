@@ -42,57 +42,57 @@ export function TransportMap({
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    console.log("useEffect ejecutado - mapContainerRef.current:", !!mapContainerRef.current);
+    console.log("[MAP] useEffect ejecutado - isMapReady:", isMapReady);
     
     const initMap = async () => {
       if (!mapContainerRef.current) {
-        console.warn("mapContainerRef.current es null");
+        console.warn("[MAP] mapContainerRef.current es null");
         return;
       }
 
       if (mapInstanceRef.current) {
-        console.warn("Mapa ya inicializado, ignorando");
+        console.warn("[MAP] Mapa ya inicializado, ignorando");
         return;
       }
 
       try {
-        console.log("Inicializando mapa...");
+        console.log("[MAP] Inicializando mapa...");
         const L = await import("leaflet");
         const container = mapContainerRef.current;
         
-        console.log("Dimensiones del contenedor:", {
+        console.log("[MAP] Dimensiones del contenedor:", {
           width: container.offsetWidth,
           height: container.offsetHeight
         });
 
         // Esperar a que el contenedor tenga altura
         if (container.offsetHeight === 0) {
-          console.warn("El contenedor no tiene altura, reintentando...");
+          console.warn("[MAP] El contenedor no tiene altura, reintentando...");
           setTimeout(initMap, 200);
           return;
         }
 
         if ((container as any)._leaflet_id) {
-          console.warn("El contenedor ya tiene un mapa");
+          console.warn("[MAP] El contenedor ya tiene un mapa");
           return;
         }
 
-        console.log("Creando mapa Leaflet...");
+        console.log("[MAP] Creando mapa Leaflet...");
         const map = L.default.map(container, {
           center: center,
           zoom: 12,
         });
 
-        console.log("Agregando capa de tiles...");
+        console.log("[MAP] Agregando capa de tiles...");
         L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(map);
 
         mapInstanceRef.current = map;
         setIsMapReady(true);
-        console.log("Mapa inicializado correctamente");
+        console.log("[MAP] Mapa inicializado correctamente - isMapReady ahora es true");
       } catch (error) {
-        console.error("Error al inicializar el mapa:", error);
+        console.error("[MAP] Error al inicializar el mapa:", error);
       }
     };
 
@@ -104,6 +104,7 @@ export function TransportMap({
     // NO limpiar el mapa aquí - solo al desmontar el componente
     return () => {
       clearTimeout(timer);
+      console.log("[MAP] Cleanup del useEffect");
     };
   }, []); // Sin dependencias - solo se ejecuta una vez al montar
 
@@ -294,12 +295,22 @@ export function TransportMap({
         </div>
       </div>
 
-      {/* Estado de carga sobre el mapa */}
-      {!isMapReady && (
+      {/* Estado de carga sobre el mapa - Solo mostrar si realmente está cargando */}
+      {!isMapReady && vehicles.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center z-[900] bg-background/50">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
             <p className="text-muted-foreground">Cargando mapa...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Si no está ready pero hay vehículos, mostrar una nota */}
+      {!isMapReady && vehicles.length > 0 && (
+        <div className="absolute inset-0 flex items-center justify-center z-[900] bg-background/50">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Inicializando mapa...</p>
           </div>
         </div>
       )}
