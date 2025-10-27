@@ -53,9 +53,10 @@ export function TransportMap() {
 
   useEffect(() => {
     if (isMapReady && vehicles && vehicles.length > 0 && mapInstanceRef.current) {
-      const L = require("leaflet");
-      
-      vehicles.forEach((vehicle) => {
+      const addMarkers = async () => {
+        const L = (await import("leaflet")).default;
+        
+        vehicles.forEach((vehicle) => {
         const vehicleIcon = L.divIcon({
           className: "custom-vehicle-marker",
           html: `<div style="
@@ -95,6 +96,9 @@ export function TransportMap() {
 
         marker.bindPopup(popupContent);
       });
+      };
+      
+      addMarkers();
     }
   }, [isMapReady, vehicles]);
 
