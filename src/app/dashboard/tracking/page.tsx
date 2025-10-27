@@ -11,6 +11,7 @@ export default function TrackingPage() {
   const { vehicles, isActive, setIsActive } = useRealtimeTracking({
     interval: 3000,
     enabled: true,
+    useFirebase: true, // Usar datos reales de Firebase
   });
   
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | undefined>();
