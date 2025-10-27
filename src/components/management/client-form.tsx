@@ -16,12 +16,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase";
 import { addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { Client } from "@/lib/types";
 import { getSunatData } from "@/app/actions";
 import { Loader2, Search } from "lucide-react";
+import { toastMessages } from "@/lib/toast-messages";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre es obligatorio."),
@@ -68,11 +68,7 @@ export function ClientForm({ setOpen, editingClient }: ClientFormProps) {
   const handleRucSearch = async () => {
     const ruc = form.getValues("ruc");
     if (ruc.length !== 11) {
-        toast({
-            variant: "destructive",
-            title: "RUC Inválido",
-            description: "Por favor, ingresa un RUC de 11 dígitos.",
-        });
+        toastMessages.client.error("Por favor, ingresa un RUC de 11 dígitos.");
         return;
     }
     
@@ -84,24 +80,13 @@ export function ClientForm({ setOpen, editingClient }: ClientFormProps) {
         if (result.success && result.data) {
             form.setValue("name", result.data.razonSocial, { shouldValidate: true });
             form.setValue("address", result.data.direccion, { shouldValidate: true });
-            toast({
-                title: "✅ Cliente Encontrado",
-                description: `${result.data.razonSocial} - ${result.data.estado}`,
-            });
+            toastMessages.success("Cliente Encontrado", `${result.data.razonSocial} - ${result.data.estado}`);
         } else {
-            toast({
-                variant: "destructive",
-                title: "⚠️ Error en la Búsqueda",
-                description: result.message || "No se pudo encontrar información del RUC. Verifica que sea correcto.",
-            });
+            toastMessages.client.error(result.message || "No se pudo encontrar información del RUC. Verifica que sea correcto.");
         }
     } catch (error) {
         console.error("Error en búsqueda RUC:", error);
-        toast({
-            variant: "destructive",
-            title: "❌ Error de Conexión",
-            description: "Error de conexión. Por favor, intenta de nuevo o ingresa los datos manualmente.",
-        });
+        toastMessages.client.error("Error de conexión. Por favor, intenta de nuevo o ingresa los datos manualmente.");
     } finally {
         setIsSearching(false);
     }
@@ -113,29 +98,19 @@ export function ClientForm({ setOpen, editingClient }: ClientFormProps) {
             // Update existing client
             const clientDocRef = doc(firestore, "clients", editingClient.id);
             setDocumentNonBlocking(clientDocRef, values, { merge: true });
-            toast({
-                title: "Cliente Actualizado",
-                description: "Los datos del cliente han sido actualizados.",
-            });
+            toastMessages.client.updated();
         } else {
             // Add new client
             const clientsCollection = collection(firestore, "clients");
             addDocumentNonBlocking(clientsCollection, values);
-            toast({
-                title: "Cliente Agregado",
-                description: "El nuevo cliente ha sido registrado exitosamente.",
-            });
+            toastMessages.client.created();
         }
         
         form.reset();
         setOpen(false);
     } catch(error) {
         console.error("Error saving client: ", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Ocurrió un error al guardar el cliente.",
-          });
+        toastMessages.client.error("Ocurrió un error al guardar el cliente.");
     }
   }
 
