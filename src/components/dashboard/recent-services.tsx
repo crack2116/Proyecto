@@ -23,7 +23,32 @@ import { Loader2 } from "lucide-react";
         "Completed": "Completado",
         "In Progress": "En Progreso",
         "Pending": "Pendiente",
+        "Assigned": "Asignado",
         "Cancelled": "Cancelado"
+    }
+
+    const getStatusBadge = (status: string | undefined) => {
+        if (!status) return <Badge className="bg-gray-500/20 text-gray-700 border-none">Sin estado</Badge>;
+        
+        const translatedStatus = statusTranslations[status] || status;
+        
+        const statusClass = status === "Completed" 
+            ? "bg-green-500/20 text-green-700"
+            : status === "In Progress" 
+            ? "bg-blue-500/20 text-blue-700"
+            : status === "Assigned"
+            ? "bg-purple-500/20 text-purple-700"
+            : status === "Pending"
+            ? "bg-yellow-500/20 text-yellow-700"
+            : status === "Cancelled"
+            ? "bg-red-500/20 text-red-700"
+            : "bg-gray-500/20 text-gray-700";
+            
+        return (
+            <Badge className={cn(statusClass, "border-none")}>
+                {translatedStatus}
+            </Badge>
+        );
     }
 
     if (isLoading) {
@@ -53,17 +78,7 @@ import { Loader2 } from "lucide-react";
                 </div>
               </TableCell>
               <TableCell>
-                <Badge
-                  className={cn(
-                    request.status === "Completed" && "bg-green-500/20 text-green-700",
-                    request.status === "In Progress" && "bg-blue-500/20 text-blue-700",
-                    request.status === "Pending" && "bg-yellow-500/20 text-yellow-700",
-                    request.status === "Cancelled" && "bg-red-500/20 text-red-700",
-                    "border-none"
-                  )}
-                >
-                  {statusTranslations[request.status]}
-                </Badge>
+                {getStatusBadge(request.status)}
               </TableCell>
               <TableCell className="text-right">{new Date(request.serviceDate).toLocaleDateString()}</TableCell>
             </TableRow>
