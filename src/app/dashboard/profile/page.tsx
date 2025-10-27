@@ -1,11 +1,10 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/firebase";
 import { User, Mail, Phone, MapPin, Calendar, Shield } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { UserRoleBadge } from "@/components/layout/user-role-badge";
+import { ProfileImageUploader } from "@/components/profile/profile-image-uploader";
 
 export default function ProfilePage() {
   const { user } = useUser();
@@ -28,17 +27,9 @@ export default function ProfilePage() {
             <CardContent className="space-y-6">
               {/* Avatar y Nombre */}
               <div className="flex items-center gap-6">
-                <Avatar className="h-24 w-24 border-4 border-primary/20">
-                  <AvatarImage src={user?.photoURL ?? undefined} alt="Avatar" />
-                  <AvatarFallback className="text-2xl">
-                    <User />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold">{user?.displayName || "Usuario"}</h2>
-                  <div className="mt-2">
-                    <UserRoleBadge />
-                  </div>
+                <ProfileImageUploader />
+                <div className="mt-12">
+                  <UserRoleBadge />
                 </div>
               </div>
 
