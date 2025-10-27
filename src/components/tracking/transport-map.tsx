@@ -239,17 +239,6 @@ export function TransportMap({
     );
   }
 
-  if (!isMapReady) {
-    return (
-      <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative flex items-center justify-center min-h-[500px]">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando mapa...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative">
       {/* Controles de tracking */}
@@ -280,6 +269,17 @@ export function TransportMap({
         </div>
       </div>
 
+      {/* Estado de carga sobre el mapa */}
+      {!isMapReady && (
+        <div className="absolute inset-0 flex items-center justify-center z-[900] bg-background/50">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Cargando mapa...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Contenedor del mapa - SIEMPRE se renderiza para que el ref funcione */}
       <div 
         ref={mapContainerRef} 
         className="w-full h-full"
