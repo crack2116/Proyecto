@@ -38,64 +38,76 @@ export function TransportMap({
   const center: [number, number] = [-5.19449, -80.63282];
 
   useEffect(() => {
-    if (typeof window !== "undefined" && mapContainerRef.current && !mapInstanceRef.current) {
-      const initMap = async () => {
-        try {
-          console.log("Inicializando mapa...");
-          const L = await import("leaflet");
-   
-          // Verificar que el contenedor tiene dimensiones
-          if (mapContainerRef.current) {
-            const container = mapContainerRef.current;
-            console.log("Dimensiones del contenedor:", {
-              width: container.offsetWidth,
-              height: container.offsetHeight
-            });
+    if (typeof window === "undefined") return;
+    
+    console.log("useEffect ejecutado - mapContainerRef.current:", !!mapContainerRef.current);
+    
+    const initMap = async () => {
+      if (!mapContainerRef.current) {
+        console.warn("mapContainerRef.current es null");
+        return;
+      }
 
-            // Si el contenedor no tiene altura, usar setTimeout para retry
-            if (container.offsetHeight === 0) {
-              console.warn("El contenedor no tiene altura, reintentando en 100ms...");
-              setTimeout(() => initMap(), 100);
-              return;
-            }
+      if (mapInstanceRef.current) {
+        console.warn("Mapa ya inicializado");
+        return;
+      }
 
-            if (!(container as any)._leaflet_id) {
-              console.log("Creando mapa Leaflet...");
-              const map = L.default.map(container, {
-                center: center,
-                zoom: 12,
-              });
+      try {
+        console.log("Inicializando mapa...");
+        const L = await import("leaflet");
+        const container = mapContainerRef.current;
+        
+        console.log("Dimensiones del contenedor:", {
+          width: container.offsetWidth,
+          height: container.offsetHeight
+        });
 
-              console.log("Agregando capa de tiles...");
-              L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-              }).addTo(map);
-
-              mapInstanceRef.current = map;
-              setIsMapReady(true);
-              console.log("Mapa inicializado correctamente");
-            }
-          }
-        } catch (error) {
-          console.error("Error al inicializar el mapa:", error);
+        // Esperar a que el contenedor tenga altura
+        if (container.offsetHeight === 0) {
+          console.warn("El contenedor no tiene altura, reintentando...");
+          setTimeout(initMap, 200);
+          return;
         }
-      };
 
-      // Pequeño delay para asegurar que el DOM está listo
-      const timer = setTimeout(() => {
-        initMap();
-      }, 100);
-
-      return () => {
-        clearTimeout(timer);
-        if (mapInstanceRef.current) {
-          console.log("Destruyendo mapa...");
-          mapInstanceRef.current.remove();
-          mapInstanceRef.current = null;
-          setIsMapReady(false);
+        if ((container as any)._leaflet_id) {
+          console.warn("El contenedor ya tiene un mapa");
+          return;
         }
-      };
-    }
+
+        console.log("Creando mapa Leaflet...");
+        const map = L.default.map(container, {
+          center: center,
+          zoom: 12,
+        });
+
+        console.log("Agregando capa de tiles...");
+        L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+
+        mapInstanceRef.current = map;
+        setIsMapReady(true);
+        console.log("Mapa inicializado correctamente");
+      } catch (error) {
+        console.error("Error al inicializar el mapa:", error);
+      }
+    };
+
+    // Pequeño delay para asegurar que el DOM está listo
+    const timer = setTimeout(() => {
+      initMap();
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+      if (mapInstanceRef.current) {
+        console.log("Destruyendo mapa...");
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        setIsMapReady(false);
+      }
+    };
   }, [center]);
 
   // Función para actualizar o crear marcadores
