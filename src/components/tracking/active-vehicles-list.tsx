@@ -22,6 +22,8 @@ type Vehicle = {
 
 interface ActiveVehiclesListProps {
   vehicles: Vehicle[];
+  onVehicleClick?: (vehicle: Vehicle) => void;
+  selectedVehicleId?: string;
 }
 
 const statusColors = {
@@ -30,7 +32,7 @@ const statusColors = {
   "En Mantenimiento": "bg-amber-500/20 text-amber-700 dark:text-amber-300",
 };
 
-export function ActiveVehiclesList({ vehicles }: ActiveVehiclesListProps) {
+export function ActiveVehiclesList({ vehicles, onVehicleClick, selectedVehicleId }: ActiveVehiclesListProps) {
   const formatTime = (date: Date) => {
     return new Date(date).toLocaleTimeString('es-PE', { 
       hour: '2-digit', 
@@ -49,15 +51,23 @@ export function ActiveVehiclesList({ vehicles }: ActiveVehiclesListProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
-          {vehicles.map((vehicle) => (
-            <div
-              key={vehicle.id}
-              className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
-            >
-              <div className="flex items-center gap-3 flex-1">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Truck className="h-4 w-4 text-primary" />
-                </div>
+          {vehicles.map((vehicle) => {
+            const isSelected = selectedVehicleId === vehicle.id;
+            
+            return (
+              <div
+                key={vehicle.id}
+                onClick={() => onVehicleClick?.(vehicle)}
+                className={`flex items-center justify-between p-3 rounded-lg border transition-colors cursor-pointer ${
+                  isSelected 
+                    ? "border-primary bg-primary/10 hover:bg-primary/20" 
+                    : "border-border hover:bg-accent/50"
+                }`}
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <div className={`p-2 rounded-lg ${isSelected ? "bg-primary" : "bg-primary/10"}`}>
+                    <Truck className={`h-4 w-4 ${isSelected ? "text-primary-foreground" : "text-primary"}`} />
+                  </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-semibold text-sm truncate">{vehicle.licensePlate}</p>
@@ -92,7 +102,8 @@ export function ActiveVehiclesList({ vehicles }: ActiveVehiclesListProps) {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

@@ -5,12 +5,19 @@ import { TrackingStats } from "@/components/tracking/tracking-stats";
 import { ActiveVehiclesList } from "@/components/tracking/active-vehicles-list";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRealtimeTracking } from "@/hooks/use-realtime-tracking";
+import { useState } from "react";
 
 export default function TrackingPage() {
   const { vehicles, isActive, setIsActive } = useRealtimeTracking({
     interval: 3000,
     enabled: true,
   });
+  
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | undefined>();
+
+  const handleVehicleClick = (vehicle: any) => {
+    setSelectedVehicleId(vehicle.id);
+  };
 
   return (
     <div className="flex flex-col gap-6 h-[calc(100vh-6rem)]">
@@ -32,6 +39,7 @@ export default function TrackingPage() {
                 vehicles={vehicles}
                 isActive={isActive}
                 onToggleActive={setIsActive}
+                selectedVehicleId={selectedVehicleId}
               />
             </CardContent>
           </Card>
@@ -39,7 +47,11 @@ export default function TrackingPage() {
 
         {/* Lista de vehículos activos */}
         <div className="lg:col-span-1 h-full flex flex-col">
-          <ActiveVehiclesList vehicles={vehicles} />
+          <ActiveVehiclesList 
+            vehicles={vehicles}
+            onVehicleClick={handleVehicleClick}
+            selectedVehicleId={selectedVehicleId}
+          />
         </div>
       </div>
     </div>

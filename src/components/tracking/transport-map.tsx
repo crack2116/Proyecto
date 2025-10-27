@@ -23,12 +23,14 @@ interface TransportMapProps {
   vehicles?: Vehicle[];
   isActive?: boolean;
   onToggleActive?: (active: boolean) => void;
+  selectedVehicleId?: string;
 }
 
 export function TransportMap({ 
   vehicles = [],
   isActive = true,
-  onToggleActive 
+  onToggleActive,
+  selectedVehicleId
 }: TransportMapProps = {}) {
   const [isMapReady, setIsMapReady] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -217,6 +219,23 @@ export function TransportMap({
       updateMarkers();
     }
   }, [isMapReady, vehicles]);
+
+  // Centrar el mapa en el vehículo seleccionado
+  useEffect(() => {
+    if (selectedVehicleId && mapInstanceRef.current && vehicles.length > 0) {
+      const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
+      if (selectedVehicle) {
+        console.log("Centrando mapa en vehículo:", selectedVehicle.licensePlate);
+        mapInstanceRef.current.setView([selectedVehicle.lat, selectedVehicle.lng], 15);
+        
+        // Abrir el popup del marcador
+        const marker = markersRef.current.find((m: any) => m.vehicleId === selectedVehicleId);
+        if (marker) {
+          marker.openPopup();
+        }
+      }
+    }
+  }, [selectedVehicleId, vehicles]);
 
   // Cleanup al desmontar el componente
   useEffect(() => {
