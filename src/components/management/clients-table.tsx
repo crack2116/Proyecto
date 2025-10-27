@@ -33,13 +33,32 @@ import { ClientForm } from "./client-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
+import { useTableState } from "@/hooks/use-table-state";
+import { TableFilters } from "@/components/ui/table-filters";
+import { TablePagination } from "@/components/ui/table-pagination";
 
   
   export function ClientsTable() {
     const firestore = useFirestore();
     const { toast } = useToast();
     const clientsQuery = useMemoFirebase(() => query(collection(firestore, "clients")), [firestore]);
-    const { data: clients, isLoading } = useCollection<Client>(clientsQuery);
+    const { data: clients = [], isLoading } = useCollection<Client>(clientsQuery);
+    
+    // Hook para filtros y paginación
+    const {
+      paginatedData,
+      totalPages,
+      searchQuery,
+      handleSearchChange,
+      handlePageChange,
+      handleItemsPerPageChange,
+      totalItems,
+      currentPage,
+      itemsPerPage,
+    } = useTableState<Client>({
+      data: clients,
+      searchFields: ["name", "ruc", "contactName", "contactEmail", "address"],
+    });
     
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [editingClient, setEditingClient] = React.useState<Client | null>(null);
@@ -81,7 +100,13 @@ import { useToast } from "@/hooks/use-toast";
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                 ) : (
-                <Table>
+                <>
+                    <TableFilters
+                        searchPlaceholder="Buscar por nombre, RUC, contacto o dirección..."
+                        onSearchChange={handleSearchChange}
+                        searchValue={searchQuery}
+                    />
+                    <Table>
                     <TableHeader>
                     <TableRow>
                         <TableHead>Nombre</TableHead>
@@ -94,7 +119,7 @@ import { useToast } from "@/hooks/use-toast";
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {clients?.map((client) => (
+                    {paginatedData?.map((client) => (
                         <TableRow key={client.id}>
                             <TableCell className="font-medium">{client.name}</TableCell>
                             <TableCell>{client.ruc}</TableCell>
@@ -138,6 +163,15 @@ import { useToast } from "@/hooks/use-toast";
                     ))}
                     </TableBody>
                 </Table>
+                <TablePagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={handlePageChange}
+                    onItemsPerPageChange={handleItemsPerPageChange}
+                />
+                </>
                 )}
             </CardContent>
              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
