@@ -26,6 +26,7 @@ const routeLabels: Record<string, string> = {
   "/dashboard/service-requests": "Solicitudes de Servicio",
   "/dashboard/reports": "Reportes",
   "/dashboard/support": "Soporte",
+  "/dashboard/profile": "Mi Perfil",
 };
 
 export function DynamicBreadcrumbs() {

@@ -15,6 +15,7 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { DynamicBreadcrumbs } from "./dynamic-breadcrumbs";
 import { Bell, User, LogOut, Search } from "lucide-react";
+import Link from "next/link";
 
 export function Header() {
     const { user } = useUser();
@@ -60,7 +61,12 @@ export function Header() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem><User className="mr-2 h-4 w-4" />Perfil</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/profile">
+              <User className="mr-2 h-4 w-4" />
+              Perfil
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem><Bell className="mr-2 h-4 w-4" />Notificaciones</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
