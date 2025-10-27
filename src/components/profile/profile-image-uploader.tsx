@@ -56,18 +56,34 @@ export function ProfileImageUploader() {
       
       // Mostrar mensaje de error más específico
       let errorMessage = "No se pudo subir la imagen. Por favor intenta de nuevo.";
+      let details = "";
       
       if (error?.code === 'storage/unauthorized') {
-        errorMessage = "No tienes permisos para subir imágenes. Verifica tus reglas de Storage.";
+        errorMessage = "No tienes permisos para subir imágenes.";
+        details = "Verifica tus reglas de Storage en Firebase Console.";
       } else if (error?.code === 'storage/canceled') {
         errorMessage = "La subida fue cancelada.";
+      } else if (error?.code === 'storage/unknown') {
+        errorMessage = "Firebase Storage no está habilitado.";
+        details = "Ve a Firebase Console > Storage > Get started para habilitarlo.";
       } else if (error?.message?.includes('CORS')) {
-        errorMessage = "Error de CORS. Verifica las reglas de Storage y el bucket configurado.";
+        errorMessage = "Error de CORS - Storage no configurado.";
+        details = "Habilita Firebase Storage en Firebase Console y configura CORS. Ver docs/FIREBASE_STORAGE_SETUP.md";
       } else if (error?.message?.includes('network')) {
-        errorMessage = "Error de red. Verifica tu conexión a internet.";
+        errorMessage = "Error de red.";
+        details = "Verifica tu conexión a internet.";
+      } else if (error?.code) {
+        details = `Código de error: ${error.code}`;
       }
       
-      toastMessages.error("Error", errorMessage);
+      console.log("📋 Para resolver este problema:");
+      console.log("1. Ve a https://console.firebase.google.com");
+      console.log("2. Selecciona tu proyecto");
+      console.log("3. Ve a Storage");
+      console.log("4. Haz clic en 'Get started'");
+      console.log("5. Sigue las instrucciones para habilitar Storage");
+      
+      toastMessages.error(errorMessage, details);
     } finally {
       setUploading(false);
     }

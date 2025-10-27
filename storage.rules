@@ -1,17 +1,15 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // TEMPORALMENTE: Reglas muy permisivas para debugging y desarrollo
+    // PRODUCCIÓN: Debe restringirse a usuarios autenticados
     
-    // Reglas para imágenes de perfil
-    match /profiles/{userId}/{fileName} {
-      // Permitir lectura y escritura a usuarios autenticados (temporalmente más permisivo)
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId
-                   && request.resource.size < 5 * 1024 * 1024 // Máx 5MB
-                   && request.resource.contentType.matches('image/.*');
+    match /profiles/{userId}/{allPaths=**} {
+      // Permitir todo a usuarios autenticados (temporal)
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Permitir lectura autenticada en general (para debugging)
+    // Permitir lectura de archivos públicos (para testing)
     match /{allPaths=**} {
       allow read, write: if request.auth != null;
     }
