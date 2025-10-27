@@ -249,22 +249,6 @@ export function TransportMap({
     };
   }, []);
 
-  if (!vehicles || vehicles.length === 0) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">
-        <div className="text-center p-6 bg-background/80 rounded-lg">
-          <TruckIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-            No hay vehículos disponibles
-          </h3>
-          <p className="text-muted-foreground text-sm">
-            No se encontraron vehículos para mostrar en el mapa.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative">
       {/* Controles de tracking */}
@@ -295,22 +279,29 @@ export function TransportMap({
         </div>
       </div>
 
-      {/* Estado de carga sobre el mapa - Solo mostrar si realmente está cargando */}
-      {!isMapReady && vehicles.length === 0 && (
+      {/* Estado de carga inicial */}
+      {!isMapReady && (
         <div className="absolute inset-0 flex items-center justify-center z-[900] bg-background/50">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Cargando mapa...</p>
+            <p className="text-muted-foreground">
+              {vehicles.length > 0 ? "Inicializando mapa..." : "Cargando mapa..."}
+            </p>
           </div>
         </div>
       )}
-      
-      {/* Si no está ready pero hay vehículos, mostrar una nota */}
-      {!isMapReady && vehicles.length > 0 && (
-        <div className="absolute inset-0 flex items-center justify-center z-[900] bg-background/50">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Inicializando mapa...</p>
+
+      {/* Overlay cuando no hay vehículos */}
+      {isMapReady && (!vehicles || vehicles.length === 0) && (
+        <div className="absolute inset-0 flex items-center justify-center z-[800] bg-background/70">
+          <div className="text-center p-6 bg-background/80 rounded-lg">
+            <TruckIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+              No hay vehículos disponibles
+            </h3>
+            <p className="text-muted-foreground text-sm">
+              No se encontraron vehículos para mostrar en el mapa.
+            </p>
           </div>
         </div>
       )}
