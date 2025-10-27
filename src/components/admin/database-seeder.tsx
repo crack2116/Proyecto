@@ -6,8 +6,7 @@ import { createSampleData } from "@/lib/sample-data";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Database, Trash2, CheckCircle, AlertCircle, RefreshCw, MapPin } from "lucide-react";
-import { updateVehiclesLocations } from "@/lib/update-vehicles-locations";
+import { Loader2, Database, Trash2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 
 export function DatabaseSeeder() {
   const firestore = useFirestore();
@@ -15,7 +14,6 @@ export function DatabaseSeeder() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isAutoSeeding, setIsAutoSeeding] = useState(false);
-  const [isUpdatingLocations, setIsUpdatingLocations] = useState(false);
   const [dataStatus, setDataStatus] = useState<'checking' | 'empty' | 'populated' | 'error'>('checking');
   const [dataCounts, setDataCounts] = useState({ clients: 0, drivers: 0, vehicles: 0, services: 0 });
 
@@ -198,28 +196,6 @@ export function DatabaseSeeder() {
     }
   };
 
-  const updateLocations = async () => {
-    setIsUpdatingLocations(true);
-    try {
-      await updateVehiclesLocations(firestore);
-      toast({
-        title: "✅ Ubicaciones Actualizadas",
-        description: "Las coordenadas de los vehículos han sido distribuidas en el mapa.",
-      });
-      // Refrescar los conteos
-      checkExistingData();
-    } catch (error) {
-      console.error("Error updating locations:", error);
-      toast({
-        variant: "destructive",
-        title: "❌ Error",
-        description: "Ocurrió un error al actualizar las ubicaciones.",
-      });
-    } finally {
-      setIsUpdatingLocations(false);
-    }
-  };
-
   const refreshData = async () => {
     await checkExistingData();
   };
@@ -320,24 +296,6 @@ export function DatabaseSeeder() {
           )}
         </Button>
 
-        <Button
-          onClick={updateLocations}
-          disabled={isUpdatingLocations || dataStatus !== 'populated'}
-          variant="outline"
-          className="hover:opacity-90 border-green-500 hover:bg-green-500/10"
-        >
-          {isUpdatingLocations ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Actualizando...</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              <span>Distribuir en Mapa</span>
-            </div>
-          )}
-        </Button>
       </div>
 
       <div className="text-xs text-muted-foreground space-y-1">
@@ -345,7 +303,6 @@ export function DatabaseSeeder() {
         <p><strong>Poblar Base de Datos:</strong> Agrega datos de ejemplo manualmente (solo si está vacía).</p>
         <p><strong>Refrescar:</strong> Verifica el estado actual de la base de datos.</p>
         <p><strong>Limpiar Base de Datos:</strong> Elimina todos los datos existentes (requiere confirmación manual).</p>
-        <p><strong>Distribuir en Mapa:</strong> Asigna coordenadas únicas a cada vehículo para mostrarlos distribuidos en el mapa.</p>
       </div>
     </div>
   );
