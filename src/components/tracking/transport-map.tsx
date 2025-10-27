@@ -2,20 +2,38 @@
 import "leaflet/dist/leaflet.css";
 import { TruckIcon, PlayCircle, PauseCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useRealtimeTracking } from "@/hooks/use-realtime-tracking";
 import { Button } from "@/components/ui/button";
 
-export function TransportMap() {
+type Vehicle = {
+  id: string;
+  make: string;
+  model: string;
+  licensePlate: string;
+  vehicleType: string;
+  driverId?: string;
+  status: string;
+  lat: number;
+  lng: number;
+  heading?: number;
+  speed?: number;
+  lastUpdate: Date;
+};
+
+interface TransportMapProps {
+  vehicles?: Vehicle[];
+  isActive?: boolean;
+  onToggleActive?: (active: boolean) => void;
+}
+
+export function TransportMap({ 
+  vehicles = [],
+  isActive = true,
+  onToggleActive 
+}: TransportMapProps = {}) {
   const [isMapReady, setIsMapReady] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
-
-  // Usar seguimiento en tiempo real
-  const { vehicles, isActive, setIsActive } = useRealtimeTracking({
-    interval: 3000, // Actualizar cada 3 segundos
-    enabled: true,
-  });
 
   const center: [number, number] = [-5.19449, -80.63282];
 
@@ -189,7 +207,7 @@ export function TransportMap() {
         <Button
           size="sm"
           variant={isActive ? "default" : "secondary"}
-          onClick={() => setIsActive(!isActive)}
+          onClick={() => onToggleActive?.(!isActive)}
           className="gap-2"
         >
           {isActive ? (
