@@ -219,3 +219,66 @@ body {
     transform: scale(1);
   }
 }
+
+/* Leaflet Map Styles */
+.leaflet-container {
+  font-family: inherit;
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.leaflet-popup-content-wrapper {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid hsl(var(--border));
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-popup-tip {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+}
+
+.dark .leaflet-popup-tip {
+  background: hsl(var(--card));
+}
+
+.leaflet-popup-close-button {
+  color: hsl(var(--muted-foreground));
+}
+
+.leaflet-popup-close-button:hover {
+  color: hsl(var(--foreground));
+}
+
+.custom-vehicle-marker {
+  cursor: pointer;
+}
+
+/* Mejora para popups en modo oscuro */
+.dark .leaflet-container {
+  background: hsl(var(--background));
+}
+
+.dark .leaflet-control {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.dark .leaflet-bar a {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.dark .leaflet-bar a:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}

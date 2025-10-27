@@ -1,39 +1,42 @@
 "use client";
 
-import { APIProvider, Map, AdvancedMarker } from "@vis.gl/react-google-maps";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { TruckIcon, Loader2, AlertCircle } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
 import type { Vehicle } from "@/lib/types";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix para iconos de Leaflet
+if (typeof window !== 'undefined') {
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  });
+}
+
+type VehicleWithLocation = Vehicle & { 
+  lat: number; 
+  lng: number; 
+  status: string;
+  driverId?: string;
+  licensePlate?: string;
+};
 
 export function TransportMap() {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const firestore = useFirestore();
-  const vehiclesQuery = useMemoFirebase(() => query(collection(firestore, "vehicles")), [firestore]);
-  const { data: vehicles, isLoading, error } = useCollection<Vehicle & { lat: number, lng: number, status: string }>(vehiclesQuery);
+  const vehiclesQuery = useMemoFirebase(
+    () => query(collection(firestore, "vehicles")), 
+    [firestore]
+  );
+  const { data: vehicles, isLoading, error } = useCollection<VehicleWithLocation>(vehiclesQuery);
 
-
-  if (!apiKey) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">
-        <div className="text-center p-6">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-destructive mb-2">
-            Configuración Requerida
-          </h3>
-          <p className="text-destructive-foreground">
-            Falta la clave de API de Google Maps. Por favor, configura la variable de entorno NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Centro del mapa en Piura, Perú
+  const center: [number, number] = [-5.19449, -80.63282];
 
   if (error) {
     return (
@@ -51,54 +54,131 @@ export function TransportMap() {
     );
   }
 
-  const position = { lat: -5.19449, lng: -80.63282 }; // Center of Piura
-
   return (
-    <APIProvider apiKey={apiKey} language="es">
-      <TooltipProvider>
-        <Map
-          defaultCenter={position}
-          defaultZoom={12}
-          mapId="mewing-transport-map"
-          className="w-full h-full rounded-lg"
-          disableDefaultUI={true}
-        >
-          {isLoading ? (
-            <div className="w-full h-full flex items-center justify-center">
-                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <div className="w-full h-full rounded-lg overflow-hidden bg-muted">
+      <MapContainer
+        center={center}
+        zoom={12}
+        style={{ height: "100%", width: "100%" }}
+        className="rounded-lg"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        
+        {isLoading ? (
+          <div className="absolute inset-0 flex items-center justify-center z-[1000] bg-background/80">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Cargando vehículos...</p>
             </div>
-          ) : vehicles && vehicles.length > 0 ? (
-            vehicles.map((vehicle) => (
-                <Tooltip key={vehicle.id}>
-                <TooltipTrigger asChild>
-                    <AdvancedMarker position={{ lat: vehicle.lat, lng: vehicle.lng }}>
-                    <div className="p-2 bg-primary rounded-full shadow-lg">
-                        <TruckIcon className="h-5 w-5 text-primary-foreground" />
+          </div>
+        ) : vehicles && vehicles.length > 0 ? (
+          <>
+            {vehicles.map((vehicle) => {
+              // Crear icono personalizado para el vehículo
+              const vehicleIcon = L.divIcon({
+                className: "custom-vehicle-marker",
+                html: `<div style="
+                  background: hsl(221, 83%, 53%);
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50% 50% 50% 0;
+                  border: 3px solid white;
+                  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                  transform: rotate(-45deg);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  position: relative;
+                ">
+                  <svg 
+                    style="transform: rotate(45deg);" 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 24 24" 
+                    fill="white"
+                  >
+                    <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5S5.17 15.5 6 15.5s1.5.67 1.5 1.5S6.83 18.5 6 18.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                  </svg>
+                </div>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40],
+              });
+
+              return (
+                <Marker
+                  key={vehicle.id}
+                  position={[vehicle.lat, vehicle.lng]}
+                  icon={vehicleIcon}
+                >
+                  <Popup className="custom-popup">
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-lg flex items-center gap-2">
+                        <TruckIcon className="h-5 w-5 text-primary" />
+                        {vehicle.licensePlate || vehicle.vehicleType}
+                      </h3>
+                      <div className="space-y-1 text-sm">
+                        {vehicle.driverId && (
+                          <p className="text-muted-foreground">
+                            <span className="font-medium">Conductor:</span> {vehicle.driverId}
+                          </p>
+                        )}
+                        <p className="text-muted-foreground">
+                          <span className="font-medium">Vehículo:</span> {vehicle.make} {vehicle.model}
+                        </p>
+                        <p className="text-muted-foreground">
+                          <span className="font-medium">Estado:</span>{" "}
+                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                            {vehicle.status || "Disponible"}
+                          </span>
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          <span className="font-medium">Ubicación:</span>{" "}
+                          {vehicle.lat.toFixed(6)}, {vehicle.lng.toFixed(6)}
+                        </p>
+                      </div>
                     </div>
-                    </AdvancedMarker>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p className="font-bold">Vehículo: {vehicle.licensePlate}</p>
-                    <p>Conductor: {vehicle.driverId}</p>
-                    <p>Estado: {vehicle.status}</p>
-                </TooltipContent>
-                </Tooltip>
-            ))
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-center p-6">
-                <TruckIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                  No hay vehículos disponibles
-                </h3>
-                <p className="text-muted-foreground">
-                  No se encontraron vehículos para mostrar en el mapa.
-                </p>
-              </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center z-[1000]">
+            <div className="text-center p-6 bg-background/80 rounded-lg">
+              <TruckIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                No hay vehículos disponibles
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                No se encontraron vehículos para mostrar en el mapa.
+              </p>
             </div>
-          )}
-        </Map>
-      </TooltipProvider>
-    </APIProvider>
+          </div>
+        )}
+      </MapContainer>
+
+      <style jsx global>{`
+        .leaflet-container {
+          font-family: inherit;
+        }
+        
+        .leaflet-popup-content-wrapper {
+          border-radius: 8px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .leaflet-popup-content {
+          margin: 0;
+        }
+        
+        .custom-popup {
+          font-size: 14px;
+        }
+      `}</style>
+    </div>
   );
 }
