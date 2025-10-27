@@ -242,6 +242,17 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
         // Si el vehículo no tiene lat/lng en Firebase, asignar coordenadas por defecto
         const hasLocation = veh.lat !== undefined && veh.lng !== undefined;
         
+        // Simular estado y velocidad para algunos vehículos (si no están definidos)
+        const currentStatus = veh.status || "Disponible";
+        let simulatedStatus = currentStatus;
+        let simulatedSpeed = 0;
+        
+        // Si el estado es "En Tránsito" o está vacío, simular velocidad
+        if (currentStatus === "En Tránsito" || (!veh.speed && Math.random() > 0.5)) {
+          simulatedStatus = "En Tránsito";
+          simulatedSpeed = 30 + Math.random() * 40; // 30-70 km/h
+        }
+        
         return {
           id: veh.id,
           make: veh.make || "",
@@ -249,22 +260,22 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
           licensePlate: veh.licensePlate || "",
           vehicleType: veh.vehicleType || "",
           driverId: veh.driverId,
-          status: veh.status || "Disponible",
+          status: simulatedStatus,
           lat: veh.lat || -5.19449,
           lng: veh.lng || -80.63282,
-          heading: veh.heading || 0,
-          speed: veh.speed || 0,
-          lastUpdate: veh.lastUpdate?.toDate?.() || new Date(),
+          heading: veh.heading || Math.random() * 360,
+          speed: veh.speed || simulatedSpeed,
+          lastUpdate: new Date(),
         };
       });
       console.log("[TRACKING] Vehículos REALES convertidos:", convertedVehicles.length);
+      console.log("[TRACKING] En Tránsito:", convertedVehicles.filter(v => v.status === "En Tránsito").length);
       console.log("[TRACKING] Ejemplo de datos:", convertedVehicles[0]);
       setVehicles(convertedVehicles);
     }
   }, [useFirebase, firebaseVehicles]);
 
-  // Actualizar posiciones en intervalo (solo para simulación)
-  // IMPORTANTE: Si usa Firebase, NO se ejecuta esto - usa datos reales
+  // Actualizar posiciones en intervalo (solo para simulación sin Firebase)
   useEffect(() => {
     if (!isActive || useFirebase) {
       console.log("[TRACKING] Simulación DESHABILITADA - usando datos reales de Firebase");
@@ -278,6 +289,42 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
 
     return () => clearInterval(timer);
   }, [isActive, interval, updateVehiclePosition, useFirebase]);
+
+  // Actualizar velocidad y estado cada cierto tiempo (para Firebase)
+  useEffect(() => {
+    if (!isActive || !useFirebase) return;
+
+    console.log("[TRACKING] Iniciando simulación de estado y velocidad (datos híbridos)...");
+    const timer = setInterval(() => {
+      setVehicles((prevVehicles) =>
+        prevVehicles.map((vehicle) => {
+          // 30% de probabilidad de que un vehículo esté en tránsito
+          const shouldBeInTransit = Math.random() > 0.7;
+          
+          let newStatus = vehicle.status;
+          let newSpeed = 0;
+          
+          if (shouldBeInTransit) {
+            newStatus = "En Tránsito";
+            newSpeed = 30 + Math.random() * 40; // 30-70 km/h
+          } else {
+            newStatus = "Disponible";
+            newSpeed = 0;
+          }
+          
+          return {
+            ...vehicle,
+            status: newStatus,
+            speed: newSpeed,
+            heading: vehicle.heading || Math.random() * 360,
+            lastUpdate: new Date(),
+          };
+        })
+      );
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [isActive, useFirebase, interval]);
 
   return {
     vehicles,
