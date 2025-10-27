@@ -3,6 +3,7 @@
 import { TransportMap } from "@/components/tracking/transport-map";
 import { TrackingStats } from "@/components/tracking/tracking-stats";
 import { ActiveVehiclesList } from "@/components/tracking/active-vehicles-list";
+import { RouteManager } from "@/components/tracking/route-manager";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRealtimeTracking } from "@/hooks/use-realtime-tracking";
 import { useState } from "react";
@@ -29,6 +30,9 @@ export default function TrackingPage() {
 
       {/* Estadísticas en tiempo real */}
       <TrackingStats vehicles={vehicles} />
+
+      {/* Gestor de Rutas */}
+      <RouteManager />
 
       {/* Mapa y lista de vehículos */}
       <div className="grid gap-6 lg:grid-cols-3 flex-grow min-h-0" style={{ height: "600px" }}>
