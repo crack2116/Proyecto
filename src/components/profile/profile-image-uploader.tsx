@@ -38,8 +38,12 @@ export function ProfileImageUploader() {
       // Generar ruta única
       const path = getProfileImagePath(user.uid, file.name);
       
+      console.log("Intentando subir imagen...", { path, storage });
+      
       // Subir imagen
       const downloadURL = await uploadImage(storage, file, path);
+      
+      console.log("Imagen subida exitosamente:", downloadURL);
       
       // Actualizar perfil de usuario en Firebase Auth
       await updateProfile(user, {
@@ -47,9 +51,23 @@ export function ProfileImageUploader() {
       });
 
       toastMessages.success("Imagen Actualizada", "Tu foto de perfil ha sido actualizada exitosamente.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading profile image:", error);
-      toastMessages.error("Error", "No se pudo subir la imagen. Por favor intenta de nuevo.");
+      
+      // Mostrar mensaje de error más específico
+      let errorMessage = "No se pudo subir la imagen. Por favor intenta de nuevo.";
+      
+      if (error?.code === 'storage/unauthorized') {
+        errorMessage = "No tienes permisos para subir imágenes. Verifica tus reglas de Storage.";
+      } else if (error?.code === 'storage/canceled') {
+        errorMessage = "La subida fue cancelada.";
+      } else if (error?.message?.includes('CORS')) {
+        errorMessage = "Error de CORS. Verifica las reglas de Storage y el bucket configurado.";
+      } else if (error?.message?.includes('network')) {
+        errorMessage = "Error de red. Verifica tu conexión a internet.";
+      }
+      
+      toastMessages.error("Error", errorMessage);
     } finally {
       setUploading(false);
     }
