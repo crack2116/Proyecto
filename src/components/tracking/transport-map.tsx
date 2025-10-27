@@ -22,22 +22,34 @@ export function TransportMap() {
       const initMap = async () => {
         const L = await import("leaflet");
    
-        const map = L.default.map(mapContainerRef.current!, {
-          center: center,
-          zoom: 12,
-        });
+        // Verificar si el contenedor ya tiene un mapa
+        if (mapContainerRef.current && !(mapContainerRef.current as any)._leaflet_id) {
+          const map = L.default.map(mapContainerRef.current!, {
+            center: center,
+            zoom: 12,
+          });
 
-        L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        }).addTo(map);
+          L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          }).addTo(map);
 
-        mapInstanceRef.current = map;
-        setIsMapReady(true);
+          mapInstanceRef.current = map;
+          setIsMapReady(true);
+        }
       };
 
       initMap();
     }
-  }, [center]);
+
+    // Cleanup function
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        setIsMapReady(false);
+      }
+    };
+  }, []); // Sin dependencias - solo se ejecuta una vez al montar
 
   useEffect(() => {
     if (isMapReady && vehicles && vehicles.length > 0 && mapInstanceRef.current) {
