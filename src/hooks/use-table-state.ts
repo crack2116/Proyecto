@@ -14,6 +14,11 @@ export function useTableState<T>({ data, searchFields, statusField }: UseTableSt
 
   // Filtrar datos
   const filteredData = useMemo(() => {
+    // Asegurar que data es un array
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+    
     let result = [...data];
 
     // Filtrar por búsqueda
