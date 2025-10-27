@@ -201,7 +201,7 @@ export function TransportMap({
   }
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative">
+    <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative flex">
       {/* Controles de tracking */}
       <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
         <Button
@@ -230,7 +230,11 @@ export function TransportMap({
         </div>
       </div>
 
-      <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }} />
+      <div 
+        ref={mapContainerRef} 
+        className="w-full h-full min-h-[400px]"
+        style={{ minHeight: "400px" }}
+      />
     </div>
   );
 }

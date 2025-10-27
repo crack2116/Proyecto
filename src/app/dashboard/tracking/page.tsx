@@ -23,11 +23,11 @@ export default function TrackingPage() {
       <TrackingStats vehicles={vehicles} />
 
       {/* Mapa y lista de vehículos */}
-      <div className="grid gap-6 lg:grid-cols-3 flex-grow min-h-0">
+      <div className="grid gap-6 lg:grid-cols-3 flex-grow min-h-0" style={{ height: "600px" }}>
         {/* Mapa - Ocupa 2 columnas en desktop */}
-        <div className="lg:col-span-2">
-          <Card className="h-full border-0 shadow-modern">
-            <CardContent className="p-0 h-full">
+        <div className="lg:col-span-2 h-full">
+          <Card className="h-full border-0 shadow-modern flex flex-col">
+            <CardContent className="p-0 h-full flex-1 min-h-0">
               <TransportMap 
                 vehicles={vehicles}
                 isActive={isActive}
@@ -38,7 +38,7 @@ export default function TrackingPage() {
         </div>
 
         {/* Lista de vehículos activos */}
-        <div className="lg:col-span-1 flex flex-col min-h-0">
+        <div className="lg:col-span-1 h-full flex flex-col">
           <ActiveVehiclesList vehicles={vehicles} />
         </div>
       </div>
