@@ -49,7 +49,7 @@ export function TransportMap({
       }
 
       if (mapInstanceRef.current) {
-        console.warn("Mapa ya inicializado");
+        console.warn("Mapa ya inicializado, ignorando");
         return;
       }
 
@@ -99,16 +99,11 @@ export function TransportMap({
       initMap();
     }, 200);
 
+    // NO limpiar el mapa aquí - solo al desmontar el componente
     return () => {
       clearTimeout(timer);
-      if (mapInstanceRef.current) {
-        console.log("Destruyendo mapa...");
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        setIsMapReady(false);
-      }
     };
-  }, [center]);
+  }, []); // Sin dependencias - solo se ejecuta una vez al montar
 
   // Función para actualizar o crear marcadores
   useEffect(() => {
@@ -222,6 +217,17 @@ export function TransportMap({
       updateMarkers();
     }
   }, [isMapReady, vehicles]);
+
+  // Cleanup al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        console.log("Componente desmontado - destruyendo mapa");
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   if (!vehicles || vehicles.length === 0) {
     return (
