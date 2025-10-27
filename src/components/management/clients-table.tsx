@@ -36,11 +36,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useTableState } from "@/hooks/use-table-state";
 import { TableFilters } from "@/components/ui/table-filters";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { Protected } from "@/components/permissions/protected";
+import { usePermissions } from "@/hooks/use-permissions";
 
   
   export function ClientsTable() {
     const firestore = useFirestore();
     const { toast } = useToast();
+    const { canCreate, canUpdate, canDelete } = usePermissions();
     const clientsQuery = useMemoFirebase(() => query(collection(firestore, "clients")), [firestore]);
     const { data: clients = [], isLoading } = useCollection<Client>(clientsQuery);
     
@@ -89,10 +92,12 @@ import { TablePagination } from "@/components/ui/table-pagination";
                     <CardTitle>Clientes</CardTitle>
                     <CardDescription>Lista de todos los clientes registrados.</CardDescription>
                 </div>
-                <Button onClick={handleAddNew}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Agregar Cliente
-                </Button>
+                <Protected permission="clients:create">
+                    <Button onClick={handleAddNew}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Agregar Cliente
+                    </Button>
+                </Protected>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -138,11 +143,14 @@ import { TablePagination } from "@/components/ui/table-pagination";
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                    <DropdownMenuItem onClick={() => handleEdit(client)}>Editar</DropdownMenuItem>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Eliminar</DropdownMenuItem>
-                                        </AlertDialogTrigger>
+                                    <Protected permission="clients:update">
+                                        <DropdownMenuItem onClick={() => handleEdit(client)}>Editar</DropdownMenuItem>
+                                    </Protected>
+                                    <Protected permission="clients:delete">
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">Eliminar</DropdownMenuItem>
+                                            </AlertDialogTrigger>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
                                                 <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
@@ -156,6 +164,7 @@ import { TablePagination } from "@/components/ui/table-pagination";
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
+                                </Protected>
                                 </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
