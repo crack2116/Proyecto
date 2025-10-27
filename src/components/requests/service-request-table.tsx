@@ -23,6 +23,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
 import type { ServiceRequest } from "@/lib/types";
+import { 
+  updateRequestStatus, 
+  assignDriverToRequest, 
+  cancelRequest, 
+  deleteRequest 
+} from "@/lib/firebase-service-requests";
   
   export function ServiceRequestTable() {
     const firestore = useFirestore();
@@ -135,11 +141,20 @@ import type { ServiceRequest } from "@/lib/types";
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                                     <DropdownMenuItem 
-                                        onClick={() => {
-                                            toast({
-                                                title: "Asignar conductor",
-                                                description: `Funcionalidad de asignación para solicitud ${request.id}`,
-                                            });
+                                        onClick={async () => {
+                                            try {
+                                                await assignDriverToRequest(firestore, request.id, "C0001");
+                                                toast({
+                                                    title: "Conductor asignado",
+                                                    description: `Conductor asignado a solicitud ${request.id}`,
+                                                });
+                                            } catch (err) {
+                                                toast({
+                                                    title: "Error",
+                                                    description: "No se pudo asignar el conductor",
+                                                    variant: "destructive",
+                                                });
+                                            }
                                         }}
                                     >
                                         <UserPlus className="mr-2 h-4 w-4" />
@@ -177,12 +192,21 @@ import type { ServiceRequest } from "@/lib/types";
                                         Copiar ID
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
-                                        onClick={() => {
-                                            toast({
-                                                title: "Cancelar solicitud",
-                                                description: `Solicitud ${request.id} cancelada`,
-                                                variant: "destructive",
-                                            });
+                                        onClick={async () => {
+                                            try {
+                                                await cancelRequest(firestore, request.id);
+                                                toast({
+                                                    title: "Solicitud cancelada",
+                                                    description: `Solicitud ${request.id} cancelada exitosamente`,
+                                                    variant: "destructive",
+                                                });
+                                            } catch (err) {
+                                                toast({
+                                                    title: "Error",
+                                                    description: "No se pudo cancelar la solicitud",
+                                                    variant: "destructive",
+                                                });
+                                            }
                                         }}
                                         className="text-destructive"
                                     >

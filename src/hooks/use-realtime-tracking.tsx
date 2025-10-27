@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query } from "firebase/firestore";
 
 type VehicleLocation = {
   id: string;
@@ -18,16 +20,27 @@ type VehicleLocation = {
 type UseRealtimeTrackingOptions = {
   interval?: number; // Intervalo de actualización en ms
   enabled?: boolean; // Habilitar o deshabilitar tracking
+  useFirebase?: boolean; // Usar Firebase en lugar de datos simulados
 };
 
 /**
  * Hook para seguimiento en tiempo real de vehículos
- * Simula el movimiento de vehículos por rutas predefinidas
+ * Puede usar Firebase (datos reales) o simulación
  */
 export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
-  const { interval = 5000, enabled = true } = options;
+  const { interval = 5000, enabled = true, useFirebase = false } = options;
   const [vehicles, setVehicles] = useState<VehicleLocation[]>([]);
   const [isActive, setIsActive] = useState(enabled);
+  
+  // Firebase connection
+  const firestore = useFirestore();
+  const vehiclesQuery = useMemoFirebase(
+    () => query(collection(firestore, "vehicles")),
+    [firestore]
+  );
+  const { data: firebaseVehicles, isLoading: isFirebaseLoading } = useCollection<VehicleLocation>(
+    useFirebase ? vehiclesQuery : null
+  );
 
   // Rutas predefinidas para simulación (por Piura, Perú)
   const routes = [
@@ -213,25 +226,50 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
 
   // Inicializar vehículos al montar
   useEffect(() => {
-    initializeVehicles();
-  }, [initializeVehicles]);
+    if (!useFirebase) {
+      initializeVehicles();
+    }
+  }, [initializeVehicles, useFirebase]);
 
-  // Actualizar posiciones en intervalo
+  // Si usa Firebase, usar los datos de Firebase
   useEffect(() => {
-    if (!isActive) return;
+    if (useFirebase && firebaseVehicles) {
+      // Convertir datos de Firebase al formato esperado
+      const convertedVehicles = firebaseVehicles.map((veh: any) => ({
+        id: veh.id,
+        make: veh.make || "",
+        model: veh.model || "",
+        licensePlate: veh.licensePlate || "",
+        vehicleType: veh.vehicleType || "",
+        driverId: veh.driverId,
+        status: veh.status || "Disponible",
+        lat: veh.lat || -5.19449,
+        lng: veh.lng || -80.63282,
+        heading: veh.heading || 0,
+        speed: veh.speed || 0,
+        lastUpdate: new Date(),
+      }));
+      setVehicles(convertedVehicles);
+    }
+  }, [useFirebase, firebaseVehicles]);
+
+  // Actualizar posiciones en intervalo (solo para simulación)
+  useEffect(() => {
+    if (!isActive || useFirebase) return;
 
     const timer = setInterval(() => {
       updateVehiclePosition();
     }, interval);
 
     return () => clearInterval(timer);
-  }, [isActive, interval, updateVehiclePosition]);
+  }, [isActive, interval, updateVehiclePosition, useFirebase]);
 
   return {
     vehicles,
     isActive,
     setIsActive,
     reset: initializeVehicles,
+    isLoading: useFirebase ? isFirebaseLoading : false,
   };
 }
 
