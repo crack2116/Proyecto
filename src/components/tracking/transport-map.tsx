@@ -1,6 +1,6 @@
 "use client";
 import "leaflet/dist/leaflet.css";
-import { TruckIcon, PlayCircle, PauseCircle } from "lucide-react";
+import { TruckIcon, PlayCircle, PauseCircle, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -40,36 +40,63 @@ export function TransportMap({
   useEffect(() => {
     if (typeof window !== "undefined" && mapContainerRef.current && !mapInstanceRef.current) {
       const initMap = async () => {
-        const L = await import("leaflet");
+        try {
+          console.log("Inicializando mapa...");
+          const L = await import("leaflet");
    
-        // Verificar si el contenedor ya tiene un mapa
-        if (mapContainerRef.current && !(mapContainerRef.current as any)._leaflet_id) {
-          const map = L.default.map(mapContainerRef.current!, {
-            center: center,
-            zoom: 12,
-          });
+          // Verificar que el contenedor tiene dimensiones
+          if (mapContainerRef.current) {
+            const container = mapContainerRef.current;
+            console.log("Dimensiones del contenedor:", {
+              width: container.offsetWidth,
+              height: container.offsetHeight
+            });
 
-          L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          }).addTo(map);
+            // Si el contenedor no tiene altura, usar setTimeout para retry
+            if (container.offsetHeight === 0) {
+              console.warn("El contenedor no tiene altura, reintentando en 100ms...");
+              setTimeout(() => initMap(), 100);
+              return;
+            }
 
-          mapInstanceRef.current = map;
-          setIsMapReady(true);
+            if (!(container as any)._leaflet_id) {
+              console.log("Creando mapa Leaflet...");
+              const map = L.default.map(container, {
+                center: center,
+                zoom: 12,
+              });
+
+              console.log("Agregando capa de tiles...");
+              L.default.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              }).addTo(map);
+
+              mapInstanceRef.current = map;
+              setIsMapReady(true);
+              console.log("Mapa inicializado correctamente");
+            }
+          }
+        } catch (error) {
+          console.error("Error al inicializar el mapa:", error);
         }
       };
 
-      initMap();
-    }
+      // Pequeño delay para asegurar que el DOM está listo
+      const timer = setTimeout(() => {
+        initMap();
+      }, 100);
 
-    // Cleanup function
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        setIsMapReady(false);
-      }
-    };
-  }, []); // Sin dependencias - solo se ejecuta una vez al montar
+      return () => {
+        clearTimeout(timer);
+        if (mapInstanceRef.current) {
+          console.log("Destruyendo mapa...");
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+          setIsMapReady(false);
+        }
+      };
+    }
+  }, [center]);
 
   // Función para actualizar o crear marcadores
   useEffect(() => {
@@ -200,8 +227,19 @@ export function TransportMap({
     );
   }
 
+  if (!isMapReady) {
+    return (
+      <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative flex items-center justify-center min-h-[500px]">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Cargando mapa...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative flex">
+    <div className="w-full h-full rounded-lg overflow-hidden bg-muted relative">
       {/* Controles de tracking */}
       <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
         <Button
@@ -232,8 +270,8 @@ export function TransportMap({
 
       <div 
         ref={mapContainerRef} 
-        className="w-full h-full min-h-[400px]"
-        style={{ minHeight: "400px" }}
+        className="w-full h-full"
+        style={{ height: "100%", minHeight: "500px" }}
       />
     </div>
   );
