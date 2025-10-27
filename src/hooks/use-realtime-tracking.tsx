@@ -231,36 +231,47 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
     }
   }, [initializeVehicles, useFirebase]);
 
-  // Si usa Firebase, usar los datos de Firebase
+  // Si usa Firebase, usar los datos de Firebase EN TIEMPO REAL
   useEffect(() => {
     console.log("[TRACKING] useFirebase:", useFirebase, "firebaseVehicles:", firebaseVehicles?.length || 0);
     
     if (useFirebase && firebaseVehicles) {
-      console.log("[TRACKING] Convirtiendo datos de Firebase...");
+      console.log("[TRACKING] Convirtiendo datos REALES de Firebase...");
       // Convertir datos de Firebase al formato esperado
-      const convertedVehicles = firebaseVehicles.map((veh: any) => ({
-        id: veh.id,
-        make: veh.make || "",
-        model: veh.model || "",
-        licensePlate: veh.licensePlate || "",
-        vehicleType: veh.vehicleType || "",
-        driverId: veh.driverId,
-        status: veh.status || "Disponible",
-        lat: veh.lat || -5.19449,
-        lng: veh.lng || -80.63282,
-        heading: veh.heading || 0,
-        speed: veh.speed || 0,
-        lastUpdate: new Date(),
-      }));
-      console.log("[TRACKING] Vehículos convertidos:", convertedVehicles.length);
+      const convertedVehicles = firebaseVehicles.map((veh: any) => {
+        // Si el vehículo no tiene lat/lng en Firebase, asignar coordenadas por defecto
+        const hasLocation = veh.lat !== undefined && veh.lng !== undefined;
+        
+        return {
+          id: veh.id,
+          make: veh.make || "",
+          model: veh.model || "",
+          licensePlate: veh.licensePlate || "",
+          vehicleType: veh.vehicleType || "",
+          driverId: veh.driverId,
+          status: veh.status || "Disponible",
+          lat: veh.lat || -5.19449,
+          lng: veh.lng || -80.63282,
+          heading: veh.heading || 0,
+          speed: veh.speed || 0,
+          lastUpdate: veh.lastUpdate?.toDate?.() || new Date(),
+        };
+      });
+      console.log("[TRACKING] Vehículos REALES convertidos:", convertedVehicles.length);
+      console.log("[TRACKING] Ejemplo de datos:", convertedVehicles[0]);
       setVehicles(convertedVehicles);
     }
   }, [useFirebase, firebaseVehicles]);
 
   // Actualizar posiciones en intervalo (solo para simulación)
+  // IMPORTANTE: Si usa Firebase, NO se ejecuta esto - usa datos reales
   useEffect(() => {
-    if (!isActive || useFirebase) return;
+    if (!isActive || useFirebase) {
+      console.log("[TRACKING] Simulación DESHABILITADA - usando datos reales de Firebase");
+      return;
+    }
 
+    console.log("[TRACKING] Iniciando simulación de movimiento...");
     const timer = setInterval(() => {
       updateVehiclePosition();
     }, interval);
