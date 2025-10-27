@@ -218,7 +218,7 @@ export const sampleDrivers: Omit<Driver, 'id'>[] = [
   }
 ];
 
-// Datos de ejemplo para Vehículos
+// Datos de ejemplo para Vehículos con ubicaciones para el mapa
 export const sampleVehicles: Omit<Vehicle, 'id'>[] = [
   {
     driverId: undefined, // Se asignará dinámicamente
@@ -289,6 +289,87 @@ export const sampleVehicles: Omit<Vehicle, 'id'>[] = [
     model: "Fuso Canter",
     licensePlate: "BCD-890",
     vehicleType: "Camión de Carga Ligera"
+  }
+];
+
+// Datos de ejemplo para vehículos con ubicaciones para el mapa de tracking
+export const sampleVehiclesWithLocations = [
+  {
+    id: "V0001",
+    make: "Volvo",
+    model: "FH16",
+    licensePlate: "ABC-123",
+    vehicleType: "Camión de Carga Pesada",
+    driverId: "C0001",
+    lat: -5.19449,
+    lng: -80.63282,
+    status: "Disponible"
+  },
+  {
+    id: "V0002",
+    make: "Scania",
+    model: "R450",
+    licensePlate: "DEF-456",
+    vehicleType: "Camión de Carga Pesada",
+    driverId: "C0002",
+    lat: -5.20449,
+    lng: -80.64282,
+    status: "En Tránsito"
+  },
+  {
+    id: "V0003",
+    make: "Mercedes-Benz",
+    model: "Actros 1845",
+    licensePlate: "GHI-789",
+    vehicleType: "Camión de Carga Pesada",
+    driverId: "C0003",
+    lat: -5.18449,
+    lng: -80.62282,
+    status: "En Mantenimiento"
+  },
+  {
+    id: "V0004",
+    make: "MAN",
+    model: "TGX 18.480",
+    licensePlate: "JKL-012",
+    vehicleType: "Camión de Carga Pesada",
+    driverId: "C0004",
+    lat: -5.21449,
+    lng: -80.65282,
+    status: "Disponible"
+  },
+  {
+    id: "V0005",
+    make: "Iveco",
+    model: "Stralis Hi-Way",
+    licensePlate: "MNO-345",
+    vehicleType: "Camión de Carga Pesada",
+    driverId: "C0005",
+    lat: -5.19449,
+    lng: -80.66282,
+    status: "En Tránsito"
+  },
+  {
+    id: "V0006",
+    make: "Ford",
+    model: "Cargo 816",
+    licensePlate: "PQR-678",
+    vehicleType: "Camión de Carga Media",
+    driverId: "C0006",
+    lat: -5.18449,
+    lng: -80.61282,
+    status: "Disponible"
+  },
+  {
+    id: "V0007",
+    make: "Chevrolet",
+    model: "NPR",
+    licensePlate: "STU-901",
+    vehicleType: "Camión de Carga Media",
+    driverId: "C0007",
+    lat: -5.20449,
+    lng: -80.62282,
+    status: "En Tránsito"
   }
 ];
 
