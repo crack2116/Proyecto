@@ -199,34 +199,6 @@ export function LoginForm() {
             </Button>
         </form>
         </Form>
-        
-        <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-3 text-muted-foreground font-medium">O continúa con</span>
-            </div>
-        </div>
-        
-        <Button 
-          variant="outline" 
-          onClick={handleGoogleSignIn}
-          disabled={isGoogleLoading}
-          className="w-full h-11 border-border/50 hover:bg-muted/50 transition-all duration-200 hover-lift"
-        >
-            {isGoogleLoading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <span className="font-medium">Conectando con Google...</span>
-              </div>
-            ) : (
-              <>
-                <GoogleIcon className="mr-2 h-4 w-4" />
-                <span className="font-medium">Continuar con Google</span>
-              </>
-            )}
-        </Button>
     </div>
   );
 }
