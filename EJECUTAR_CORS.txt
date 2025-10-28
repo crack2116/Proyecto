@@ -1,0 +1,11 @@
+Para configurar CORS, copia y pega ESTOS comandos uno por uno:
+
+1. Establecer proyecto:
+gcloud config set project studio-4560916840-4310c
+
+2. Configurar CORS:
+gsutil cors set cors.json gs://studio-4560916840-4310c.firebasestorage.app
+
+3. Verificar (opcional):
+gsutil cors get gs://studio-4560916840-4310c.firebasestorage.app
+

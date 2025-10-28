@@ -59,7 +59,7 @@ import { usePermissions } from "@/hooks/use-permissions";
       currentPage,
       itemsPerPage,
     } = useTableState<Client>({
-      data: clients,
+      data: clients ?? [], // Asegurarse de que siempre sea un array
       searchFields: ["name", "ruc", "contactName", "contactEmail", "address"],
     });
     

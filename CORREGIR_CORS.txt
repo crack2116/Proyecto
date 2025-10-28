@@ -1,0 +1,13 @@
+El problema: configuraste CORS en el bucket INCORRECTO.
+
+Tu app usa: studio-4560916840-4310c.appspot.com
+Configuraste CORS en: studio-4560916840-4310c.firebasestorage.app
+
+SON DOS BUCKETS DIFERENTES.
+
+Ejecuta en CMD:
+
+gsutil cors set cors.json gs://studio-4560916840-4310c.appspot.com
+
+(Nota el cambio: .appspot.com no .firebasestorage.app)
+
