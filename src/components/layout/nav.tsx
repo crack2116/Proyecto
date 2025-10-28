@@ -9,6 +9,7 @@ import {
   BarChart3,
   LifeBuoy,
   Users,
+  UserCircle,
 } from "lucide-react";
 
 import {
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/dashboard/tracking", icon: Map, label: "Seguimiento en Tiempo Real" },
   { href: "/dashboard/reports", icon: BarChart3, label: "Reportes" },
   { href: "/dashboard/support", icon: LifeBuoy, label: "Soporte" },
+  { href: "/dashboard/profile", icon: UserCircle, label: "Mi Perfil" },
 ];
 
 export function Nav() {

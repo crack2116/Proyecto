@@ -18,13 +18,21 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
-  import { MoreHorizontal, Loader2, AlertCircle } from "lucide-react";
+  import { MoreHorizontal, Loader2, AlertCircle, Copy, UserPlus, Edit, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
 import type { ServiceRequest } from "@/lib/types";
+import { 
+  updateRequestStatus, 
+  assignDriverToRequest, 
+  cancelRequest, 
+  deleteRequest 
+} from "@/lib/firebase-service-requests";
   
   export function ServiceRequestTable() {
     const firestore = useFirestore();
+    const { toast } = useToast();
     const serviceRequestsQuery = useMemoFirebase(() => query(collection(firestore, "serviceRequests")), [firestore]);
     const { data: serviceRequests, isLoading, error } = useCollection<ServiceRequest>(serviceRequestsQuery);
 
@@ -32,7 +40,32 @@ import type { ServiceRequest } from "@/lib/types";
         "Completed": "Completado",
         "In Progress": "En Progreso",
         "Pending": "Pendiente",
+        "Assigned": "Asignado",
         "Cancelled": "Cancelado"
+    }
+
+    const getStatusBadge = (status: string | undefined) => {
+        if (!status) return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 border-none text-xs">Sin estado</Badge>;
+        
+        const translatedStatus = statusTranslations[status] || status;
+        
+        const statusClass = status === "Completed" 
+            ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+            : status === "In Progress" 
+            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
+            : status === "Assigned"
+            ? "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300"
+            : status === "Pending"
+            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
+            : status === "Cancelled"
+            ? "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+            : "bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300";
+            
+        return (
+            <Badge className={cn(statusClass, "border-none text-xs")} variant="outline">
+                {translatedStatus}
+            </Badge>
+        );
     }
 
     if (error) {
@@ -94,19 +127,7 @@ import type { ServiceRequest } from "@/lib/types";
                                 <div className="text-sm text-muted-foreground">a {request.destination}</div>
                             </TableCell>
                             <TableCell>
-                                <Badge
-                                    className={cn(
-                                        "text-xs",
-                                        request.status === "Completed" && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
-                                        request.status === "In Progress" && "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
-                                        request.status === "Pending" && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
-                                        request.status === "Cancelled" && "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
-                                        "border-none"
-                                    )}
-                                    variant="outline"
-                                >
-                                    {statusTranslations[request.status]}
-                                </Badge>
+                                {getStatusBadge(request.status)}
                             </TableCell>
                             <TableCell>{request.driverId ?? 'No Asignado'}</TableCell>
                             <TableCell>
@@ -119,9 +140,79 @@ import type { ServiceRequest } from "@/lib/types";
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                    <DropdownMenuItem>Asignar Conductor</DropdownMenuItem>
-                                    <DropdownMenuItem>Editar</DropdownMenuItem>
-                                    <DropdownMenuItem className="text-destructive">Cancelar</DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={async () => {
+                                            try {
+                                                await assignDriverToRequest(firestore, request.id, "C0001");
+                                                toast({
+                                                    title: "Conductor asignado",
+                                                    description: `Conductor asignado a solicitud ${request.id}`,
+                                                });
+                                            } catch (err) {
+                                                toast({
+                                                    title: "Error",
+                                                    description: "No se pudo asignar el conductor",
+                                                    variant: "destructive",
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <UserPlus className="mr-2 h-4 w-4" />
+                                        Asignar Conductor
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={() => {
+                                            toast({
+                                                title: "Editar solicitud",
+                                                description: `Funcionalidad de edición para solicitud ${request.id}`,
+                                            });
+                                        }}
+                                    >
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={async () => {
+                                            try {
+                                                await navigator.clipboard.writeText(request.id);
+                                                toast({
+                                                    title: "ID copiado",
+                                                    description: `ID de solicitud copiado al portapapeles`,
+                                                });
+                                            } catch (err) {
+                                                toast({
+                                                    title: "Error",
+                                                    description: "No se pudo copiar el ID",
+                                                    variant: "destructive",
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <Copy className="mr-2 h-4 w-4" />
+                                        Copiar ID
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={async () => {
+                                            try {
+                                                await cancelRequest(firestore, request.id);
+                                                toast({
+                                                    title: "Solicitud cancelada",
+                                                    description: `Solicitud ${request.id} cancelada exitosamente`,
+                                                    variant: "destructive",
+                                                });
+                                            } catch (err) {
+                                                toast({
+                                                    title: "Error",
+                                                    description: "No se pudo cancelar la solicitud",
+                                                    variant: "destructive",
+                                                });
+                                            }
+                                        }}
+                                        className="text-destructive"
+                                    >
+                                        <X className="mr-2 h-4 w-4" />
+                                        Cancelar
+                                    </DropdownMenuItem>
                                 </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>

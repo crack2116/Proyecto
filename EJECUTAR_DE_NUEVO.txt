@@ -1,0 +1,14 @@
+Abre la misma CMD donde ejecutaste los comandos de antes.
+
+Luego ejecuta ESTE comando:
+
+cd "C:\Users\elcra\Desktop\PROYECTO FABIAN\Proyecto"
+gsutil cors set cors.json gs://studio-4560916840-4310c.firebasestorage.app
+
+Después:
+1. Cierra el navegador completamente
+2. Lo abres de nuevo
+3. Ve a: http://localhost:9002
+4. Presiona Ctrl + Shift + R
+5. Intenta subir una imagen de nuevo
+

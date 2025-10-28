@@ -1,0 +1,18 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // TEMPORALMENTE: Reglas muy permisivas para debugging y desarrollo
+    // PRODUCCIÓN: Debe restringirse a usuarios autenticados
+    
+    match /profiles/{userId}/{allPaths=**} {
+      // Permitir todo a usuarios autenticados (temporal)
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Permitir lectura de archivos públicos (para testing)
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
