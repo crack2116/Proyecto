@@ -42,8 +42,8 @@ const supportChatFlow = ai.defineFlow(
       - Mantén las respuestas breves, idealmente en 2-3 frases.`;
 
     const { output } = await ai.generate({
-      prompt: history.map(m => m.content), // Usar solo el contenido para el prompt
-      history: history, // Pasar el historial completo
+      prompt: history[history.length - 1]?.content ?? '',
+      history: history.slice(0, -1), // Enviar el historial previo correctamente
       system: systemPrompt,
       model: 'googleai/gemini-pro',
       config: {
