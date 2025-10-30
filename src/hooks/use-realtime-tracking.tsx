@@ -1,113 +1,48 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query } from "firebase/firestore";
-import { createSampleData } from "@/lib/sample-data";
+import { useState, useEffect } from "react";
+import { useDoc } from "@/firebase";
+import type { Vehicle } from "@/lib/types";
 
-type VehicleLocation = {
-  id: string;
-  make: string;
-  model: string;
-  licensePlate: string;
-  vehicleType: string;
-  driverId?: string;
-  status: string;
+// Extiende el tipo Vehicle para incluir los campos de tracking en tiempo real
+type VehicleLocation = Vehicle & {
   lat: number;
   lng: number;
-  heading?: number; // Dirección del vehículo
+  heading?: number;
   speed?: number;
   lastUpdate: Date;
-  route?: Array<{ lat: number; lng: number }>; // Ruta asignada
-  currentRoutePointIndex?: number; // Índice actual en la ruta
+  route?: Array<{ lat: number; lng: number }>;
+  currentRoutePointIndex?: number;
 };
 
 type UseRealtimeTrackingOptions = {
-  interval?: number; // Intervalo de actualización en ms
-  enabled?: boolean; // Habilitar o deshabilitar tracking
-  useFirebase?: boolean; // Usar Firebase en lugar de datos simulados
+  enabled?: boolean;
 };
 
 /**
- * Hook para seguimiento en tiempo real de vehículos
+ * Hook para seguimiento en tiempo real de vehículos, conectado exclusivamente a Firebase.
  */
 export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
-  const { interval = 5000, enabled = true, useFirebase = false } = options; // Default to local data
-
-  const [vehicles, setVehicles] = useState<VehicleLocation[]>([]);
+  const { enabled = true } = options;
   const [isActive, setIsActive] = useState(enabled);
-  
-  // Firebase connection (optional)
-  const { data: firebaseVehicles, isLoading: isFirebaseLoading } = useDoc<VehicleLocation>('vehicles');
-  
-  // Local data generation
-  const generateInitialData = useCallback(() => {
-    const { vehicles: sampleVehicles } = createSampleData();
-    const vehiclesWithLocation = sampleVehicles.map((v, i) => ({
-      ...v,
-      status: i % 3 === 0 ? "En Tránsito" : i % 3 === 1 ? "Disponible" : "En Mantenimiento",
-      lat: -5.19449 + (Math.random() - 0.5) * 0.1,
-      lng: -80.63282 + (Math.random() - 0.5) * 0.1,
-      heading: Math.random() * 360,
-      speed: Math.random() * 60,
-      lastUpdate: new Date(),
-    }));
-    setVehicles(vehiclesWithLocation);
-  }, []);
 
-  // Use Firebase data if available and enabled
+  // Obtener datos directamente de Firebase
+  const { data: firebaseVehicles, isLoading: isFirebaseLoading, error } = useDoc<VehicleLocation>('vehicles');
+
+  const vehicles = (firebaseVehicles || []).map(v => ({
+    ...v,
+    lastUpdate: v.lastUpdate ? new Date(v.lastUpdate) : new Date(),
+  }));
+
   useEffect(() => {
-    if (useFirebase && firebaseVehicles) {
-      setVehicles(firebaseVehicles.map(v => ({ ...v, lastUpdate: new Date() })));
-    }
-  }, [useFirebase, firebaseVehicles]);
-
-  // Fallback to local data if Firebase is not used or fails
-  useEffect(() => {
-    if (!useFirebase) {
-      generateInitialData();
-    }
-  }, [useFirebase, generateInitialData]);
-
-  // Simulate movement for local data
-  useEffect(() => {
-    if (!isActive || useFirebase) {
-      return;
-    }
-
-    const simulationInterval = setInterval(() => {
-      setVehicles((prevVehicles) =>
-        prevVehicles.map((v) => {
-          if (v.status !== 'En Tránsito') return v;
-          const speedKmS = (v.speed ?? 50) / 3600;
-          const intervalSeconds = interval / 1000;
-          const distance = speedKmS * intervalSeconds;
-          const angleRad = ((v.heading ?? 0) - 90) * (Math.PI / 180);
-          
-          const latRad = v.lat * (Math.PI / 180);
-          
-          const deltaLat = distance * Math.sin(angleRad) / 111.32;
-          const deltaLng = distance * Math.cos(angleRad) / (111.32 * Math.cos(latRad));
-
-          return {
-            ...v,
-            lat: v.lat + deltaLat,
-            lng: v.lng + deltaLng,
-            heading: (v.heading ?? 0) + (Math.random() - 0.5) * 5,
-            lastUpdate: new Date(),
-          };
-        })
-      );
-    }, interval);
-
-    return () => clearInterval(simulationInterval);
-  }, [isActive, interval, useFirebase]);
+    setIsActive(enabled);
+  }, [enabled]);
 
   return {
     vehicles,
     isActive,
     setIsActive,
-    reset: generateInitialData,
-    isLoading: useFirebase ? isFirebaseLoading : false,
+    isLoading: isFirebaseLoading,
+    error,
   };
 }
