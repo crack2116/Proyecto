@@ -30,7 +30,7 @@ type UseRealtimeTrackingOptions = {
  * Hook para seguimiento en tiempo real de vehículos
  */
 export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
-  const { enabled = true, useFirebase = false } = options; // Forzar datos locales
+  const { enabled = true, useFirebase = false } = options; 
 
   const [vehicles, setVehicles] = useState<VehicleLocation[]>([]);
   const [isActive, setIsActive] = useState(enabled);
@@ -45,16 +45,9 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
     useFirebase ? vehiclesQuery : null
   );
 
-  // Si usa Firebase, usar los datos de Firebase EN TIEMPO REAL
+  // Cargar datos de muestra si no se usa Firebase
   useEffect(() => {
-    if (useFirebase && firebaseVehicles) {
-      const convertedVehicles = firebaseVehicles.map((veh: any) => ({
-        ...veh,
-        lastUpdate: veh.lastUpdate?.toDate?.() || new Date(),
-      }));
-      setVehicles(convertedVehicles);
-    } else if (!useFirebase) {
-      // Cargar datos de muestra si no se usa Firebase
+    if (!useFirebase) {
       const sampleData = createSampleData();
       const sampleVehiclesWithLocation = sampleData.vehicles.map((v, index) => ({
         ...v,
@@ -66,6 +59,17 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
         heading: Math.random() * 360,
       }));
       setVehicles(sampleVehiclesWithLocation as VehicleLocation[]);
+    }
+  }, [useFirebase]);
+  
+  // Si usa Firebase, usar los datos de Firebase EN TIEMPO REAL
+  useEffect(() => {
+    if (useFirebase && firebaseVehicles) {
+      const convertedVehicles = firebaseVehicles.map((veh: any) => ({
+        ...veh,
+        lastUpdate: veh.lastUpdate?.toDate?.() || new Date(),
+      }));
+      setVehicles(convertedVehicles);
     }
   }, [useFirebase, firebaseVehicles]);
 

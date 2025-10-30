@@ -11,6 +11,12 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { createSampleData } from '@/lib/sample-data'; // Importar datos de muestra
+
+// ========= SOLUCIÓN TEMPORAL: DESCONECTAR FIREBASE =========
+// Poner en `false` para usar datos locales y evitar errores de permisos.
+const CONNECT_TO_FIREBASE = false;
+// ==========================================================
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -39,17 +45,6 @@ export interface InternalQuery extends Query<DocumentData> {
 
 /**
  * React hook to subscribe to a Firestore collection or query in real-time.
- * Handles nullable references/queries.
- * 
- *
- * IMPORTANT! YOU MUST MEMOIZE the inputted memoizedTargetRefOrQuery or BAD THINGS WILL HAPPEN
- * use useMemo to memoize it per React guidence.  Also make sure that it's dependencies are stable
- * references
- *  
- * @template T Optional type for document data. Defaults to any.
- * @param {CollectionReference<DocumentData> | Query<DocumentData> | null | undefined} targetRefOrQuery -
- * The Firestore CollectionReference or Query. Waits if null/undefined.
- * @returns {UseCollectionResult<T>} Object with data, isLoading, error.
  */
 export function useCollection<T = any>(
     memoizedTargetRefOrQuery: ((CollectionReference<DocumentData> | Query<DocumentData>) & {__memo?: boolean})  | null | undefined,
@@ -62,6 +57,26 @@ export function useCollection<T = any>(
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
+    // Si estamos en modo de datos locales, cargarlos y salir.
+    if (!CONNECT_TO_FIREBASE) {
+      const { clients, drivers, vehicles, serviceRequests } = createSampleData();
+      const collectionPath = memoizedTargetRefOrQuery?.type === 'collection'
+        ? (memoizedTargetRefOrQuery as CollectionReference).path
+        : (memoizedTargetRefOrQuery as unknown as InternalQuery)?._query?.path?.toString() ?? '';
+
+      let sampleData: any[] = [];
+      if (collectionPath.includes('clients')) sampleData = clients;
+      if (collectionPath.includes('drivers')) sampleData = drivers;
+      if (collectionPath.includes('vehicles')) sampleData = vehicles;
+      if (collectionPath.includes('serviceRequests')) sampleData = serviceRequests;
+      
+      setData(sampleData as ResultItemType[]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    // Lógica original de conexión a Firebase
     if (!memoizedTargetRefOrQuery) {
       setData(null);
       setIsLoading(false);
@@ -110,7 +125,7 @@ export function useCollection<T = any>(
     return () => unsubscribe();
   }, [memoizedTargetRefOrQuery]);
   
-  if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
+  if (CONNECT_TO_FIREBASE && memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
     throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
   }
 
