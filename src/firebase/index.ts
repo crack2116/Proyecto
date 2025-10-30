@@ -30,11 +30,11 @@ storage = getStorage(firebaseApp);
 if (USE_EMULATOR) {
     // Esta comprobación evita reconexiones en HMR (Hot Module Replacement)
     if (!(auth as any)._isEmulator) {
-        console.log("🟠 Conectando a los Emuladores de Firebase en localhost...");
+        console.log("🟠 Conectando a los Emuladores de Firebase en 127.0.0.1...");
         try {
-            connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-            connectFirestoreEmulator(firestore, 'localhost', 8080);
-            connectStorageEmulator(storage, 'localhost', 9199);
+            connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+            connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
+            connectStorageEmulator(storage, '127.0.0.1', 9199);
             console.log("✅ Emuladores conectados exitosamente.");
         } catch (error) {
             console.error("🔴 Error al conectar con los emuladores:", error);
