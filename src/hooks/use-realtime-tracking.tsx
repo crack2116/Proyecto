@@ -30,7 +30,7 @@ type UseRealtimeTrackingOptions = {
  * Hook para seguimiento en tiempo real de vehículos
  */
 export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
-  const { enabled = true, useFirebase = true } = options; // Default to true now
+  const { enabled = true, useFirebase = true } = options; 
 
   const [vehicles, setVehicles] = useState<VehicleLocation[]>([]);
   const [isActive, setIsActive] = useState(enabled);
@@ -41,27 +41,7 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
     () => (firestore ? query(collection(firestore, "vehicles")) : null),
     [firestore]
   );
-  const { data: firebaseVehicles, isLoading: isFirebaseLoading } = useCollection<VehicleLocation>(
-    useFirebase ? vehiclesQuery : null
-  );
-
-  // Cargar datos de muestra si no se usa Firebase (ahora solo como fallback)
-  useEffect(() => {
-    if (!useFirebase) {
-      console.log("Using sample data for tracking.");
-      const sampleData = createSampleData();
-      const sampleVehiclesWithLocation = sampleData.vehicles.map((v, index) => ({
-        ...v,
-        status: index % 3 === 0 ? "En Tránsito" : (index % 3 === 1 ? "Disponible" : "En Mantenimiento"),
-        lat: -5.19449 + (Math.random() - 0.5) * 0.05,
-        lng: -80.63282 + (Math.random() - 0.5) * 0.05,
-        lastUpdate: new Date(),
-        speed: Math.random() * 60,
-        heading: Math.random() * 360,
-      }));
-      setVehicles(sampleVehiclesWithLocation as VehicleLocation[]);
-    }
-  }, [useFirebase]);
+  const { data: firebaseVehicles, isLoading: isFirebaseLoading } = useCollection<VehicleLocation>(vehiclesQuery);
   
   // Si usa Firebase, usar los datos de Firebase EN TIEMPO REAL
   useEffect(() => {
