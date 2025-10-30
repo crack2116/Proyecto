@@ -2,12 +2,12 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
-// FORZAR CONEXIÓN A PRODUCCIÓN PARA EVITAR PROBLEMAS DE EMULADOR
-const USE_EMULATOR = false;
+// FORZAR CONEXIÓN AL EMULADOR PARA DESARROLLO
+const USE_EMULATOR = true;
 
 let firebaseApp: FirebaseApp;
 if (getApps().length === 0) {
@@ -21,8 +21,10 @@ const firestore = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp);
 
 if (USE_EMULATOR) {
-  // Esta sección ya no se ejecutará en desarrollo
-  console.log("🟠 Conectando a los emuladores de Firebase...");
+  console.log("🟠 Conectando a los emuladores de Firebase en localhost...");
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+  connectFirestoreEmulator(firestore, 'localhost', 8080);
+  connectStorageEmulator(storage, 'localhost', 9199);
 } else {
     console.log("🔵 Conectado a los servicios de Firebase en producción.");
 }
