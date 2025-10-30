@@ -62,7 +62,6 @@ export function useDoc<T = any>(
             setError(null);
         },
         (err: FirestoreError) => {
-            console.error(`Error listening to collection ${collectionName}:`, err);
             const contextualError = new FirestorePermissionError({
                 operation: 'list',
                 path: collectionName,
