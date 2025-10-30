@@ -72,6 +72,7 @@ const managementInsightsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
+    // When an output schema is defined, Genkit returns a parsed object in the 'output' property.
     return output!;
   }
 );
