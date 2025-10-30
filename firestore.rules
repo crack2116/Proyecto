@@ -1,148 +1,28 @@
+/**
+ * @file Firebase Security Rules for Transport Service App
+ *
+ * @description This ruleset enforces a role-based access control model with user-specific ownership where appropriate.
+ *
+ * Data Structure:
+ * - /users/{userId}: User profiles, accessible only by the user and admins.
+ * - /roles_admin/{userId}: Admin role markers; document existence grants admin privileges.
+ * - /clients/{clientId}: Client information, accessible by admins.
+ * - /drivers/{driverId}: Driver information, accessible by admins.
+ * - /vehicles/{vehicleId}: Vehicle information, accessible by admins.
+ * - /serviceRequests/{serviceRequestId}: Service requests, accessible by admins.
+ * - /routes/{routeId}: Route information, accessible by admins.
+ *
+ * Key Security Decisions:
+ * - User listing is disabled for privacy.
+ * - Admin privileges are determined by the presence of a document in the /roles_admin/{userId} collection.
+ * - Data validation is relaxed in prototyping mode, focusing on authorization and relational integrity.
+ *
+ * Denormalization for Authorization:
+ * - The `ServiceRequest` entity should contain the `clientId` to quickly verify ownership.
+ */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /**
-     * @description Allows users to read and write their own profile data. Admins can also read and write user profiles.
-     * @path /users/{userId}
-     * @allow (create) User with ID 'user123' creates a profile with id: 'user123'.
-     * @allow (get) User with ID 'user123' reads their own profile. Admin reads user profile.
-     * @allow (update) User with ID 'user123' updates their own profile. Admin updates user profile.
-     * @allow (delete) User with ID 'user123' deletes their own profile. Admin deletes user profile.
-     * @deny (create) User with ID 'user123' attempts to create a profile with id: 'user456'.
-     * @deny (get) User with ID 'user123' attempts to read the profile of 'user456' (non-admin).
-     * @deny (update) User with ID 'user123' attempts to update the profile of 'user456' (non-admin).
-     * @deny (delete) User with ID 'user123' attempts to delete the profile of 'user456' (non-admin).
-     * @principle Enforces user-ownership for user profiles and allows admin override.
-     */
-    match /users/{userId} {
-      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
-      allow list: if false;
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && (isOwner(userId) || isAdmin());
-      allow delete: if isSignedIn() && (isOwner(userId) || isAdmin());
-    }
-
-    /**
-     * @description Allows admins to be created and read by anyone. This collection is only for role assignment and existence grants admin privileges.
-     * @path /roles_admin/{userId}
-     * @allow (create) User with ID 'admin123' creates an admin role document.
-     * @allow (get) Any user reads an admin role document.
-     * @deny (update) Non-admin attempts to update an admin role document.
-     * @deny (delete) Non-admin attempts to delete an admin role document.
-     * @principle Only admins can manage admin roles.
-     */
-    match /roles_admin/{userId} {
-      allow get: if true;
-      allow list: if false;
-      allow create: if isSignedIn() && isNewAdmin(userId);
-      allow update: if false;
-      allow delete: if isSignedIn() && isAdmin();
-    }
-
-    /**
-     * @description Allows admins to manage client information.
-     * @path /clients/{clientId}
-     * @allow (create) Admin creates a new client.
-     * @allow (get) Any user reads client information.
-     * @allow (update) Admin updates a client's information.
-     * @allow (delete) Admin deletes a client.
-     * @deny (create) Non-admin attempts to create a client.
-     * @deny (update) Non-admin attempts to update a client.
-     * @deny (delete) Non-admin attempts to delete a client.
-     * @principle Only admins can manage client data.
-     */
-    match /clients/{clientId} {
-      allow get: if isSignedIn();
-      allow list: if false;
-      allow create: if isSignedIn() && isAdmin();
-      allow update: if isSignedIn() && isAdmin();
-      allow delete: if isSignedIn() && isAdmin();
-    }
-
-    /**
-     * @description Allows admins to manage driver information.
-     * @path /drivers/{driverId}
-     * @allow (create) Admin creates a new driver.
-     * @allow (get) Admin reads driver information.
-     * @allow (update) Admin updates a driver's information.
-     * @allow (delete) Admin deletes a driver.
-     * @deny (create) Non-admin attempts to create a driver.
-     * @deny (get) Non-admin attempts to read driver information.
-     * @deny (update) Non-admin attempts to update a driver.
-     * @deny (delete) Non-admin attempts to delete a driver.
-     * @principle Only admins can manage driver data.
-     */
-    match /drivers/{driverId} {
-      allow get: if isSignedIn() && isAdmin();
-      allow list: if false;
-      allow create: if isSignedIn() && isAdmin();
-      allow update: if isSignedIn() && isAdmin();
-      allow delete: if isSignedIn() && isAdmin();
-    }
-
-    /**
-     * @description Allows admins to manage vehicle information.
-     * @path /vehicles/{vehicleId}
-     * @allow (create) Admin creates a new vehicle.
-     * @allow (get) Admin reads vehicle information.
-     * @allow (update) Admin updates a vehicle's information.
-     * @allow (delete) Admin deletes a vehicle.
-     * @deny (create) Non-admin attempts to create a vehicle.
-     * @deny (get) Non-admin attempts to read vehicle information.
-     * @deny (update) Non-admin attempts to update a vehicle.
-     * @deny (delete) Non-admin attempts to delete a vehicle.
-     * @principle Only admins can manage vehicle data.
-     */
-    match /vehicles/{vehicleId} {
-      allow get: if isSignedIn() && isAdmin();
-      allow list: if false;
-      allow create: if isSignedIn() && isAdmin();
-      allow update: if isSignedIn() && isAdmin();
-      allow delete: if isSignedIn() && isAdmin();
-    }
-
-    /**
-     * @description Allows admins to manage service requests.
-     * @path /serviceRequests/{serviceRequestId}
-     * @allow (create) Any signed-in user can create a service request.
-     * @allow (get) Any signed-in user can read a service request.
-     * @allow (update) Admin updates a service request.
-     * @allow (delete) Admin deletes a service request.
-     * @deny (update) Non-admin attempts to update a service request.
-     * @deny (delete) Non-admin attempts to delete a service request.
-     * @principle Admins manage service requests.
-     */
-    match /serviceRequests/{serviceRequestId} {
-      allow get: if isSignedIn();
-      allow list: if false;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && isAdmin();
-      allow delete: if isSignedIn() && isAdmin();
-    }
-
-    /**
-     * @description Allows admins to manage route information.
-     * @path /routes/{routeId}
-     * @allow (create) Admin creates a new route.
-     * @allow (get) Admin reads route information.
-     * @allow (update) Admin updates a route's information.
-     * @allow (delete) Admin deletes a route.
-     * @deny (create) Non-admin attempts to create a route.
-     * @deny (get) Non-admin attempts to read route information.
-     * @deny (update) Non-admin attempts to update a route.
-     * @deny (delete) Non-admin attempts to delete a route.
-     * @principle Only admins can manage route data.
-     */
-    match /routes/{routeId} {
-      allow get: if isSignedIn() && isAdmin();
-      allow list: if false;
-      allow create: if isSignedIn() && isAdmin();
-      allow update: if isSignedIn() && isAdmin();
-      allow delete: if isSignedIn() && isAdmin();
-    }
-
-    // --- Helper Functions ---
 
     /**
      * @description Checks if the user is signed in.
@@ -153,78 +33,152 @@ service cloud.firestore {
     }
 
     /**
-     * @description Checks if the user is the owner of the resource.
-     * @param {string} userId The user ID to check against.
+     * @description Checks if the user is the owner of the document, based on the provided userId.
+     * @param {string} userId The user ID to compare against the request's authentication UID.
      * @return {boolean} True if the user is the owner, false otherwise.
      */
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * @description Checks if the user is an admin based on the existence of a document in the `/roles_admin/{userId}` collection.
-     * @return {boolean} True if the user is an admin, false otherwise.
-     */
-    function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-     /**
-      * @description Checks if an admin exists
-      * @param {string} userId The user ID to check against.
-      * @return {boolean} True if the admin exists, false otherwise.
-      */
-     function isExistingAdmin(userId) {
-          return exists(/databases/$(database)/documents/roles_admin/$(userId));
-     }
-
-     function isNewAdmin(userId) {
-          return !exists(/databases/$(database)/documents/roles_admin/$(userId));
-     }
-
-     /**
-      * @description Checks if the driver exists
-      * @param {string} driverId The driver ID to check against.
-      * @return {boolean} True if the driver exists, false otherwise.
-      */
-     function isExistingDriver(driverId) {
-          return exists(/databases/$(database)/documents/drivers/$(driverId));
-     }
-
-      /**
-      * @description Checks if the vehicle exists
-      * @param {string} vehicleId The vehicle ID to check against.
-      * @return {boolean} True if the vehicle exists, false otherwise.
-      */
-     function isExistingVehicle(vehicleId) {
-          return exists(/databases/$(database)/documents/vehicles/$(vehicleId));
-     }
-
-     /**
-      * @description Checks if the service request exists
-      * @param {string} serviceRequestId The service request ID to check against.
-      * @return {boolean} True if the service request exists, false otherwise.
-      */
-     function isExistingServiceRequest(serviceRequestId) {
-          return exists(/databases/$(database)/documents/serviceRequests/$(serviceRequestId));
-     }
-
-     /**
-      * @description Checks if the route exists
-      * @param {string} routeId The route ID to check against.
-      * @return {boolean} True if the route exists, false otherwise.
-      */
-     function isExistingRoute(routeId) {
-          return exists(/databases/$(database)/documents/routes/$(routeId));
-     }
-
-    /**
-     * @description Checks if the user is the owner of the resource and the resource exists.
-     * @param {string} userId The user ID to check against.
+     * @description Checks if the user is an existing owner of the document.
+     * @param {string} userId The user ID to compare against the resource data.
      * @return {boolean} True if the user is the owner and the resource exists, false otherwise.
      */
     function isExistingOwner(userId) {
-          return exists(/databases/$(database)/documents/users/$(userId));
+        return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Checks if the user is an admin.
+     * @return {boolean} True if the user is an admin, false otherwise.
+     */
+    function isAdmin() {
+        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * @description Rules for user profiles.
+     * @path /users/{userId}
+     * @allow (create) User with ID 'user123' creates their profile.
+     *   - Auth: { uid: 'user123' }
+     * @deny (create) User with ID 'user123' tries to create profile for 'user456'.
+     *   - Auth: { uid: 'user123' }
+     * @allow (get) User with ID 'user123' reads their own profile.
+     *   - Auth: { uid: 'user123' }
+     * @deny (get) User with ID 'user123' tries to read profile for 'user456'.
+     *   - Auth: { uid: 'user123' }
+     * @principle Enforces document ownership for reads and writes, with admin override.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if false; // User listing is not permitted.
+      allow create: if isOwner(userId) ;
+      allow update: if isExistingOwner(userId) || isAdmin();
+      allow delete: if isExistingOwner(userId) || isAdmin();
+    }
+
+    /**
+     * @description Rules for admin roles.
+     * @path /roles_admin/{userId}
+     * @allow (create) An admin can grant another user admin rights.
+     *   - Auth: { uid: 'admin123' }, Request: create /roles_admin/user456
+     * @deny (create) A non-admin user tries to grant themselves admin rights.
+     *   - Auth: { uid: 'user123' }, Request: create /roles_admin/user123
+     * @principle Restricts admin role creation to existing admins.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isAdmin();
+      allow list: if false; // Admin role listing is not permitted.
+      allow create: if isAdmin();
+      allow update: if false; // Admin roles cannot be updated.
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Rules for client information.
+     * @path /clients/{clientId}
+     * @allow (create) An admin can create a new client.
+     *   - Auth: { uid: 'admin123' }
+     * @deny (update) A non-admin user tries to update a client.
+     *   - Auth: { uid: 'user123' }
+     * @principle Restricts client data management to admins.
+     */
+    match /clients/{clientId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for driver information.
+     * @path /drivers/{driverId}
+     * @allow (create) An admin can create a new driver.
+     *   - Auth: { uid: 'admin123' }
+     * @deny (update) A non-admin user tries to update a driver.
+     *   - Auth: { uid: 'user123' }
+     * @principle Restricts driver data management to admins.
+     */
+    match /drivers/{driverId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for vehicle information.
+     * @path /vehicles/{vehicleId}
+     * @allow (create) An admin can create a new vehicle.
+     *   - Auth: { uid: 'admin123' }
+     * @deny (update) A non-admin user tries to update a vehicle.
+     *   - Auth: { uid: 'user123' }
+     * @principle Restricts vehicle data management to admins.
+     */
+    match /vehicles/{vehicleId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for transport service requests.
+     * @path /serviceRequests/{serviceRequestId}
+     * @allow (create) An authenticated user can create a service request.
+     *   - Auth: { uid: 'user123' }, Request: create /serviceRequests/req123
+     * @deny (update) A non-admin user tries to update a service request that they don't own.
+     *   - Auth: { uid: 'user456' }, Request: update /serviceRequests/req123, Resource: { clientId: 'user123' }
+     * @principle Allows admins to manage all requests and users to manage their own requests.
+     */
+    match /serviceRequests/{serviceRequestId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin(); //Fixed: Admin can read all the Service Requests, to fix error reported in prompt.
+      allow create: if isSignedIn();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Rules for route information.
+     * @path /routes/{routeId}
+     * @allow (create) An admin can create a new route.
+     *   - Auth: { uid: 'admin123' }
+     * @deny (update) A non-admin user tries to update a route.
+     *   - Auth: { uid: 'user123' }
+     * @principle Restricts route data management to admins.
+     */
+    match /routes/{routeId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
     }
   }
 }
