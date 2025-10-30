@@ -46,7 +46,7 @@ const supportChatFlow = ai.defineFlow(
       prompt: history[history.length - 1]?.content ?? '',
       history: history.slice(0, -1), // Enviar el historial previo correctamente
       system: systemPrompt,
-      model: 'googleai/gemini-1.5-flash-latest',
+      model: 'gemini-1.5-flash-latest',
       config: {
         temperature: 0.5,
       },
@@ -54,7 +54,7 @@ const supportChatFlow = ai.defineFlow(
 
     const result: Message = {
       role: 'model',
-      content: output?.text ?? 'Lo siento, no pude procesar tu solicitud en este momento.',
+      content: output?.text() ?? 'Lo siento, no pude procesar tu solicitud en este momento.',
     };
 
     return result;
