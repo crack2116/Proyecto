@@ -2,12 +2,12 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage }from 'firebase/storage';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
-// Eliminar la lógica del emulador y conectar siempre a producción.
-// La configuración del emulador estaba causando problemas de red persistentes.
+const USE_EMULATOR = process.env.NODE_ENV === 'development';
+
 let firebaseApp: FirebaseApp;
 if (getApps().length === 0) {
   firebaseApp = initializeApp(firebaseConfig);
@@ -19,7 +19,19 @@ const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp);
 
-console.log("🔵 Conectado a los servicios de Firebase en producción.");
+if (USE_EMULATOR) {
+  console.log("🟠 Conectando a los emuladores de Firebase...");
+  try {
+    connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+    connectFirestoreEmulator(firestore, "localhost", 8080);
+    connectStorageEmulator(storage, "localhost", 9199);
+    console.log("✅ Emuladores de Firebase conectados.");
+  } catch (error) {
+    console.error("❌ Error al conectar con los emuladores:", error);
+  }
+} else {
+    console.log("🔵 Conectado a los servicios de Firebase en producción.");
+}
 
 const getFirebaseServices = () => {
     return { firebaseApp, auth, firestore, storage };
