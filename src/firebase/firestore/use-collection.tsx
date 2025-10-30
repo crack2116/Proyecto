@@ -38,17 +38,6 @@ export interface InternalQuery extends Query<DocumentData> {
   }
 }
 
-// FORZAR DATOS LOCALES PARA EVITAR ERRORES DE PERMISOS
-const CONNECT_TO_FIREBASE = false;
-
-const { clients, drivers, vehicles, serviceRequests } = createSampleData();
-const localDataMap: { [key: string]: any[] } = {
-  clients,
-  drivers,
-  vehicles,
-  serviceRequests,
-};
-
 /**
  * React hook to subscribe to a Firestore collection or query in real-time.
  * Handles nullable references/queries.
@@ -74,33 +63,6 @@ export function useCollection<T = any>(
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
-    if (!CONNECT_TO_FIREBASE) {
-      setIsLoading(true);
-      // Extraer el nombre de la colección del query o referencia
-      let collectionName = "unknown";
-      if (memoizedTargetRefOrQuery) {
-        if ('_query' in memoizedTargetRefOrQuery) { // Es un Query
-          collectionName = (memoizedTargetRefOrQuery as any)._query.path.segments[0];
-        } else if ('path' in memoizedTargetRefOrQuery) { // Es un CollectionReference
-          collectionName = (memoizedTargetRefOrQuery as any).path;
-        }
-      }
-      
-      console.log(`[LOCAL DATA] Faking collection: ${collectionName}`);
-
-      setTimeout(() => {
-        if (localDataMap[collectionName]) {
-          setData(localDataMap[collectionName] as StateDataType);
-          setError(null);
-        } else {
-          console.warn(`[LOCAL DATA] No local data found for collection: ${collectionName}`);
-          setData([]);
-        }
-        setIsLoading(false);
-      }, 500); // Simular una pequeña demora
-      return;
-    }
-
     if (!memoizedTargetRefOrQuery) {
       setData(null);
       setIsLoading(false);
@@ -149,7 +111,7 @@ export function useCollection<T = any>(
     return () => unsubscribe();
   }, [memoizedTargetRefOrQuery]);
   
-  if(CONNECT_TO_FIREBASE && memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
+  if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
     throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
   }
   return { data, isLoading, error };
