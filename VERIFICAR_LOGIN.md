@@ -80,3 +80,8 @@ Puedes ver los usuarios en: http://localhost:4000
 ---
 
 ¿Tu app está corriendo ahora? ¿Qué pasa cuando intentas iniciar sesión?
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 2a8a951bc4432a149b7621ba57dc7c361411c6c5

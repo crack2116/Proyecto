@@ -78,3 +78,8 @@ npx firebase emulators:start
 ```
 
 ¡Y luego intenta iniciar sesión de nuevo!
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 2a8a951bc4432a149b7621ba57dc7c361411c6c5

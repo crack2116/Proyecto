@@ -94,3 +94,8 @@ El mensaje de "Dynamic Links" es solo un **aviso informativo**. El problema real
 3. ¿Qué error aparece cuando intentas iniciar sesión?
 
 **El mensaje de Dynamic Links NO es el problema.**
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 2a8a951bc4432a149b7621ba57dc7c361411c6c5

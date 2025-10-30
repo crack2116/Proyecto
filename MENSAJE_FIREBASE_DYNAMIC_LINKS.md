@@ -29,3 +29,8 @@ Si quieres saber más sobre las alternativas:
 - O visita: https://firebase.google.com/docs/dynamic-links
 
 Pero **no necesitas hacer nada** porque tu app no usa esas características.
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 2a8a951bc4432a149b7621ba57dc7c361411c6c5

@@ -40,3 +40,8 @@
 - Asegúrate de estar en **Google Cloud Console** (no Firebase Console)
 - El link es: console.cloud.google.com
 - Busca "Configuration" arriba del bucket
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 2a8a951bc4432a149b7621ba57dc7c361411c6c5

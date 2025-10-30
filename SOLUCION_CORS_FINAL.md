@@ -76,4 +76,8 @@
 - **Para desarrollar:** Usa la **Opción 1 (Firebase Emulator)**. Es la más fácil y rápida.
 - **Para desplegar a producción:** Usa la **Opción 2 o 3** para configurar CORS una sola vez.
 
+<<<<<<< HEAD
 Si tienes más problemas, la **Opción 1** es la más segura para evitar bloqueos durante el desarrollo.
+=======
+
+>>>>>>> 2a8a951bc4432a149b7621ba57dc7c361411c6c5

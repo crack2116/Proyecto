@@ -9,3 +9,4 @@ gsutil cors set cors.json gs://studio-4560916840-4310c.firebasestorage.app
 3. Verificar (opcional):
 gsutil cors get gs://studio-4560916840-4310c.firebasestorage.app
 
+

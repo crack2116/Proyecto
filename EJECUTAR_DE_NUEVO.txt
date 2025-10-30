@@ -12,3 +12,4 @@ Después:
 4. Presiona Ctrl + Shift + R
 5. Intenta subir una imagen de nuevo
 
+

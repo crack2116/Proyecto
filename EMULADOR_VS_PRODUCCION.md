@@ -83,3 +83,4 @@ Cuando quieras desplegar tu app:
 - **Producción = Firebase Real** → Imágenes permanentes
 - Necesitas configurar CORS solo para producción
 
+

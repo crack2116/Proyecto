@@ -179,3 +179,4 @@ Dime qué enfoque prefieres y lo implemento en tu reporte:
 - **C**: Mejoras visuales (más gráficos, colores)
 - **D**: Todo lo anterior (implementación completa)
 
+
