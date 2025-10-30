@@ -29,4 +29,3 @@ Si quieres saber más sobre las alternativas:
 - O visita: https://firebase.google.com/docs/dynamic-links
 
 Pero **no necesitas hacer nada** porque tu app no usa esas características.
-

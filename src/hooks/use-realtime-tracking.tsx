@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
 import { createSampleData } from "@/lib/sample-data";
 
@@ -36,12 +38,7 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
   const [isActive, setIsActive] = useState(enabled);
   
   // Firebase connection (optional)
-  const firestore = useFirestore();
-  const vehiclesQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, "vehicles")) : null),
-    [firestore]
-  );
-  const { data: firebaseVehicles, isLoading: isFirebaseLoading } = useCollection<VehicleLocation>(vehiclesQuery);
+  const { data: firebaseVehicles, isLoading: isFirebaseLoading } = useDoc<VehicleLocation>('vehicles');
   
   // Local data generation
   const generateInitialData = useCallback(() => {
