@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -46,7 +47,7 @@ const supportChatFlow = ai.defineFlow(
       prompt: history[history.length - 1]?.content ?? '',
       history: history.slice(0, -1), // Enviar el historial previo correctamente
       system: systemPrompt,
-      model: 'gemini-1.5-flash-latest',
+      model: googleAI.model('gemini-1.5-flash-latest'),
       config: {
         temperature: 0.5,
       },
