@@ -1,12 +1,13 @@
 "use client";
 
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, writeBatch } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
 import { createSampleData } from "@/lib/sample-data";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Database, Trash2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { addDocumentNonBlocking } from "@/firebase";
 
 export function DatabaseSeeder() {
   const firestore = useFirestore();
@@ -63,26 +64,26 @@ export function DatabaseSeeder() {
     setIsAutoSeeding(true);
     try {
       const { clients, drivers, vehicles, serviceRequests } = createSampleData();
+      const batch = writeBatch(firestore);
+
+      clients.forEach(client => {
+        const docRef = doc(collection(firestore, "clients"));
+        batch.set(docRef, client);
+      });
+      drivers.forEach(driver => {
+        const docRef = doc(collection(firestore, "drivers"));
+        batch.set(docRef, driver);
+      });
+      vehicles.forEach(vehicle => {
+        const docRef = doc(collection(firestore, "vehicles"));
+        batch.set(docRef, vehicle);
+      });
+      serviceRequests.forEach(request => {
+        const docRef = doc(collection(firestore, "serviceRequests"));
+        batch.set(docRef, request);
+      });
       
-      // Agregar clientes
-      for (const client of clients) {
-        await addDoc(collection(firestore, "clients"), client);
-      }
-
-      // Agregar conductores
-      for (const driver of drivers) {
-        await addDoc(collection(firestore, "drivers"), driver);
-      }
-
-      // Agregar vehículos
-      for (const vehicle of vehicles) {
-        await addDoc(collection(firestore, "vehicles"), vehicle);
-      }
-
-      // Agregar solicitudes de servicio
-      for (const request of serviceRequests) {
-        await addDoc(collection(firestore, "serviceRequests"), request);
-      }
+      await batch.commit();
 
       setDataStatus('populated');
       setDataCounts({
@@ -125,39 +126,36 @@ export function DatabaseSeeder() {
       
       // Verificar si ya existen datos
       const clientsSnapshot = await getDocs(collection(firestore, "clients"));
-      const driversSnapshot = await getDocs(collection(firestore, "drivers"));
-      const vehiclesSnapshot = await getDocs(collection(firestore, "vehicles"));
-      const requestsSnapshot = await getDocs(collection(firestore, "serviceRequests"));
-
-      if (clientsSnapshot.size > 0 || driversSnapshot.size > 0 || 
-          vehiclesSnapshot.size > 0 || requestsSnapshot.size > 0) {
+      if (clientsSnapshot.size > 0) {
         toast({
           variant: "destructive",
           title: "⚠️ Datos Existentes",
           description: "Ya existen datos en la base de datos. Usa 'Limpiar Base de Datos' primero si quieres empezar de nuevo.",
         });
+        setIsSeeding(false);
         return;
       }
+      
+      const batch = writeBatch(firestore);
 
-      // Agregar clientes
-      for (const client of clients) {
-        await addDoc(collection(firestore, "clients"), client);
-      }
-
-      // Agregar conductores
-      for (const driver of drivers) {
-        await addDoc(collection(firestore, "drivers"), driver);
-      }
-
-      // Agregar vehículos
-      for (const vehicle of vehicles) {
-        await addDoc(collection(firestore, "vehicles"), vehicle);
-      }
-
-      // Agregar solicitudes de servicio
-      for (const request of serviceRequests) {
-        await addDoc(collection(firestore, "serviceRequests"), request);
-      }
+      clients.forEach(client => {
+        const docRef = doc(collection(firestore, "clients"));
+        batch.set(docRef, client);
+      });
+      drivers.forEach(driver => {
+        const docRef = doc(collection(firestore, "drivers"));
+        batch.set(docRef, driver);
+      });
+      vehicles.forEach(vehicle => {
+        const docRef = doc(collection(firestore, "vehicles"));
+        batch.set(docRef, vehicle);
+      });
+      serviceRequests.forEach(request => {
+        const docRef = doc(collection(firestore, "serviceRequests"));
+        batch.set(docRef, request);
+      });
+      
+      await batch.commit();
 
       setDataStatus('populated');
       setDataCounts({
