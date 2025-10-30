@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { geminiPro } from '@genkit-ai/google-genai';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -45,7 +46,7 @@ const supportChatFlow = ai.defineFlow(
       prompt: history.map(m => m.content), // Usar solo el contenido para el prompt
       history: history, // Pasar el historial completo
       system: systemPrompt,
-      model: 'googleai/gemini-2.5-flash',
+      model: geminiPro,
       config: {
         temperature: 0.5,
       },
