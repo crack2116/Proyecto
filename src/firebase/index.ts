@@ -30,7 +30,7 @@ if (USE_EMULATOR) {
     // Asegurarse de que no intentamos conectar los emuladores varias veces.
     // Esto previene un error de "hot reload" en Next.js.
     if (!(auth as any)._isEmulator) {
-        console.log('Connecting to Firebase Emulators at 127.0.0.1...');
+        console.log('Connecting to Firebase Emulators at http://127.0.0.1...');
         connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
         connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
         connectStorageEmulator(storage, '127.0.0.1', 9199);
