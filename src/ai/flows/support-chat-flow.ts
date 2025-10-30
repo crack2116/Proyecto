@@ -46,7 +46,7 @@ const supportChatFlow = ai.defineFlow(
       prompt: history[history.length - 1]?.content ?? '',
       history: history.slice(0, -1), // Enviar el historial previo correctamente
       system: systemPrompt,
-      model: 'googleai/gemini-pro',
+      model: 'googleai/gemini-1.5-flash-latest',
       config: {
         temperature: 0.5,
       },
