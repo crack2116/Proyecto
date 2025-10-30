@@ -100,8 +100,11 @@ export function LoginForm() {
       case 'auth/account-exists-with-different-credential':
           errorMessage = 'Ya existe una cuenta con este correo electrónico usando otro método de autenticación.';
           break;
+      case 'auth/network-request-failed':
+        errorMessage = 'Error de red. Verifica tu conexión a internet y asegúrate de que el emulador de Firebase (si lo usas) esté corriendo.';
+        break;
       default:
-        errorMessage = 'Error de autenticación. Por favor, intenta de nuevo.';
+        errorMessage = `Error de autenticación: ${error.message}`;
         break;
     }
     toast({
@@ -146,7 +149,25 @@ export function LoginForm() {
 
   return (
     <div className="space-y-6">
-        <Form {...form}>
+      <Button 
+        variant="outline" 
+        className="w-full h-11"
+        onClick={handleGoogleSignIn}
+        disabled={isGoogleLoading}
+      >
+        {isGoogleLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+            <GoogleIcon className="mr-2" />
+        )}
+        Continuar con Google
+      </Button>
+      <div className="flex items-center space-x-2">
+        <Separator className="flex-1" />
+        <span className="text-xs text-muted-foreground">O CONTINUAR CON</span>
+        <Separator className="flex-1" />
+      </div>
+      <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
             control={form.control}

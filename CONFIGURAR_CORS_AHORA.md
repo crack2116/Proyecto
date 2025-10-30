@@ -36,7 +36,7 @@ Tu app ahora usa **Firebase Real**. Para que las imágenes funcionen, necesitas 
 
 En PowerShell (mismo que arriba):
 ```powershell
-gsutil cors set cors.json gs://studio-4560916840-4310c.firebasestorage.app
+gsutil cors set cors.json gs://studio-4560916840-4310c.appspot.com
 ```
 
 Deberías ver un mensaje de éxito.
@@ -81,8 +81,7 @@ Después de configurar CORS, tu app:
 
 ```powershell
 gcloud auth login
-gsutil cors set cors.json gs://studio-4560916840-4310c.firebasestorage.app
+gsutil cors set cors.json gs://studio-4560916840-4310c.appspot.com
 ```
 
 Y luego prueba subir una imagen! 🎉
-

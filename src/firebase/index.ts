@@ -2,47 +2,24 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage }from 'firebase/storage';
 
-// Detecta el entorno de desarrollo para usar el emulador automáticamente.
-const USE_EMULATOR = process.env.NODE_ENV === 'development';
-
+// Eliminar la lógica del emulador y conectar siempre a producción.
+// La configuración del emulador estaba causando problemas de red persistentes.
 let firebaseApp: FirebaseApp;
-let auth: ReturnType<typeof getAuth>;
-let firestore: ReturnType<typeof getFirestore>;
-let storage: ReturnType<typeof getStorage>;
-
-// Inicializar Firebase
 if (getApps().length === 0) {
   firebaseApp = initializeApp(firebaseConfig);
 } else {
   firebaseApp = getApp();
 }
 
-// Obtener servicios
-auth = getAuth(firebaseApp);
-firestore = getFirestore(firebaseApp);
-storage = getStorage(firebaseApp);
+const auth = getAuth(firebaseApp);
+const firestore = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 
-// Conectar a emuladores SOLO en desarrollo y si no está ya conectado.
-if (USE_EMULATOR) {
-    // Esta comprobación evita reconexiones en HMR (Hot Module Replacement)
-    if (!(auth as any)._isEmulator) {
-        console.log("🟠 Conectando a los Emuladores de Firebase en 127.0.0.1...");
-        try {
-            connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-            connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-            connectStorageEmulator(storage, '127.0.0.1', 9199);
-            console.log("✅ Emuladores conectados exitosamente.");
-        } catch (error) {
-            console.error("🔴 Error al conectar con los emuladores:", error);
-        }
-    }
-} else {
-    console.log("🔵 Conectando a Firebase en producción...");
-}
+console.log("🔵 Conectado a los servicios de Firebase en producción.");
 
 const getFirebaseServices = () => {
     return { firebaseApp, auth, firestore, storage };
