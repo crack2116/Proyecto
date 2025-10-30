@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 export interface UseTableStateOptions<T> {
   data: T[];
@@ -12,16 +12,14 @@ export function useTableState<T>({ data, searchFields, statusField }: UseTableSt
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Filtrar datos
+  // Memoizar los datos filtrados
   const filteredData = useMemo(() => {
-    // Asegurar que data es un array
-    if (!data || !Array.isArray(data)) {
-      return [];
-    }
+    // Asegurarse de que `data` siempre sea un array para evitar errores
+    const sourceData = Array.isArray(data) ? data : [];
     
-    let result = [...data];
+    let result = [...sourceData];
 
-    // Filtrar por búsqueda
+    // Filtrar por búsqueda de texto
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter((item) => {
@@ -39,8 +37,17 @@ export function useTableState<T>({ data, searchFields, statusField }: UseTableSt
 
     return result;
   }, [data, searchQuery, statusFilter, searchFields, statusField]);
+  
+  // Reiniciar la página actual si los datos filtrados cambian y la página actual queda fuera de rango
+  useEffect(() => {
+    const newTotalPages = Math.ceil(filteredData.length / itemsPerPage);
+    if (currentPage > newTotalPages && newTotalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [filteredData.length, itemsPerPage, currentPage]);
 
-  // Calcular paginación
+
+  // Calcular paginación sobre los datos ya filtrados
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -48,15 +55,15 @@ export function useTableState<T>({ data, searchFields, statusField }: UseTableSt
     return filteredData.slice(start, end);
   }, [filteredData, currentPage, itemsPerPage]);
 
-  // Resetear página cuando cambian los filtros
+  // Handlers para cambiar filtros y paginación
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    setCurrentPage(1);
+    setCurrentPage(1); // Resetear página al buscar
   };
 
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);
-    setCurrentPage(1);
+    setCurrentPage(1); // Resetear página al filtrar
   };
 
   const handlePageChange = (page: number) => {
@@ -65,7 +72,7 @@ export function useTableState<T>({ data, searchFields, statusField }: UseTableSt
 
   const handleItemsPerPageChange = (items: number) => {
     setItemsPerPage(items);
-    setCurrentPage(1);
+    setCurrentPage(1); // Resetear página al cambiar ítems por página
   };
 
   return {
@@ -88,4 +95,3 @@ export function useTableState<T>({ data, searchFields, statusField }: UseTableSt
     handleItemsPerPageChange,
   };
 }
-
