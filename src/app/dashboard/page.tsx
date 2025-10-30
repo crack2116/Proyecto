@@ -3,6 +3,8 @@ import { RecentServices } from "@/components/dashboard/recent-services";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, Truck, MapPin, Clock, CheckCircle } from "lucide-react";
+import { DatabaseSeeder } from "@/components/admin/database-seeder";
+import { Protected } from "@/components/permissions/protected";
 
 export default function DashboardPage() {
   return (
@@ -42,6 +44,11 @@ export default function DashboardPage() {
 
         {/* Quick Actions & Status */}
         <div className="space-y-6">
+          {/* Database Seeder */}
+          <Protected requireAdmin>
+            <DatabaseSeeder />
+          </Protected>
+
           {/* Quick Actions */}
           <Card className="hover-lift">
             <CardHeader>
@@ -92,61 +99,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <Badge variant="secondary" className="text-xs">Live</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* System Status */}
-          <Card className="hover-lift">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-headline">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                Estado del Sistema
-              </CardTitle>
-              <CardDescription>
-                Monitoreo en tiempo real
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-sm font-medium">Servicios Activos</span>
-                  </div>
-                  <Badge variant="outline" className="text-green-600 border-green-200">12</Badge>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="text-sm font-medium">Vehículos Online</span>
-                  </div>
-                  <Badge variant="outline" className="text-blue-600 border-blue-200">8/10</Badge>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                    <span className="text-sm font-medium">Pendientes</span>
-                  </div>
-                  <Badge variant="outline" className="text-yellow-600 border-yellow-200">3</Badge>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span className="text-sm font-medium">Tiempo Promedio</span>
-                  </div>
-                  <Badge variant="outline" className="text-green-600 border-green-200">2.5h</Badge>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-border">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>Última actualización: hace 2 minutos</span>
                 </div>
               </div>
             </CardContent>
