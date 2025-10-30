@@ -53,7 +53,7 @@ const supportChatFlow = ai.defineFlow(
 
     const result: Message = {
       role: 'model',
-      content: output.text ?? 'Lo siento, no pude procesar tu solicitud en este momento.',
+      content: output?.text ?? 'Lo siento, no pude procesar tu solicitud en este momento.',
     };
 
     return result;
