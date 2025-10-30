@@ -1,7 +1,5 @@
 import { Faq } from "@/components/support/faq";
-import { ChatAssistant } from "@/components/support/chat-assistant";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SupportPage() {
   return (
@@ -11,26 +9,14 @@ export default function SupportPage() {
         <p className="text-muted-foreground">Encuentra respuestas a tus preguntas y obtén asistencia.</p>
       </div>
 
-      <Tabs defaultValue="assistant" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="assistant">Asistente Virtual</TabsTrigger>
-          <TabsTrigger value="faq">Preguntas Frecuentes</TabsTrigger>
-        </TabsList>
-        <TabsContent value="assistant">
-          <Card>
-            <CardContent className="p-0">
-                <ChatAssistant />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="faq">
-          <Card>
-            <CardContent className="p-6">
-                <Faq />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card>
+        <CardHeader>
+          <CardTitle>Preguntas Frecuentes</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <Faq />
+        </CardContent>
+      </Card>
     </div>
   );
 }
