@@ -38,7 +38,8 @@ export interface InternalQuery extends Query<DocumentData> {
   }
 }
 
-const CONNECT_TO_FIREBASE = true; // Control para usar datos locales
+// FORZAR DATOS LOCALES PARA EVITAR ERRORES DE PERMISOS
+const CONNECT_TO_FIREBASE = false;
 
 const { clients, drivers, vehicles, serviceRequests } = createSampleData();
 const localDataMap: { [key: string]: any[] } = {
@@ -75,7 +76,16 @@ export function useCollection<T = any>(
   useEffect(() => {
     if (!CONNECT_TO_FIREBASE) {
       setIsLoading(true);
-      const collectionName = (memoizedTargetRefOrQuery as any)?.path || (memoizedTargetRefOrQuery as any)?._query.path.segments.join('/');
+      // Extraer el nombre de la colección del query o referencia
+      let collectionName = "unknown";
+      if (memoizedTargetRefOrQuery) {
+        if ('_query' in memoizedTargetRefOrQuery) { // Es un Query
+          collectionName = (memoizedTargetRefOrQuery as any)._query.path.segments[0];
+        } else if ('path' in memoizedTargetRefOrQuery) { // Es un CollectionReference
+          collectionName = (memoizedTargetRefOrQuery as any).path;
+        }
+      }
+      
       console.log(`[LOCAL DATA] Faking collection: ${collectionName}`);
 
       setTimeout(() => {
@@ -101,7 +111,6 @@ export function useCollection<T = any>(
     setIsLoading(true);
     setError(null);
 
-    // Directly use memoizedTargetRefOrQuery as it's assumed to be the final query
     const unsubscribe = onSnapshot(
       memoizedTargetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
@@ -119,7 +128,6 @@ export function useCollection<T = any>(
         setIsLoading(false);
       },
       (error: FirestoreError) => {
-        // This logic extracts the path from either a ref or a query
         const path: string =
           memoizedTargetRefOrQuery.type === 'collection'
             ? (memoizedTargetRefOrQuery as CollectionReference).path
@@ -134,13 +142,12 @@ export function useCollection<T = any>(
         setData(null)
         setIsLoading(false)
 
-        // trigger global error propagation
         errorEmitter.emit('permission-error', contextualError);
       }
     );
 
     return () => unsubscribe();
-  }, [memoizedTargetRefOrQuery]); // Re-run if the target query/reference changes.
+  }, [memoizedTargetRefOrQuery]);
   
   if(CONNECT_TO_FIREBASE && memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
     throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
