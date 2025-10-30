@@ -22,9 +22,9 @@ export function usePermissions() {
   // Obtener rol del usuario desde metadata o default a 'viewer'
   const userRole: UserRole = useMemo(() => {
     if (!user) return "viewer";
-    // Aquí puedes obtener el rol desde user.customClaims o desde una colección de usuarios
-    // Por ahora asumimos que todos los usuarios autenticados son 'admin' o 'viewer'
-    return (user as any).role || "viewer";
+    // Asignar 'admin' por defecto para el desarrollo. En un futuro se puede cambiar
+    // a `(user as any).role || "viewer";` para leerlo de Firebase.
+    return "admin";
   }, [user]);
 
   const permissions = useMemo(() => getRolePermissions(userRole), [userRole]);
@@ -43,4 +43,3 @@ export function usePermissions() {
     getRoleDescription: () => getRoleDescription(userRole),
   };
 }
-
