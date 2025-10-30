@@ -9,15 +9,12 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const MessageSchema = z.object({
+const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
   content: z.string(),
 });
-export type Message = z.infer<typeof MessageSchema>;
 
-export async function supportChat(history: Message[]): Promise<Message> {
-  return supportChatFlow(history);
-}
+export type Message = z.infer<typeof MessageSchema>;
 
 const supportChatFlow = ai.defineFlow(
   {
@@ -61,3 +58,7 @@ const supportChatFlow = ai.defineFlow(
     };
   }
 );
+
+export async function supportChat(history: Message[]): Promise<Message> {
+  return supportChatFlow(history);
+}
