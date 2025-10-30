@@ -19,6 +19,12 @@ export function DatabaseSeeder() {
 
   // Verificar datos existentes
   const checkExistingData = async () => {
+    // Si no hay firestore, no hacer nada.
+    if (!firestore) {
+      setDataStatus('checking');
+      return;
+    }
+
     try {
       const [clientsSnapshot, driversSnapshot, vehiclesSnapshot, requestsSnapshot] = await Promise.all([
         getDocs(collection(firestore, "clients")),
@@ -53,6 +59,7 @@ export function DatabaseSeeder() {
 
   // Auto-poblar base de datos
   const autoSeedDatabase = async () => {
+    if (!firestore) return;
     setIsAutoSeeding(true);
     try {
       const { clients, drivers, vehicles, serviceRequests } = createSampleData();
@@ -105,10 +112,13 @@ export function DatabaseSeeder() {
 
   // Verificar datos al cargar el componente
   useEffect(() => {
-    checkExistingData();
-  }, []);
+    if (firestore) {
+      checkExistingData();
+    }
+  }, [firestore]);
 
   const seedDatabase = async () => {
+    if (!firestore) return;
     setIsSeeding(true);
     try {
       const { clients, drivers, vehicles, serviceRequests } = createSampleData();
@@ -197,6 +207,7 @@ export function DatabaseSeeder() {
   };
 
   const refreshData = async () => {
+    setDataStatus('checking');
     await checkExistingData();
   };
 
@@ -219,7 +230,7 @@ export function DatabaseSeeder() {
         {dataStatus === 'empty' && (
           <div className="flex items-center gap-2 text-sm text-yellow-600">
             <AlertCircle className="h-4 w-4" />
-            <span>Base de datos vacía - Poblando automáticamente...</span>
+            <span>Base de datos vacía. Poblando automáticamente...</span>
           </div>
         )}
 
@@ -241,7 +252,7 @@ export function DatabaseSeeder() {
         {dataStatus === 'error' && (
           <div className="flex items-center gap-2 text-sm text-red-600">
             <AlertCircle className="h-4 w-4" />
-            <span>Error al verificar datos - Intenta refrescar</span>
+            <span>Error al conectar con la base de datos.</span>
           </div>
         )}
       </div>
@@ -249,7 +260,7 @@ export function DatabaseSeeder() {
       <div className="flex gap-3">
         <Button
           onClick={seedDatabase}
-          disabled={isSeeding || isAutoSeeding}
+          disabled={isSeeding || isAutoSeeding || dataStatus === 'populated'}
           className="gradient-primary hover:opacity-90 text-primary-foreground font-medium"
         >
           {isSeeding ? (
@@ -267,7 +278,7 @@ export function DatabaseSeeder() {
 
         <Button
           onClick={refreshData}
-          disabled={isSeeding || isAutoSeeding}
+          disabled={isSeeding || isAutoSeeding || dataStatus === 'checking'}
           variant="outline"
           className="hover:opacity-90"
         >
