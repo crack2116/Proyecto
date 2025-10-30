@@ -11,6 +11,12 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { createSampleData } from '@/lib/sample-data';
+
+// ========= SOLUCIÓN TEMPORAL: DESACTIVAR FIREBASE =========
+// Cambia esto a `true` cuando la conexión a Firebase esté estable.
+const CONNECT_TO_FIREBASE = false;
+// ==========================================================
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -62,6 +68,31 @@ export function useCollection<T = any>(
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
+    // ========= INICIO DE LA SOLUCIÓN TEMPORAL =========
+    if (!CONNECT_TO_FIREBASE) {
+      setIsLoading(true);
+      setTimeout(() => {
+        const sampleData = createSampleData();
+        const collectionPath = (memoizedTargetRefOrQuery as CollectionReference)?.path;
+
+        if (collectionPath === 'clients') {
+          setData(sampleData.clients as any);
+        } else if (collectionPath === 'drivers') {
+          setData(sampleData.drivers as any);
+        } else if (collectionPath === 'vehicles') {
+          setData(sampleData.vehicles as any);
+        } else if (collectionPath === 'serviceRequests') {
+          setData(sampleData.serviceRequests as any);
+        } else {
+          setData([]);
+        }
+        setIsLoading(false);
+      }, 500); // Simular un pequeño delay de carga
+      return;
+    }
+    // ========= FIN DE LA SOLUCIÓN TEMPORAL =========
+
+
     if (!memoizedTargetRefOrQuery) {
       setData(null);
       setIsLoading(false);
@@ -110,7 +141,7 @@ export function useCollection<T = any>(
     return () => unsubscribe();
   }, [memoizedTargetRefOrQuery]);
   
-  if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
+  if(memoizedTargetRefOrQuery && CONNECT_TO_FIREBASE && !memoizedTargetRefOrQuery.__memo) {
     throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
   }
 

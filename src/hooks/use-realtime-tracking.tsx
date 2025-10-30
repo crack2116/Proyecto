@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
+import { createSampleData } from "@/lib/sample-data";
 
 type VehicleLocation = {
   id: string;
@@ -29,7 +30,7 @@ type UseRealtimeTrackingOptions = {
  * Hook para seguimiento en tiempo real de vehículos
  */
 export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
-  const { enabled = true, useFirebase = true } = options;
+  const { enabled = true, useFirebase = false } = options; // Forzar datos locales
 
   const [vehicles, setVehicles] = useState<VehicleLocation[]>([]);
   const [isActive, setIsActive] = useState(enabled);
@@ -52,6 +53,19 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
         lastUpdate: veh.lastUpdate?.toDate?.() || new Date(),
       }));
       setVehicles(convertedVehicles);
+    } else if (!useFirebase) {
+      // Cargar datos de muestra si no se usa Firebase
+      const sampleData = createSampleData();
+      const sampleVehiclesWithLocation = sampleData.vehicles.map((v, index) => ({
+        ...v,
+        status: index % 3 === 0 ? "En Tránsito" : (index % 3 === 1 ? "Disponible" : "En Mantenimiento"),
+        lat: -5.19449 + (Math.random() - 0.5) * 0.05,
+        lng: -80.63282 + (Math.random() - 0.5) * 0.05,
+        lastUpdate: new Date(),
+        speed: Math.random() * 60,
+        heading: Math.random() * 360,
+      }));
+      setVehicles(sampleVehiclesWithLocation as VehicleLocation[]);
     }
   }, [useFirebase, firebaseVehicles]);
 
