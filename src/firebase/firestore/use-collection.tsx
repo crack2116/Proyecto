@@ -38,7 +38,7 @@ export interface InternalQuery extends Query<DocumentData> {
   }
 }
 
-const CONNECT_TO_FIREBASE = false; // Control para usar datos locales
+const CONNECT_TO_FIREBASE = true; // Control para usar datos locales
 
 const { clients, drivers, vehicles, serviceRequests } = createSampleData();
 const localDataMap: { [key: string]: any[] } = {
@@ -75,7 +75,7 @@ export function useCollection<T = any>(
   useEffect(() => {
     if (!CONNECT_TO_FIREBASE) {
       setIsLoading(true);
-      const collectionName = (memoizedTargetRefOrQuery as any)?.path || '';
+      const collectionName = (memoizedTargetRefOrQuery as any)?.path || (memoizedTargetRefOrQuery as any)?._query.path.segments.join('/');
       console.log(`[LOCAL DATA] Faking collection: ${collectionName}`);
 
       setTimeout(() => {
@@ -105,6 +105,11 @@ export function useCollection<T = any>(
     const unsubscribe = onSnapshot(
       memoizedTargetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
+        if (snapshot.empty) {
+            setData([]);
+            setIsLoading(false);
+            return;
+        }
         const results: ResultItemType[] = [];
         for (const doc of snapshot.docs) {
           results.push({ ...(doc.data() as T), id: doc.id });
