@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
-import { createSampleData } from "@/lib/sample-data";
 
 type VehicleLocation = {
   id: string;
@@ -26,18 +25,11 @@ type UseRealtimeTrackingOptions = {
   useFirebase?: boolean; // Usar Firebase en lugar de datos simulados
 };
 
-// Forzar el uso de datos locales para resolver el problema de conexión
-const FORCE_LOCAL_DATA = true;
-
-const { vehicles: sampleVehiclesData } = createSampleData();
-
 /**
  * Hook para seguimiento en tiempo real de vehículos
- * Puede usar Firebase (datos reales) o simulación
  */
 export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
-  const { interval = 5000, enabled = true } = options;
-  const useFirebase = options.useFirebase && !FORCE_LOCAL_DATA;
+  const { enabled = true, useFirebase = true } = options;
 
   const [vehicles, setVehicles] = useState<VehicleLocation[]>([]);
   const [isActive, setIsActive] = useState(enabled);
@@ -52,19 +44,6 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
     useFirebase ? vehiclesQuery : null
   );
 
-  const initializeVehicles = useCallback(() => {
-    const initialVehicles = sampleVehiclesData.map(v => ({
-      ...v,
-      lat: -5.19449 + (Math.random() - 0.5) * 0.1,
-      lng: -80.63282 + (Math.random() - 0.5) * 0.1,
-      status: Math.random() > 0.5 ? "En Tránsito" : "Disponible",
-      heading: 0,
-      speed: 0,
-      lastUpdate: new Date(),
-    }));
-    setVehicles(initialVehicles as VehicleLocation[]);
-  }, []);
-
   // Si usa Firebase, usar los datos de Firebase EN TIEMPO REAL
   useEffect(() => {
     if (useFirebase && firebaseVehicles) {
@@ -73,17 +52,15 @@ export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
         lastUpdate: veh.lastUpdate?.toDate?.() || new Date(),
       }));
       setVehicles(convertedVehicles);
-    } else if (!useFirebase) {
-      initializeVehicles();
     }
-  }, [useFirebase, firebaseVehicles, initializeVehicles]);
+  }, [useFirebase, firebaseVehicles]);
 
 
   return {
     vehicles,
     isActive,
     setIsActive,
-    reset: initializeVehicles,
+    reset: () => {},
     isLoading: useFirebase ? isFirebaseLoading : false,
   };
 }
