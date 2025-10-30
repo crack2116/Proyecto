@@ -32,6 +32,8 @@ import {
   import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
   import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
   import { useToast } from "@/hooks/use-toast";
+  import { Badge } from "../ui/badge";
+import { cn } from "@/lib/utils";
   
   export function VehiclesTable() {
     const firestore = useFirestore();
@@ -53,12 +55,34 @@ import {
     };
 
     const handleDelete = (vehicleId: string) => {
+        if (!firestore) {
+            toast({ variant: "destructive", title: "Error", description: "Firestore no está disponible." });
+            return;
+        }
         const docRef = doc(firestore, "vehicles", vehicleId);
         deleteDocumentNonBlocking(docRef);
         toast({
             title: "Vehículo Eliminado",
             description: "El vehículo ha sido eliminado exitosamente.",
         });
+    }
+
+    const getStatusBadge = (status: string | undefined) => {
+        if (!status) return <Badge className="bg-gray-500/20 text-gray-700 border-none">Sin estado</Badge>;
+        
+        const statusClass = status === "Disponible" 
+            ? "bg-green-500/20 text-green-700"
+            : status === "En Tránsito" 
+            ? "bg-blue-500/20 text-blue-700"
+            : status === "En Mantenimiento"
+            ? "bg-amber-500/20 text-amber-700"
+            : "bg-gray-500/20 text-gray-700";
+            
+        return (
+            <Badge className={cn(statusClass, "border-none")}>
+                {status}
+            </Badge>
+        );
     }
 
     return (
@@ -85,6 +109,7 @@ import {
                         <TableHead>Placa</TableHead>
                         <TableHead>Marca y Modelo</TableHead>
                         <TableHead>Tipo</TableHead>
+                        <TableHead>Estado</TableHead>
                         <TableHead>Conductor Asignado</TableHead>
                         <TableHead>
                         <span className="sr-only">Acciones</span>
@@ -97,6 +122,7 @@ import {
                             <TableCell className="font-medium">{vehicle.licensePlate}</TableCell>
                             <TableCell>{vehicle.make} {vehicle.model}</TableCell>
                             <TableCell>{vehicle.vehicleType}</TableCell>
+                            <TableCell>{getStatusBadge((vehicle as any).status)}</TableCell>
                             <TableCell>{vehicle.driverId ?? "No asignado"}</TableCell>
                             <TableCell>
                                 <DropdownMenu>

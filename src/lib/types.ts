@@ -26,6 +26,8 @@ export type Vehicle = {
     model: string;
     licensePlate: string;
     vehicleType: string;
+    lat?: number;
+    lng?: number;
 };
 
 export type ServiceRequest = {

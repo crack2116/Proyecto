@@ -122,7 +122,9 @@ export function TransportMap({
 
           if (existingMarker) {
             // Actualizar posición con animación
-            existingMarker.setLatLng([vehicle.lat, vehicle.lng]);
+            if(existingMarker.getLatLng().lat !== vehicle.lat || existingMarker.getLatLng().lng !== vehicle.lng) {
+              existingMarker.setLatLng([vehicle.lat, vehicle.lng]);
+            }
             
             // Actualizar rotación del icono según el heading
             const rotation = vehicle.heading ? vehicle.heading - 45 : 0;

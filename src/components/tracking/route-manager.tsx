@@ -29,6 +29,10 @@ export function RouteManager() {
   }, []);
 
   const handleAssignRoutes = async () => {
+    if (!firestore) {
+      toast({ variant: "destructive", title: "Firestore no está disponible." });
+      return;
+    }
     setIsAssigning(true);
     try {
       await assignRoutesToAllVehicles(firestore);
@@ -49,6 +53,10 @@ export function RouteManager() {
   };
 
   const handleSetVehiclesInTransit = async () => {
+    if (!firestore) {
+      toast({ variant: "destructive", title: "Firestore no está disponible." });
+      return;
+    }
     setIsSettingTransit(true);
     try {
       await setRandomVehiclesInTransit(firestore, 0.4); // 40% en tránsito
@@ -69,6 +77,10 @@ export function RouteManager() {
   };
 
   const toggleSimulation = () => {
+    if (!firestore) {
+      toast({ variant: "destructive", title: "Firestore no está disponible." });
+      return;
+    }
     if (isSimulating) {
       // Detener simulación
       if (simulationInterval.current) {
@@ -99,7 +111,7 @@ export function RouteManager() {
     <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
       <Button
         onClick={handleAssignRoutes}
-        disabled={isAssigning || isSimulating}
+        disabled={isAssigning || isSimulating || !firestore}
         variant="outline"
         size="sm"
         className="gap-2 border-blue-500 hover:bg-blue-500/10"
@@ -119,7 +131,7 @@ export function RouteManager() {
 
       <Button
         onClick={handleSetVehiclesInTransit}
-        disabled={isSettingTransit || isSimulating}
+        disabled={isSettingTransit || isSimulating || !firestore}
         variant="outline"
         size="sm"
         className="gap-2 border-green-500 hover:bg-green-500/10"
@@ -139,7 +151,7 @@ export function RouteManager() {
 
       <Button
         onClick={toggleSimulation}
-        disabled={isAssigning || isSettingTransit}
+        disabled={isAssigning || isSettingTransit || !firestore}
         variant={isSimulating ? "destructive" : "default"}
         size="sm"
         className="gap-2"
@@ -159,4 +171,3 @@ export function RouteManager() {
     </div>
   );
 }
-

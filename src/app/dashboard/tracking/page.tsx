@@ -12,7 +12,7 @@ export default function TrackingPage() {
   const { vehicles, isActive, setIsActive } = useRealtimeTracking({
     interval: 3000,
     enabled: true,
-    useFirebase: true, // Usar datos reales de Firebase
+    useFirebase: false, // Default to local data to avoid connection errors
   });
   
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | undefined>();
@@ -31,8 +31,8 @@ export default function TrackingPage() {
       {/* Estadísticas en tiempo real */}
       <TrackingStats vehicles={vehicles} />
 
-      {/* Gestor de Rutas */}
-      <RouteManager />
+      {/* Gestor de Rutas - Comentado para simplificar */}
+      {/* <RouteManager /> */}
 
       {/* Mapa y lista de vehículos */}
       <div className="grid gap-6 lg:grid-cols-3 flex-grow min-h-0" style={{ height: "600px" }}>

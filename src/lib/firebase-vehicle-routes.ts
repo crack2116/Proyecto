@@ -2,7 +2,7 @@
  * Funciones para gestionar rutas de vehículos en Firebase
  */
 
-import { Firestore, collection, getDocs, doc, updateDoc, query, where } from "firebase/firestore";
+import { Firestore, collection, getDocs, doc, updateDoc, query, where, writeBatch } from "firebase/firestore";
 import { predefindedRoutes, assignRandomRoute, calculateDistance, calculateHeading } from "./vehicle-routes";
 
 /**
@@ -19,16 +19,17 @@ export async function assignRoutesToAllVehicles(firestore: Firestore) {
     return;
   }
 
-  const updates = snapshot.docs.map(async (vehicleDoc) => {
+  const batch = writeBatch(firestore);
+
+  snapshot.docs.forEach((vehicleDoc) => {
     const vehicleId = vehicleDoc.id;
-    const vehicle = vehicleDoc.data();
     
     // Asignar ruta aleatoria
     const route = assignRandomRoute(vehicleId);
     const startingPoint = route.points[0];
     
-    // Actualizar vehículo con ruta y posición inicial
-    await updateDoc(doc(firestore, "vehicles", vehicleId), {
+    const vehicleRef = doc(firestore, "vehicles", vehicleId);
+    batch.update(vehicleRef, {
       route: route.points,
       currentRoutePointIndex: 0,
       lat: startingPoint.lat,
@@ -42,7 +43,7 @@ export async function assignRoutesToAllVehicles(firestore: Firestore) {
     console.log(`✓ Vehículo ${vehicleId} asignado a ${route.name}`);
   });
 
-  await Promise.all(updates);
+  await batch.commit();
   console.log("✅ Rutas asignadas a todos los vehículos");
 }
 
@@ -61,7 +62,9 @@ export async function simulateVehicleMovement(firestore: Firestore, intervalMs: 
     return;
   }
 
-  const updates = snapshot.docs.map(async (vehicleDoc) => {
+  const batch = writeBatch(firestore);
+
+  snapshot.docs.forEach((vehicleDoc) => {
     const vehicleData = vehicleDoc.data();
     const vehicleId = vehicleDoc.id;
     
@@ -72,7 +75,7 @@ export async function simulateVehicleMovement(firestore: Firestore, intervalMs: 
 
     if (!route || route.length < 2) {
       console.warn(`⚠️ Vehículo ${vehicleId} no tiene ruta válida`);
-      return;
+      return; // continue to next vehicle
     }
 
     const currentPoint = route[currentRoutePointIndex];
@@ -97,9 +100,8 @@ export async function simulateVehicleMovement(firestore: Firestore, intervalMs: 
     if (distanceToNextPoint < 0.05) {
       currentRoutePointIndex = nextPointIndex;
     }
-
-    // Actualizar posición en Firebase
-    await updateDoc(doc(firestore, "vehicles", vehicleId), {
+    const vehicleRef = doc(firestore, "vehicles", vehicleId);
+    batch.update(vehicleRef, {
       lat: newLat,
       lng: newLng,
       heading: newHeading,
@@ -109,7 +111,7 @@ export async function simulateVehicleMovement(firestore: Firestore, intervalMs: 
     });
   });
 
-  await Promise.all(updates);
+  await batch.commit();
   console.log(`✅ Movimiento simulado para ${snapshot.size} vehículos`);
 }
 
@@ -122,17 +124,23 @@ export async function setRandomVehiclesInTransit(firestore: Firestore, percentag
   const vehiclesRef = collection(firestore, "vehicles");
   const snapshot = await getDocs(vehiclesRef);
 
-  const updates = snapshot.docs.map(async (vehicleDoc) => {
+  if (snapshot.empty) {
+      console.warn("⚠️ No se encontraron vehículos para marcar.");
+      return;
+  }
+  
+  const batch = writeBatch(firestore);
+  snapshot.docs.forEach((vehicleDoc) => {
     const shouldBeInTransit = Math.random() < percentage;
     
     if (shouldBeInTransit) {
-      await updateDoc(doc(firestore, "vehicles", vehicleDoc.id), {
-        status: "En Tránsito",
-      });
+        const vehicleRef = doc(firestore, "vehicles", vehicleDoc.id);
+        batch.update(vehicleRef, {
+            status: "En Tránsito",
+        });
     }
   });
 
-  await Promise.all(updates);
+  await batch.commit();
   console.log("✅ Vehículos marcados como 'En Tránsito'");
 }
-
