@@ -18,8 +18,12 @@ export function ManagementAI() {
   const [analysis, setAnalysis] = useState<ManagementInsightsOutput | null>(null);
 
   const firestore = useFirestore();
-  const serviceRequestsQuery = useMemoFirebase(() => query(collection(firestore, "serviceRequests")), [firestore]);
-  const { data: serviceRequests, isLoading: isLoadingData } = useDoc<ServiceRequest>(serviceRequestsQuery as any);
+  const serviceRequestsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "serviceRequests"))
+  }, [firestore]);
+  
+  const { data: serviceRequests, isLoading: isLoadingData } = useDoc<ServiceRequest>(serviceRequestsQuery);
 
   const kpis = useMemo(() => {
     if (!serviceRequests) {
@@ -87,7 +91,7 @@ export function ManagementAI() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Columna de KPIs y control */}
       <div className="lg:col-span-1 space-y-6">
-        <Card className="shadow-modern border-0">
+        <Card className="shadow-modern border-0 bg-gradient-to-br from-blue-50 to-slate-50 dark:from-slate-900/50 dark:to-slate-800/50">
           <CardHeader>
             <CardTitle>Indicadores Clave (KPIs)</CardTitle>
             <CardDescription>Datos en tiempo real de la operación.</CardDescription>
@@ -123,7 +127,7 @@ export function ManagementAI() {
              </div>
           </CardContent>
         </Card>
-        <Button onClick={handleGenerateAnalysis} disabled={isLoading || isLoadingData} className="w-full h-12 text-lg gradient-blue text-primary-foreground hover:opacity-90 transition-opacity">
+        <Button onClick={handleGenerateAnalysis} disabled={isLoading || isLoadingData} className="w-full h-12 text-lg gradient-blue text-primary-foreground hover:opacity-90 transition-opacity shadow-lg hover:shadow-xl">
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
