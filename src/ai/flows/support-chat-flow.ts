@@ -41,14 +41,10 @@ const supportChatFlow = ai.defineFlow(
       - No inventes funcionalidades que no existen.
       - Mantén las respuestas breves, idealmente en 2-3 frases.`;
 
-    // Genkit espera un arreglo de mensajes; construimos uno con un mensaje "system" inicial
-    const messages = [
-      { role: 'system' as const, content: [{ text: systemPrompt }] },
-      ...history.map((m) => ({ role: m.role as 'user' | 'model', content: [{ text: m.content }] })),
-    ];
-
     const { output } = await ai.generate({
-      messages,
+      prompt: history.map(m => m.content), // Usar solo el contenido para el prompt
+      history: history, // Pasar el historial completo
+      system: systemPrompt,
       model: 'googleai/gemini-2.5-flash',
       config: {
         temperature: 0.5,
@@ -57,7 +53,7 @@ const supportChatFlow = ai.defineFlow(
 
     const result: Message = {
       role: 'model',
-      content: output.text ?? '',
+      content: output.text ?? 'Lo siento, no pude procesar tu solicitud en este momento.',
     };
 
     return result;

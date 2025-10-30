@@ -16,6 +16,10 @@ const apiKey =
   process.env.GOOGLE_GENAI_API_KEY ||
   process.env.GEMINI_API_KEY; // compat: usuario pudo definir GEMINI_API_KEY
 
+if (!apiKey) {
+    console.warn("⚠️ ADVERTENCIA: La GOOGLE_AI_API_KEY no está configurada en las variables de entorno. La funcionalidad de IA no funcionará.");
+}
+
 export const ai = genkit({
   plugins: [
     googleAI({
