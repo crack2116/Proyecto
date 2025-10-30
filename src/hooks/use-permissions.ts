@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser, useDoc } from "@/firebase";
+import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { useMemo } from "react";
 import type { UserRole, Permission } from "@/lib/permissions";
 import { 
@@ -13,18 +13,26 @@ import {
   getRoleDescription 
 } from "@/lib/permissions";
 import type { UserProfile } from "@/lib/types";
+import { doc } from "firebase/firestore";
 
 /**
  * Hook para gestionar permisos del usuario actual
  */
 export function usePermissions() {
   const { user } = useUser();
-  const { data: userProfiles } = useDoc<UserProfile>('users');
+  const firestore = useFirestore();
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
   
+  const { data: userProfileData } = useDoc<UserProfile>(userProfileRef!);
+
   const userProfile = useMemo(() => {
-    if (!user || !userProfiles) return null;
-    return userProfiles.find(p => p.id === user.uid) || null;
-  }, [user, userProfiles]);
+    if (!userProfileData || userProfileData.length === 0) return null;
+    return userProfileData[0];
+  }, [userProfileData]);
 
   const userRole: UserRole = useMemo(() => {
     if (!user || !userProfile) return "viewer";

@@ -5,7 +5,10 @@ import {
   collection,
   onSnapshot,
   FirestoreError,
-  Query
+  Query,
+  DocumentReference,
+  getDoc,
+  getDocs
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -25,14 +28,14 @@ export interface UseDocResult<T> {
 }
 
 /**
- * React hook to subscribe to a Firestore collection in real-time.
+ * React hook to subscribe to a Firestore collection or a specific document in real-time.
  *
  * @template T Optional type for document data. Defaults to any.
- * @param {string} collectionName - The name of the Firestore collection.
+ * @param {string | DocumentReference} target - The name of the Firestore collection or a DocumentReference.
  * @returns {UseDocResult<T>} Object with data, isLoading, error.
  */
 export function useDoc<T = any>(
-  collectionName: string,
+  target: string | DocumentReference,
 ): UseDocResult<T> {
   type StateDataType = WithId<T>[] | null;
 
@@ -42,40 +45,66 @@ export function useDoc<T = any>(
   const firestore = useFirestore();
 
   useEffect(() => {
-    if (!firestore || !collectionName) {
+    if (!firestore || !target) {
       setIsLoading(false);
       return;
     }
 
-    const collectionRef = collection(firestore, collectionName) as Query;
+    let unsubscribe: () => void;
 
-    const unsubscribe = onSnapshot(
-        collectionRef,
-        (snapshot) => {
-            if (snapshot.empty) {
-                setData([]);
-            } else {
-                const results = snapshot.docs.map(doc => ({ ...doc.data() as T, id: doc.id }));
-                setData(results);
+    if (typeof target === 'string') {
+        const collectionRef = collection(firestore, target) as Query;
+        unsubscribe = onSnapshot(
+            collectionRef,
+            (snapshot) => {
+                if (snapshot.empty) {
+                    setData([]);
+                } else {
+                    const results = snapshot.docs.map(doc => ({ ...doc.data() as T, id: doc.id }));
+                    setData(results);
+                }
+                setIsLoading(false);
+                setError(null);
+            },
+            (err: FirestoreError) => {
+                const contextualError = new FirestorePermissionError({
+                    operation: 'list',
+                    path: target,
+                });
+                errorEmitter.emit('permission-error', contextualError);
+                setError(err);
+                setIsLoading(false);
             }
-            setIsLoading(false);
-            setError(null);
-        },
-        (err: FirestoreError) => {
-            const contextualError = new FirestorePermissionError({
-                operation: 'list',
-                path: collectionName,
-            });
-            errorEmitter.emit('permission-error', contextualError);
-            setError(err);
-            setIsLoading(false);
-        }
-    );
+        );
+    } else {
+        const docRef = target as DocumentReference;
+        unsubscribe = onSnapshot(
+            docRef,
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    setData([{ ...docSnap.data() as T, id: docSnap.id }]);
+                } else {
+                    setData([]);
+                }
+                setIsLoading(false);
+                setError(null);
+            },
+            (err: FirestoreError) => {
+                const contextualError = new FirestorePermissionError({
+                    operation: 'get',
+                    path: docRef.path,
+                });
+                errorEmitter.emit('permission-error', contextualError);
+                setError(err);
+                setIsLoading(false);
+            }
+        );
+    }
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
 
-  }, [collectionName, firestore]);
+  }, [target, firestore]);
 
   return { data, isLoading, error };
 }
