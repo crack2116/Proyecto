@@ -8,26 +8,38 @@ import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
 const USE_EMULATOR = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
 
-let firebaseApp: FirebaseApp;
-let auth: ReturnType<typeof getAuth>;
-let firestore: ReturnType<typeof getFirestore>;
-let storage: ReturnType<typeof getStorage>;
+let firebaseApp: FirebaseApp | null = null;
+let auth: ReturnType<typeof getAuth> | null = null;
+let firestore: ReturnType<typeof getFirestore> | null = null;
+let storage: ReturnType<typeof getStorage> | null = null;
 
-if (getApps().length === 0) {
-  firebaseApp = initializeApp(firebaseConfig);
-  auth = getAuth(firebaseApp);
-  firestore = getFirestore(firebaseApp);
-  storage = getStorage(firebaseApp);
+// Solo inicializar Firebase si no estamos en un modo de "solo datos locales"
+// Por ahora, para resolver el bloqueo, desactivaremos la conexión real por defecto.
+const CONNECT_TO_FIREBASE = false; 
 
-  if (USE_EMULATOR) {
-    console.log('Connecting to Firebase Emulators...');
-    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-    connectFirestoreEmulator(firestore, 'localhost', 8080);
-    connectStorageEmulator(storage, 'localhost', 9199);
-  } else {
-    console.log('Connecting to Firebase Production...');
+if (CONNECT_TO_FIREBASE && getApps().length === 0) {
+  try {
+    firebaseApp = initializeApp(firebaseConfig);
+    auth = getAuth(firebaseApp);
+    firestore = getFirestore(firebaseApp);
+    storage = getStorage(firebaseApp);
+
+    if (USE_EMULATOR) {
+      console.log('Connecting to Firebase Emulators...');
+      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+      connectFirestoreEmulator(firestore, 'localhost', 8080);
+      connectStorageEmulator(storage, 'localhost', 9199);
+    } else {
+      console.log('Connecting to Firebase Production...');
+    }
+  } catch (error) {
+    console.error("Error initializing Firebase:", error);
+    firebaseApp = null;
+    auth = null;
+    firestore = null;
+    storage = null;
   }
-} else {
+} else if (CONNECT_TO_FIREBASE) {
   firebaseApp = getApp();
   auth = getAuth(firebaseApp);
   firestore = getFirestore(firebaseApp);
