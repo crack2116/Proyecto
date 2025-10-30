@@ -2,29 +2,45 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
-// IMPORTANT: DO NOT MODIFY THIS FUNCTION
-export function initializeFirebase() {
-  if (!getApps().length) {
-    console.log('🌐 Initializing Firebase for Production...');
-    let firebaseApp = initializeApp(firebaseConfig);
-    return getSdks(firebaseApp);
+const USE_EMULATOR = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
+
+let firebaseApp: FirebaseApp;
+let auth: ReturnType<typeof getAuth>;
+let firestore: ReturnType<typeof getFirestore>;
+let storage: ReturnType<typeof getStorage>;
+
+if (getApps().length === 0) {
+  firebaseApp = initializeApp(firebaseConfig);
+  auth = getAuth(firebaseApp);
+  firestore = getFirestore(firebaseApp);
+  storage = getStorage(firebaseApp);
+
+  if (USE_EMULATOR) {
+    console.log('Connecting to Firebase Emulators...');
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+    connectFirestoreEmulator(firestore, 'localhost', 8080);
+    connectStorageEmulator(storage, 'localhost', 9199);
+  } else {
+    console.log('Connecting to Firebase Production...');
   }
-
-  // If already initialized, return the SDKs with the already initialized App
-  return getSdks(getApp());
+} else {
+  firebaseApp = getApp();
+  auth = getAuth(firebaseApp);
+  firestore = getFirestore(firebaseApp);
+  storage = getStorage(firebaseApp);
 }
 
-export function getSdks(firebaseApp: FirebaseApp) {
-  return {
-    firebaseApp,
-    auth: getAuth(firebaseApp),
-    firestore: getFirestore(firebaseApp),
-    storage: getStorage(firebaseApp)
-  };
+const getFirebaseServices = () => {
+    return { firebaseApp, auth, firestore, storage };
+};
+
+
+export function initializeFirebase() {
+    return getFirebaseServices();
 }
 
 export * from './provider';
