@@ -13,3 +13,4 @@ Write-Host ""
 # Iniciar emulador
 npx firebase emulators:start
 
+

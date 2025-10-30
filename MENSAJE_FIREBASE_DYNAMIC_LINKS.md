@@ -30,3 +30,4 @@ Si quieres saber más sobre las alternativas:
 
 Pero **no necesitas hacer nada** porque tu app no usa esas características.
 
+

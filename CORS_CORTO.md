@@ -41,3 +41,4 @@
 - El link es: console.cloud.google.com
 - Busca "Configuration" arriba del bucket
 
+

@@ -86,3 +86,4 @@ gsutil cors set cors.json gs://studio-4560916840-4310c.firebasestorage.app
 
 Y luego prueba subir una imagen! 🎉
 
+

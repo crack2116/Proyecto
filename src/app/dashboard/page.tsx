@@ -3,7 +3,7 @@ import { RecentServices } from "@/components/dashboard/recent-services";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, Truck, MapPin, Clock, CheckCircle } from "lucide-react";
-import { DatabaseSeeder } from "@/components/admin/database-seeder";
+// DatabaseSeeder removido en producción
 import { Protected } from "@/components/permissions/protected";
 
 export default function DashboardPage() {
@@ -44,10 +44,7 @@ export default function DashboardPage() {
 
         {/* Quick Actions & Status */}
         <div className="space-y-6">
-          {/* Database Seeder */}
-          <Protected requireAdmin>
-            <DatabaseSeeder />
-          </Protected>
+          {/* Database Seeder removido */}
 
           {/* Quick Actions */}
           <Card className="hover-lift">

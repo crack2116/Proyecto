@@ -8,7 +8,7 @@ import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
 // Detecta el entorno de desarrollo para usar el emulador automáticamente.
 // Esto es más robusto que depender de variables de entorno.
-const USE_EMULATOR = process.env.NODE_ENV === 'development';
+const USE_EMULATOR = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
 
 let firebaseApp: FirebaseApp;
 let auth: ReturnType<typeof getAuth>;
@@ -30,10 +30,14 @@ if (USE_EMULATOR) {
     // Asegurarse de que no intentamos conectar los emuladores varias veces.
     // Esto previene un error de "hot reload" en Next.js.
     if (!(auth as any)._isEmulator) {
-        console.log('Connecting to Firebase Emulators at 127.0.0.1...');
-        connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-        connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-        connectStorageEmulator(storage, '127.0.0.1', 9199);
+        try {
+            console.log('Connecting to Firebase Emulators at 127.0.0.1...');
+            connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+            connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
+            connectStorageEmulator(storage, '127.0.0.1', 9199);
+        } catch (e) {
+            console.warn('Failed to connect to emulators, falling back to production services.', e);
+        }
     }
 } else {
     console.log('Connecting to Firebase Production...');

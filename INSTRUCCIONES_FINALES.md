@@ -63,3 +63,4 @@ Ve a: **http://localhost:4000** para ver:
 Cuando despliegues tu app (Firebase App Hosting):
 - Configura CORS siguiendo `INSTALAR_Y_CONFIGURAR_CORS.md`
 
+

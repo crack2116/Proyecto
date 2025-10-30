@@ -67,3 +67,4 @@ Si prefieres usar emulador:
 1. **Desarrollo con Emulador** → Cambia a `USE_EMULATOR = true`
 2. **Firebase Real + CORS** → Lee `INSTALAR_Y_CONFIGURAR_CORS.md`
 
+

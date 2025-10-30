@@ -82,3 +82,4 @@ Si no encuentras la opción de CORS:
    - Ve a **Storage** > **Browser**
    - Haz clic en el bucket
 
+

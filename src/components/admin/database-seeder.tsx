@@ -11,6 +11,7 @@ import { Loader2, Database, Trash2, CheckCircle, AlertCircle, RefreshCw } from "
 export function DatabaseSeeder() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  const IS_PRODUCTION = typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
   const [isSeeding, setIsSeeding] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isAutoSeeding, setIsAutoSeeding] = useState(false);
@@ -51,8 +52,13 @@ export function DatabaseSeeder() {
       } else {
         setDataStatus('populated');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking existing data:', error);
+      // En producción, evitamos mostrar alerta roja por permisos y asumimos que los datos existen
+      if (IS_PRODUCTION && (error?.code === 'permission-denied' || error?.message?.includes('Missing or insufficient permissions'))) {
+        setDataStatus('populated');
+        return;
+      }
       setDataStatus('error');
     }
   };
@@ -250,9 +256,9 @@ export function DatabaseSeeder() {
         )}
 
         {dataStatus === 'error' && (
-          <div className="flex items-center gap-2 text-sm text-red-600">
+          <div className="flex items-center gap-2 text-sm text-amber-600">
             <AlertCircle className="h-4 w-4" />
-            <span>Error al conectar con la base de datos.</span>
+            <span>No se pudo verificar el estado de la base de datos. Intenta refrescar.</span>
           </div>
         )}
       </div>

@@ -114,9 +114,12 @@ service cloud.firestore {
      * @principle Admins manage service requests.
      */
     match /serviceRequests/{serviceRequestId} {
+      // Permitir a usuarios autenticados leer la colección completa y documentos individuales
       allow get: if isSignedIn();
-      allow list: if false;
+      allow list: if isSignedIn();
+      // Cualquier usuario autenticado puede crear solicitudes de servicio
       allow create: if isSignedIn();
+      // Solo administradores pueden actualizar/eliminar
       allow update: if isSignedIn() && isAdmin();
       allow delete: if isSignedIn() && isAdmin();
     }

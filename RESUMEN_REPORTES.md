@@ -108,3 +108,4 @@ Todo el contenido en formato impreso con:
 
 **En resumen**: El reporte te da una **vista completa del rendimiento operativo** de tu empresa de transporte con datos históricos, métricas clave y análisis visual.
 
+

@@ -11,3 +11,4 @@ gsutil cors set cors.json gs://studio-4560916840-4310c.appspot.com
 
 (Nota el cambio: .appspot.com no .firebasestorage.app)
 
+
