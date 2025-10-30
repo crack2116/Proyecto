@@ -2,13 +2,12 @@
     
 import { useState, useEffect } from 'react';
 import {
-  collection,
   onSnapshot,
   FirestoreError,
   Query,
   DocumentReference,
-  getDoc,
-  getDocs
+  DocumentSnapshot,
+  QuerySnapshot,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -31,75 +30,59 @@ export interface UseDocResult<T> {
  * React hook to subscribe to a Firestore collection or a specific document in real-time.
  *
  * @template T Optional type for document data. Defaults to any.
- * @param {string | DocumentReference} target - The name of the Firestore collection or a DocumentReference.
+ * @param {Query | DocumentReference | null} target - A Firestore Query, DocumentReference, or null.
  * @returns {UseDocResult<T>} Object with data, isLoading, error.
  */
 export function useDoc<T = any>(
-  target: string | DocumentReference,
+  target: Query | DocumentReference | null,
 ): UseDocResult<T> {
   type StateDataType = WithId<T>[] | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading immediately
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
   const firestore = useFirestore();
 
   useEffect(() => {
     if (!firestore || !target) {
       setIsLoading(false);
+      setData(null);
       return;
     }
 
-    let unsubscribe: () => void;
+    const handleSnapshot = (snapshot: DocumentSnapshot<any> | QuerySnapshot<any>) => {
+      if ('docs' in snapshot) { // It's a QuerySnapshot
+        if (snapshot.empty) {
+          setData([]);
+        } else {
+          const results = snapshot.docs.map(doc => ({ ...doc.data() as T, id: doc.id }));
+          setData(results);
+        }
+      } else { // It's a DocumentSnapshot
+        if (snapshot.exists()) {
+          setData([{ ...snapshot.data() as T, id: snapshot.id }]);
+        } else {
+          setData([]);
+        }
+      }
+      setIsLoading(false);
+      setError(null);
+    };
 
-    if (typeof target === 'string') {
-        const collectionRef = collection(firestore, target) as Query;
-        unsubscribe = onSnapshot(
-            collectionRef,
-            (snapshot) => {
-                if (snapshot.empty) {
-                    setData([]);
-                } else {
-                    const results = snapshot.docs.map(doc => ({ ...doc.data() as T, id: doc.id }));
-                    setData(results);
-                }
-                setIsLoading(false);
-                setError(null);
-            },
-            (err: FirestoreError) => {
-                const contextualError = new FirestorePermissionError({
-                    operation: 'list',
-                    path: target,
-                });
-                errorEmitter.emit('permission-error', contextualError);
-                setError(err);
-                setIsLoading(false);
-            }
-        );
-    } else {
-        const docRef = target as DocumentReference;
-        unsubscribe = onSnapshot(
-            docRef,
-            (docSnap) => {
-                if (docSnap.exists()) {
-                    setData([{ ...docSnap.data() as T, id: docSnap.id }]);
-                } else {
-                    setData([]);
-                }
-                setIsLoading(false);
-                setError(null);
-            },
-            (err: FirestoreError) => {
-                const contextualError = new FirestorePermissionError({
-                    operation: 'get',
-                    path: docRef.path,
-                });
-                errorEmitter.emit('permission-error', contextualError);
-                setError(err);
-                setIsLoading(false);
-            }
-        );
-    }
+    const handleError = (err: FirestoreError) => {
+      const isCollectionQuery = 'docs' in target;
+      const path = 'path' in target ? target.path : (target as any)._query?.path?.toString() || 'unknown path';
+
+      const contextualError = new FirestorePermissionError({
+        operation: isCollectionQuery ? 'list' : 'get',
+        path: path,
+      });
+      errorEmitter.emit('permission-error', contextualError);
+      setError(err);
+      setIsLoading(false);
+    };
+
+    const unsubscribe = onSnapshot(target as any, handleSnapshot, handleError);
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
