@@ -9,12 +9,20 @@ import {
   } from "@/components/ui/table";
   import { Badge } from "@/components/ui/badge";
   import { cn } from "@/lib/utils";
-  import { useDoc } from "@/firebase";
+  import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
   import type { ServiceRequest } from "@/lib/types";
 import { Loader2 } from "lucide-react";
+import { collection, query, orderBy, limit } from "firebase/firestore";
   
   export function RecentServices() {
-    const { data: serviceRequests, isLoading } = useDoc<ServiceRequest>('serviceRequests');
+    const firestore = useFirestore();
+
+    const serviceRequestsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "serviceRequests"), orderBy("requestDate", "desc"), limit(5));
+    }, [firestore]);
+
+    const { data: serviceRequests, isLoading } = useDoc<ServiceRequest>(serviceRequestsQuery);
 
     const statusTranslations: { [key: string]: string } = {
         "Completed": "Completado",
@@ -84,4 +92,3 @@ import { Loader2 } from "lucide-react";
       </Table>
     );
   }
-  

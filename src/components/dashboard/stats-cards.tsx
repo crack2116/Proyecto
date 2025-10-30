@@ -7,12 +7,19 @@ import {
     CardTitle,
   } from "@/components/ui/card";
   import { DollarSign, Truck, Users, CheckCircle, Clock, Loader2, AlertCircle, TrendingUp } from "lucide-react";
-  import { useDoc } from "@/firebase";
+  import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
   import { useMemo } from "react";
   import type { ServiceRequest } from "@/lib/types";
+  import { collection, query } from "firebase/firestore";
   
   export function StatsCards() {
-    const { data: serviceRequests, isLoading, error } = useDoc<ServiceRequest>('serviceRequests');
+    const firestore = useFirestore();
+    const serviceRequestsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "serviceRequests"));
+    }, [firestore]);
+    
+    const { data: serviceRequests, isLoading, error } = useDoc<ServiceRequest>(serviceRequestsQuery);
     
     const stats = useMemo(() => {
       if (!serviceRequests) {
@@ -162,4 +169,3 @@ import {
       </div>
     );
   }
-  

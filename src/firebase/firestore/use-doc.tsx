@@ -50,15 +50,17 @@ export function useDoc<T = any>(
       return;
     }
 
+    setIsLoading(true);
+
     const handleSnapshot = (snapshot: DocumentSnapshot<any> | QuerySnapshot<any>) => {
-      if ('docs' in snapshot) { // It's a QuerySnapshot
+      if ('docs' in snapshot) { // It's a QuerySnapshot for a collection
         if (snapshot.empty) {
           setData([]);
         } else {
           const results = snapshot.docs.map(doc => ({ ...doc.data() as T, id: doc.id }));
           setData(results);
         }
-      } else { // It's a DocumentSnapshot
+      } else { // It's a DocumentSnapshot for a single document
         if (snapshot.exists()) {
           setData([{ ...snapshot.data() as T, id: snapshot.id }]);
         } else {
