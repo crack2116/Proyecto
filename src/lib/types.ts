@@ -51,7 +51,7 @@ export type Route = {
     estimatedTime: number;
 };
 
-export type User = {
+export type UserProfile = {
     id: string;
     username: string;
     dni: string;
@@ -64,4 +64,5 @@ export type User = {
     direccion: string;
     role: 'administrator' | 'assistant';
     fechaRegistro: string;
+    photoURL?: string;
 };

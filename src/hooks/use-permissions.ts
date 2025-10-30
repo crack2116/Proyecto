@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/firebase";
+import { useUser, useDoc, useMemoFirebase, useFirestore } from "@/firebase";
 import { useMemo } from "react";
 import type { UserRole, Permission } from "@/lib/permissions";
 import { 
@@ -12,20 +12,26 @@ import {
   getRoleLabel,
   getRoleDescription 
 } from "@/lib/permissions";
+import type { UserProfile } from "@/lib/types";
+import { doc } from "firebase/firestore";
 
 /**
  * Hook para gestionar permisos del usuario actual
  */
 export function usePermissions() {
   const { user } = useUser();
+  const firestore = useFirestore();
+
+  const userProfileRef = useMemoFirebase(
+    () => (user ? doc(firestore, "users", user.uid) : null),
+    [user, firestore]
+  );
+  const { data: userProfile } = useDoc<UserProfile>(userProfileRef);
   
-  // Obtener rol del usuario desde metadata o default a 'viewer'
   const userRole: UserRole = useMemo(() => {
-    if (!user) return "viewer";
-    // Asignar 'admin' por defecto para el desarrollo. En un futuro se puede cambiar
-    // a `(user as any).role || "viewer";` para leerlo de Firebase.
-    return "admin";
-  }, [user]);
+    if (!user || !userProfile) return "viewer";
+    return userProfile.role || "viewer";
+  }, [user, userProfile]);
 
   const permissions = useMemo(() => getRolePermissions(userRole), [userRole]);
 
@@ -36,8 +42,9 @@ export function usePermissions() {
     canCreate: (entity: "clients" | "drivers" | "vehicles" | "requests") => canCreate(userRole, entity),
     canUpdate: (entity: "clients" | "drivers" | "vehicles" | "requests") => canUpdate(userRole, entity),
     canDelete: (entity: "clients" | "drivers" | "vehicles" | "requests") => canDelete(userRole, entity),
-    isAdmin: userRole === "admin",
-    isManager: userRole === "manager" || userRole === "admin",
+    isAdmin: userRole === "administrator",
+    isManager: userRole === "assistant", // Mapping manager to assistant
+    isAssistant: userRole === "assistant",
     isViewer: userRole === "viewer",
     getRoleLabel: () => getRoleLabel(userRole),
     getRoleDescription: () => getRoleDescription(userRole),
