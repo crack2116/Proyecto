@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Lightbulb, TrendingUp, TrendingDown, Target, CheckCircle, BarChart, DollarSign, Truck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
 import type { ServiceRequest } from "@/lib/types";
 import { useMemo } from "react";
@@ -19,7 +19,7 @@ export function ManagementAI() {
 
   const firestore = useFirestore();
   const serviceRequestsQuery = useMemoFirebase(() => query(collection(firestore, "serviceRequests")), [firestore]);
-  const { data: serviceRequests, isLoading: isLoadingData } = useCollection<ServiceRequest>(serviceRequestsQuery);
+  const { data: serviceRequests, isLoading: isLoadingData } = useDoc<ServiceRequest>(serviceRequestsQuery as any);
 
   const kpis = useMemo(() => {
     if (!serviceRequests) {
