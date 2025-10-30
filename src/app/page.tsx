@@ -2,9 +2,7 @@ import Image from 'next/image';
 import { Truck, ArrowRight, Shield, Clock, Users } from 'lucide-react';
 import { LoginForm } from '@/components/auth/login-form';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RegisterForm } from '@/components/auth/register-form';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LoginPage() {
   const loginImage = PlaceHolderImages.find(p => p.id === 'login-background');
@@ -33,38 +31,18 @@ export default function LoginPage() {
                   <p className="text-sm text-muted-foreground font-medium">Gestión Profesional</p>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <h2 className="text-2xl font-semibold font-headline text-foreground">
-                  ¡Bienvenido de vuelta!
-                </h2>
-                <p className="text-muted-foreground">
-                  Accede a tu panel de control para gestionar tus servicios de transporte.
-                </p>
-              </div>
             </div>
 
-            {/* Login/Register Tabs */}
+            {/* Login Form Card */}
             <Card className="shadow-modern-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <Tabs defaultValue="login" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50">
-                    <TabsTrigger value="login" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      Iniciar Sesión
-                    </TabsTrigger>
-                    <TabsTrigger value="register" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      Crear Cuenta
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="login" className="space-y-4">
-                    <LoginForm />
-                  </TabsContent>
-                  
-                  <TabsContent value="register" className="space-y-4">
-                    <RegisterForm />
-                  </TabsContent>
-                </Tabs>
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold font-headline text-foreground">¡Bienvenido de vuelta!</CardTitle>
+                <CardDescription>
+                  Accede a tu panel de control para gestionar tus servicios de transporte.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LoginForm />
               </CardContent>
             </Card>
 
