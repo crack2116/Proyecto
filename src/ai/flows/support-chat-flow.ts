@@ -36,6 +36,7 @@ const supportChatFlow = ai.defineFlow(
 
       Instrucciones:
       - Sé amable, conciso y directo.
+      - RESPONDE SIEMPRE Y EXCLUSIVAMENTE EN ESPAÑOL.
       - Responde únicamente sobre las funcionalidades de la aplicación "Mewing Transport Manager".
       - Si te preguntan algo que no tiene que ver con la aplicación, responde amablemente que solo puedes ayudar con temas relacionados al sistema de gestión de transporte.
       - No inventes funcionalidades que no existen.
