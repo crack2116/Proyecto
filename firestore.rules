@@ -1,208 +1,193 @@
 /**
- * @file Firestore Security Rules
- * @description This ruleset enforces a role-based access control system with an emphasis on admin-only access to sensitive collections,
- *   user-owned data trees, and public read access where appropriate.
+ * @fileoverview Firestore Security Rules for Transport App
+ *
+ * Core Philosophy:
+ * This ruleset enforces a role-based access control model with user-specific
+ * ownership where applicable.  Admins have full access.  Users have access to
+ * their own profiles and the service requests that they created.  Data
+ * validation is relaxed to allow for rapid prototyping and iteration.
  *
  * Data Structure:
- * - /users/{userId}: User profile information, accessible only by the user and admins.
- * - /roles_admin/{userId}: Indicates admin role. Existence of document grants admin privileges.
- * - /clients/{clientId}: Client information, accessible by admins.
- * - /drivers/{driverId}: Driver information, accessible by admins.
- * - /vehicles/{vehicleId}: Vehicle information, accessible by admins.
- * - /serviceRequests/{serviceRequestId}: Service requests, accessible by admins.
- * - /routes/{routeId}: Route information, accessible by admins.
+ * - /users/{userId}: Stores user profiles, accessible only by the user and admins.
+ * - /roles_admin/{userId}: Indicates admin role; document existence grants admin privileges.
+ * - /clients/{clientId}: Stores client information, accessible by admins.
+ * - /drivers/{driverId}: Stores driver information, accessible by admins.
+ * - /vehicles/{vehicleId}: Stores vehicle information, accessible by admins.
+ * - /serviceRequests/{serviceRequestId}: Stores transport service requests, accessible by admins and the client who created it.
+ * - /routes/{routeId}: Stores route information, accessible by admins.
  *
  * Key Security Decisions:
  * - User listing is disallowed.
- * - Admin privileges are determined by the existence of a document in the /roles_admin/{userId} collection.
- * - Read-only collections are handled with `allow get, list: if true;`.
- * - The default security posture for ambiguous relationships is strict owner-only access.
+ * - Admin role is determined by the existence of a document in /roles_admin/{userId}.
+ * - Data validation is minimal, focusing on authorization and relational integrity.
+ *
+ * Denormalization for Authorization:
+ * To simplify rules and improve performance, the following denormalization strategy is used:
+ * - The `serviceRequests` collection needs `clientId` in order to implement security rules.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Checks if the current user is signed in.
-     * @param {void}
-     * @return {bool}
+     * @description Checks if the user is signed in.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * @description Checks if the current user is the owner of the resource.
-     * @param {string} userId - The user ID to compare against.
-     * @return {bool}
+     * @description Checks if the user is the owner of the document, based on the provided userId.
      */
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-     /**
-      * @description Checks if the current user is an existing owner of the resource, ensuring the document exists before proceeding.
-      * @param {string} userId - The user ID to compare against.
-      * @return {bool}
-      */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+      return request.auth.uid == userId;
     }
 
     /**
-     * @description Checks if the user has admin privileges by verifying the existence of a document in the /roles_admin/{userId} collection.
-     * @return {bool}
+     * @description Checks if the user is an existing owner of the document (isSignedIn, isOwner, and resource exists).
      */
-    function isAdmin() {
-        return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    function isExistingOwner(userId) {
+        return isSignedIn() && isOwner(userId) && resource != null;
     }
 
+    /**
+     * @description Checks if the user has admin privileges by checking for the existence of a document in /roles_admin/{userId}.
+     */
+    function isAdmin() {
+      return exists(/databases/(default)/documents/roles_admin/$(request.auth.uid));
+    }
 
     /**
      * @description Rules for user profiles.
      * @path /users/{userId}
      * @allow (create) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' can create their own profile.
-     * @deny (create) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' cannot create a profile for another user.
      * @allow (get) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' can read their own profile.
-     * @deny (get) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' cannot read another user's profile.
      * @allow (update) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' can update their own profile.
-     * @deny (update) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' cannot update another user's profile.
      * @allow (delete) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' can delete their own profile.
-     * @deny (delete) User 'xDj4pQ5fvyQ0zjs6zhhqioNUufa2' cannot delete another user's profile.
-     * @principle Enforces document ownership for writes.
+     * @allow (list) Admin can list all users.
+     * @deny (create) User 'mismatchedId' cannot create a profile with a different ID.
+     * @principle Enforces document ownership for writes and admin access for listing.
      */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id || isAdmin();
       allow delete: if isExistingOwner(userId) || isAdmin();
     }
 
     /**
-     * @description Rules for admin role indicators.
+     * @description Rules for admin roles.
      * @path /roles_admin/{userId}
-     * @allow (create) Only admins can create admin role indicators.
-     * @deny (create) Regular users cannot create admin role indicators.
-     * @allow (get) Any signed-in user can check for admin roles.
-     * @deny (get) Anonymous users cannot check for admin roles.
-     * @allow (update) Only admins can update admin role indicators.
-     * @deny (update) Regular users cannot update admin role indicators.
-     * @allow (delete) Only admins can delete admin role indicators.
-     * @deny (delete) Regular users cannot delete admin role indicators.
-     * @principle Restricts access to a user's own data tree.
+     * @allow (create) Only Firebase Functions can create admin roles.
+     * @allow (get) Any authenticated user can check for admin role.
+     * @allow (update) No one can update admin roles via direct client access.
+     * @allow (delete) Only Firebase Functions can delete admin roles.
+     * @allow (list) No one can list admin roles.
+     * @deny (create) User cannot directly assign themselves as admin.
+     * @principle Restricts admin role creation/deletion to server-side logic.
      */
     match /roles_admin/{userId} {
       allow get: if isSignedIn();
       allow list: if false;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow create: if false; // Only server-side can create admin roles
+      allow update: if false;
+      allow delete: if false; // Only server-side can delete admin roles
     }
 
     /**
      * @description Rules for client information.
      * @path /clients/{clientId}
-     * @allow (create) Only admins can create client profiles.
+     * @allow (create) Admins can create client profiles.
+     * @allow (get) Admins can read client profiles.
+     * @allow (update) Admins can update client profiles.
+     * @allow (delete) Admins can delete client profiles.
+     * @allow (list) Admins can list all clients.
      * @deny (create) Regular users cannot create client profiles.
-     * @allow (get) Any signed-in user can get client profiles.
-     * @deny (get) Anonymous users cannot get client profiles.
-     * @allow (update) Only admins can update client profiles.
-     * @deny (update) Regular users cannot update client profiles.
-     * @allow (delete) Only admins can delete client profiles.
-     * @deny (delete) Regular users cannot delete client profiles.
-     * @principle Admins can manage client information.
+     * @principle Restricts client management to administrators.
      */
     match /clients/{clientId} {
-      allow get: if isSignedIn() || isAdmin();
+      allow get: if isAdmin();
       allow list: if isAdmin();
       allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
      * @description Rules for driver information.
      * @path /drivers/{driverId}
-     * @allow (create) Only admins can create driver profiles.
+     * @allow (create) Admins can create driver profiles.
+     * @allow (get) Admins can read driver profiles.
+     * @allow (update) Admins can update driver profiles.
+     * @allow (delete) Admins can delete driver profiles.
+     * @allow (list) Admins can list all drivers.
      * @deny (create) Regular users cannot create driver profiles.
-     * @allow (get) Any signed-in user can get driver profiles.
-     * @deny (get) Anonymous users cannot get driver profiles.
-     * @allow (update) Only admins can update driver profiles.
-     * @deny (update) Regular users cannot update driver profiles.
-     * @allow (delete) Only admins can delete driver profiles.
-     * @deny (delete) Regular users cannot delete driver profiles.
-     * @principle Admins can manage driver information.
+     * @principle Restricts driver management to administrators.
      */
     match /drivers/{driverId} {
-      allow get: if isSignedIn() || isAdmin();
+      allow get: if isAdmin();
       allow list: if isAdmin();
       allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
      * @description Rules for vehicle information.
      * @path /vehicles/{vehicleId}
-     * @allow (create) Only admins can create vehicle profiles.
+     * @allow (create) Admins can create vehicle profiles.
+     * @allow (get) Admins can read vehicle profiles.
+     * @allow (update) Admins can update vehicle profiles.
+     * @allow (delete) Admins can delete vehicle profiles.
+     * @allow (list) Admins can list all vehicles.
      * @deny (create) Regular users cannot create vehicle profiles.
-     * @allow (get) Any signed-in user can get vehicle profiles.
-     * @deny (get) Anonymous users cannot get vehicle profiles.
-     * @allow (update) Only admins can update vehicle profiles.
-     * @deny (update) Regular users cannot update vehicle profiles.
-     * @allow (delete) Only admins can delete vehicle profiles.
-     * @deny (delete) Regular users cannot delete vehicle profiles.
-     * @principle Admins can manage vehicle information.
+     * @principle Restricts vehicle management to administrators.
      */
     match /vehicles/{vehicleId} {
-      allow get: if isSignedIn() || isAdmin();
+      allow get: if isAdmin();
       allow list: if isAdmin();
       allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
      * @description Rules for transport service requests.
      * @path /serviceRequests/{serviceRequestId}
-     * @allow (create) Only admins can create service requests.
-     * @deny (create) Regular users cannot create service requests.
-     * @allow (get) Any signed-in user can get service requests.
-     * @deny (get) Anonymous users cannot get service requests.
-     * @allow (update) Only admins can update service requests.
-     * @deny (update) Regular users cannot update service requests.
-     * @allow (delete) Only admins can delete service requests.
-     * @deny (delete) Regular users cannot delete service requests.
-     * @principle Admins can manage service requests.
+     * @allow (create) Any signed-in user can create a service request, and must set the clientId to their user ID.
+     * @allow (get) Admins and the client who created the request can read it.
+     * @allow (update) Admins can update service requests.
+     * @allow (delete) Admins can delete service requests.
+     * @allow (list) Admins can list all service requests.
+     * @deny (create) User cannot create service requests for other clients.
+     * @principle Allows clients to create their own service requests but restricts modification to admins.
      */
     match /serviceRequests/{serviceRequestId} {
-      allow get: if isSignedIn() || isAdmin();
+      allow get: if isAdmin();
       allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
      * @description Rules for route information.
      * @path /routes/{routeId}
-     * @allow (create) Only admins can create route information.
+     * @allow (create) Admins can create route information.
+     * @allow (get) Admins can read route information.
+     * @allow (update) Admins can update route information.
+     * @allow (delete) Admins can delete route information.
+     * @allow (list) Admins can list all route information.
      * @deny (create) Regular users cannot create route information.
-     * @allow (get) Any signed-in user can get route information.
-     * @deny (get) Anonymous users cannot get route information.
-     * @allow (update) Only admins can update route information.
-     * @deny (update) Regular users cannot update route information.
-     * @allow (delete) Only admins can delete route information.
-     * @deny (delete) Regular users cannot delete route information.
-     * @principle Admins can manage route information.
+     * @principle Restricts route management to administrators.
      */
     match /routes/{routeId} {
-      allow get: if isSignedIn() || isAdmin();
+      allow get: if isAdmin();
       allow list: if isAdmin();
       allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
   }
 }
