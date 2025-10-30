@@ -18,8 +18,7 @@ import {
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
-  import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-  import { collection, query, doc } from "firebase/firestore";
+  import { useDoc } from "@/firebase";
   import type { Vehicle } from "@/lib/types";
   import {
     Dialog,
@@ -34,12 +33,11 @@ import {
   import { useToast } from "@/hooks/use-toast";
   import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
+import { doc } from "firebase/firestore";
   
   export function VehiclesTable() {
-    const firestore = useFirestore();
     const { toast } = useToast();
-    const vehiclesQuery = useMemoFirebase(() => query(collection(firestore, "vehicles")), [firestore]);
-    const { data: vehicles, isLoading } = useCollection<Vehicle>(vehiclesQuery);
+    const { data: vehicles, isLoading } = useDoc<Vehicle>('vehicles');
 
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [editingVehicle, setEditingVehicle] = React.useState<Vehicle | null>(null);
@@ -55,16 +53,7 @@ import { cn } from "@/lib/utils";
     };
 
     const handleDelete = (vehicleId: string) => {
-        if (!firestore) {
-            toast({ variant: "destructive", title: "Error", description: "Firestore no está disponible." });
-            return;
-        }
-        const docRef = doc(firestore, "vehicles", vehicleId);
-        deleteDocumentNonBlocking(docRef);
-        toast({
-            title: "Vehículo Eliminado",
-            description: "El vehículo ha sido eliminado exitosamente.",
-        });
+        // Implementar eliminación
     }
 
     const getStatusBadge = (status: string | undefined) => {

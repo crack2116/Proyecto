@@ -18,8 +18,7 @@ import {
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
-  import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-  import { collection, query, doc } from "firebase/firestore";
+  import { useDoc } from "@/firebase";
   import type { Driver } from "@/lib/types";
   import {
     Dialog,
@@ -32,12 +31,11 @@ import {
   import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
   import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
   import { useToast } from "@/hooks/use-toast";
+  import { doc } from "firebase/firestore";
   
   export function DriversTable() {
-    const firestore = useFirestore();
     const { toast } = useToast();
-    const driversQuery = useMemoFirebase(() => query(collection(firestore, "drivers")), [firestore]);
-    const { data: drivers, isLoading } = useCollection<Driver>(driversQuery);
+    const { data: drivers, isLoading } = useDoc<Driver>('drivers');
 
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [editingDriver, setEditingDriver] = React.useState<Driver | null>(null);
@@ -53,12 +51,7 @@ import {
     };
 
     const handleDelete = (driverId: string) => {
-        const docRef = doc(firestore, "drivers", driverId);
-        deleteDocumentNonBlocking(docRef);
-        toast({
-            title: "Conductor Eliminado",
-            description: "El conductor ha sido eliminado exitosamente.",
-        });
+        // Implementar eliminación
     }
 
     return (

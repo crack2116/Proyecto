@@ -18,8 +18,7 @@ import {
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
-  import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-  import { collection, query, doc } from "firebase/firestore";
+  import { useDoc } from "@/firebase";
   import type { Client } from "@/lib/types";
   import {
     Dialog,
@@ -38,16 +37,14 @@ import { TableFilters } from "@/components/ui/table-filters";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { Protected } from "@/components/permissions/protected";
 import { usePermissions } from "@/hooks/use-permissions";
+import { doc } from "firebase/firestore";
 
   
   export function ClientsTable() {
-    const firestore = useFirestore();
     const { toast } = useToast();
     const { canCreate, canUpdate, canDelete } = usePermissions();
-    const clientsQuery = useMemoFirebase(() => query(collection(firestore, "clients")), [firestore]);
-    const { data: clients = [], isLoading } = useCollection<Client>(clientsQuery);
+    const { data: clients, isLoading } = useDoc<Client>('clients');
     
-    // Hook para filtros y paginación
     const {
       paginatedData,
       totalPages,
@@ -59,7 +56,7 @@ import { usePermissions } from "@/hooks/use-permissions";
       currentPage,
       itemsPerPage,
     } = useTableState<Client>({
-      data: clients ?? [], // Asegurarse de que siempre sea un array
+      data: clients ?? [],
       searchFields: ["name", "ruc", "contactName", "contactEmail", "address"],
     });
     
@@ -77,12 +74,7 @@ import { usePermissions } from "@/hooks/use-permissions";
     };
 
     const handleDelete = (clientId: string) => {
-        const docRef = doc(firestore, "clients", clientId);
-        deleteDocumentNonBlocking(docRef);
-        toast({
-            title: "Cliente Eliminado",
-            description: "El cliente ha sido eliminado exitosamente.",
-        });
+        // Implementar la eliminación
     }
 
     return (

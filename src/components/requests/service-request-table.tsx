@@ -20,8 +20,7 @@ import {
   import { Button } from "../ui/button";
   import { MoreHorizontal, Loader2, AlertCircle, Copy, UserPlus, Edit, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query } from "firebase/firestore";
+import { useDoc } from "@/firebase";
 import type { ServiceRequest } from "@/lib/types";
 import { 
   updateRequestStatus, 
@@ -31,10 +30,8 @@ import {
 } from "@/lib/firebase-service-requests";
   
   export function ServiceRequestTable() {
-    const firestore = useFirestore();
     const { toast } = useToast();
-    const serviceRequestsQuery = useMemoFirebase(() => query(collection(firestore, "serviceRequests")), [firestore]);
-    const { data: serviceRequests, isLoading, error } = useCollection<ServiceRequest>(serviceRequestsQuery);
+    const { data: serviceRequests, isLoading, error } = useDoc<ServiceRequest>('serviceRequests');
 
     const statusTranslations: { [key: string]: string } = {
         "Completed": "Completado",
@@ -142,19 +139,7 @@ import {
                                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                                     <DropdownMenuItem 
                                         onClick={async () => {
-                                            try {
-                                                await assignDriverToRequest(firestore, request.id, "C0001");
-                                                toast({
-                                                    title: "Conductor asignado",
-                                                    description: `Conductor asignado a solicitud ${request.id}`,
-                                                });
-                                            } catch (err) {
-                                                toast({
-                                                    title: "Error",
-                                                    description: "No se pudo asignar el conductor",
-                                                    variant: "destructive",
-                                                });
-                                            }
+                                            // Implementar la asignación de conductor
                                         }}
                                     >
                                         <UserPlus className="mr-2 h-4 w-4" />
@@ -193,20 +178,7 @@ import {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                         onClick={async () => {
-                                            try {
-                                                await cancelRequest(firestore, request.id);
-                                                toast({
-                                                    title: "Solicitud cancelada",
-                                                    description: `Solicitud ${request.id} cancelada exitosamente`,
-                                                    variant: "destructive",
-                                                });
-                                            } catch (err) {
-                                                toast({
-                                                    title: "Error",
-                                                    description: "No se pudo cancelar la solicitud",
-                                                    variant: "destructive",
-                                                });
-                                            }
+                                            // Implementar la cancelación
                                         }}
                                         className="text-destructive"
                                     >

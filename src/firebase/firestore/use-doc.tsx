@@ -7,9 +7,13 @@ import {
   DocumentData,
   FirestoreError,
   DocumentSnapshot,
+  collection,
+  getDocs,
+  QuerySnapshot
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { useFirestore } from '..';
 
 /** Utility type to add an 'id' field to a given type T. */
 type WithId<T> = T & { id: string };
@@ -19,7 +23,7 @@ type WithId<T> = T & { id: string };
  * @template T Type of the document data.
  */
 export interface UseDocResult<T> {
-  data: WithId<T> | null; // Document data with ID, or null.
+  data: WithId<T>[] | null; // Document data with ID, or null.
   isLoading: boolean;       // True if loading.
   error: FirestoreError | Error | null; // Error object, or null.
 }
@@ -39,16 +43,17 @@ export interface UseDocResult<T> {
  * @returns {UseDocResult<T>} Object with data, isLoading, error.
  */
 export function useDoc<T = any>(
-  memoizedDocRef: DocumentReference<DocumentData> | null | undefined,
+  collectionName: string,
 ): UseDocResult<T> {
-  type StateDataType = WithId<T> | null;
+  type StateDataType = WithId<T>[] | null;
 
   const [data, setData] = useState<StateDataType>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
+  const firestore = useFirestore();
 
   useEffect(() => {
-    if (!memoizedDocRef) {
+    if (!firestore) {
       setData(null);
       setIsLoading(false);
       setError(null);
@@ -57,37 +62,28 @@ export function useDoc<T = any>(
 
     setIsLoading(true);
     setError(null);
-    // Optional: setData(null); // Clear previous data instantly
-
-    const unsubscribe = onSnapshot(
-      memoizedDocRef,
-      (snapshot: DocumentSnapshot<DocumentData>) => {
-        if (snapshot.exists()) {
-          setData({ ...(snapshot.data() as T), id: snapshot.id });
-        } else {
-          // Document does not exist
-          setData(null);
+    
+    const fetchData = async () => {
+        try {
+            const collectionRef = collection(firestore, collectionName);
+            const snapshot = await getDocs(collectionRef);
+            
+            if (snapshot.empty) {
+                setData([]);
+            } else {
+                const results = snapshot.docs.map(doc => ({ ...doc.data() as T, id: doc.id }));
+                setData(results);
+            }
+        } catch (err: any) {
+            setError(err);
+        } finally {
+            setIsLoading(false);
         }
-        setError(null); // Clear any previous error on successful snapshot (even if doc doesn't exist)
-        setIsLoading(false);
-      },
-      (error: FirestoreError) => {
-        const contextualError = new FirestorePermissionError({
-          operation: 'get',
-          path: memoizedDocRef.path,
-        })
+    }
 
-        setError(contextualError)
-        setData(null)
-        setIsLoading(false)
+    fetchData();
 
-        // trigger global error propagation
-        errorEmitter.emit('permission-error', contextualError);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [memoizedDocRef]); // Re-run if the memoizedDocRef changes.
+  }, [collectionName, firestore]);
 
   return { data, isLoading, error };
 }

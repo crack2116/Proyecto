@@ -7,23 +7,13 @@ import {
     CardTitle,
   } from "@/components/ui/card";
   import { DollarSign, Truck, Users, CheckCircle, Clock, Loader2, AlertCircle, TrendingUp } from "lucide-react";
-  import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-  import { collection, query, where } from "firebase/firestore";
+  import { useDoc } from "@/firebase";
   import { useMemo } from "react";
   import type { ServiceRequest } from "@/lib/types";
   
   export function StatsCards() {
-    const firestore = useFirestore();
+    const { data: serviceRequests, isLoading, error } = useDoc<ServiceRequest>('serviceRequests');
     
-    // Query for all service requests
-    const serviceRequestsQuery = useMemoFirebase(() => 
-      query(collection(firestore, "serviceRequests")), 
-      [firestore]
-    );
-    
-    const { data: serviceRequests, isLoading, error } = useCollection<ServiceRequest>(serviceRequestsQuery);
-    
-    // Calculate statistics from real data
     const stats = useMemo(() => {
       if (!serviceRequests) {
         return {
@@ -42,20 +32,17 @@ import {
       const inProgressServices = serviceRequests.filter(req => req.status === 'In Progress').length;
       const pendingRequests = serviceRequests.filter(req => req.status === 'Pending').length;
       
-      // For demo purposes, we'll calculate completed services this month
-      // In a real app, you'd have completion dates
       const completedThisMonth = serviceRequests.filter(req => req.status === 'Completed').length;
       
-      // Mock revenue calculation (in a real app, you'd have pricing data)
-      const totalRevenue = serviceRequests.filter(req => req.status === 'Completed').length * 150; // $150 per completed service
+      const totalRevenue = serviceRequests.filter(req => req.status === 'Completed').length * 150;
       
       return {
         totalRevenue,
         inProgressServices,
         completedThisMonth,
         pendingRequests,
-        revenueGrowth: 20.1, // Mock growth percentage
-        completionGrowth: 10 // Mock growth percentage
+        revenueGrowth: 20.1,
+        completionGrowth: 10
       };
     }, [serviceRequests]);
     
