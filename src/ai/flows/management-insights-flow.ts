@@ -9,6 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const ManagementInsightsInputSchema = z.object({
   totalServices: z.number().describe('Cantidad total de servicios en el período.'),
@@ -41,7 +42,6 @@ export async function generateManagementInsights(input: ManagementInsightsInput)
 
 const prompt = ai.definePrompt({
   name: 'managementInsightsPrompt',
-  model: 'googleai/gemini-pro',
   input: {schema: ManagementInsightsInputSchema},
   output: {schema: ManagementInsightsOutputSchema},
   prompt: `Eres un consultor de negocios experto en la industria del transporte y la logística, trabajando para "Mewing Transport Manager". Tu tarea es analizar los siguientes KPIs (Key Performance Indicators) y generar un reporte conciso y accionable para la gerencia.
@@ -72,7 +72,13 @@ const managementInsightsFlow = ai.defineFlow(
     outputSchema: ManagementInsightsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+        model: googleAI.model('gemini-1.5-flash-latest'),
+        prompt: {
+            ...prompt,
+            input
+        }
+    });
     // When an output schema is defined, Genkit returns a parsed object in the 'output' property.
     return output!;
   }
