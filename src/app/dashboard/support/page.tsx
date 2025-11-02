@@ -1,7 +1,7 @@
 import { SupportChat } from "@/components/support/support-chat";
 import { Faq } from "@/components/support/faq";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Robot } from "lucide-react";
+import { Bot } from "lucide-react";
 
 export default function SupportPage() {
   return (
