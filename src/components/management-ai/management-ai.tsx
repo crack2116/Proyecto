@@ -11,7 +11,6 @@ import type { ServiceRequest } from "@/lib/types";
 import { useMemo } from "react";
 import { generateManagementInsights, ManagementInsightsOutput } from "@/ai/flows/management-insights-flow";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
-import { googleAI } from '@genkit-ai/google-genai';
 
 export function ManagementAI() {
   const { toast } = useToast();

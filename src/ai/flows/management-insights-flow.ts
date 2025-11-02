@@ -9,7 +9,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 
 const ManagementInsightsInputSchema = z.object({
   totalServices: z.number().describe('Cantidad total de servicios en el período.'),
@@ -42,6 +41,7 @@ export async function generateManagementInsights(input: ManagementInsightsInput)
 
 const prompt = ai.definePrompt({
   name: 'managementInsightsPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: ManagementInsightsInputSchema},
   output: {schema: ManagementInsightsOutputSchema},
   prompt: `Eres un consultor de negocios experto en la industria del transporte y la logística, trabajando para "Mewing Transport Manager". Tu tarea es analizar los siguientes KPIs (Key Performance Indicators) y generar un reporte conciso y accionable para la gerencia.
