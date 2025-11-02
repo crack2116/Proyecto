@@ -32,7 +32,6 @@ const supportChatFlow = ai.defineFlow(
       - Gestión: Administra Clientes, Conductores y Vehículos.
       - Seguimiento en Tiempo Real: Muestra la ubicación de los vehículos en un mapa.
       - Reportes: Genera reportes de rendimiento y utilización.
-      - IA Gerencial: Ofrece análisis y recomendaciones estratégicas basadas en KPIs.
       - Perfil: Permite al usuario ver y editar su información.
 
       Instrucciones:

@@ -27,6 +27,7 @@ const navItems = [
   { href: "/dashboard/management", icon: Users, label: "Gestión" },
   { href: "/dashboard/tracking", icon: Map, label: "Seguimiento en Tiempo Real" },
   { href: "/dashboard/reports", icon: BarChart3, label: "Reportes" },
+  { href: "/dashboard/support", icon: BrainCircuit, label: "Asistente IA" },
   { href: "/dashboard/profile", icon: UserCircle, label: "Mi Perfil" },
 ];
 
