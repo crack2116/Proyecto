@@ -77,7 +77,7 @@ const managementInsightsFlow = ai.defineFlow(
         ...prompt,
         input,
       },
-      model: googleAI.model('gemini-pro'),
+      model: 'gemini-pro',
     });
     // When an output schema is defined, Genkit returns a parsed object in the 'output' property.
     return output!;
