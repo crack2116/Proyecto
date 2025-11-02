@@ -27,13 +27,6 @@ const navItems = [
   { href: "/dashboard/management", icon: Users, label: "Gestión" },
   { href: "/dashboard/tracking", icon: Map, label: "Seguimiento en Tiempo Real" },
   { href: "/dashboard/reports", icon: BarChart3, label: "Reportes" },
-  { 
-    href: "/dashboard/management-ai", 
-    icon: BrainCircuit, 
-    label: "IA Gerencial",
-    adminOnly: true 
-  },
-  { href: "/dashboard/support", icon: LifeBuoy, label: "Soporte" },
   { href: "/dashboard/profile", icon: UserCircle, label: "Mi Perfil" },
 ];
 
@@ -61,10 +54,6 @@ export function Nav() {
             </Link>
           </SidebarMenuItem>
         );
-
-        if (item.adminOnly) {
-          return <Protected key={item.href} requireAdmin>{menuItem}</Protected>;
-        }
         
         return menuItem;
       })}
