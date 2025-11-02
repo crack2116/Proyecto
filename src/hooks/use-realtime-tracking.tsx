@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useDoc } from "@/firebase";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import type { Vehicle } from "@/lib/types";
+import { collection, query } from "firebase/firestore";
 
 // Extiende el tipo Vehicle para incluir los campos de tracking en tiempo real
 type VehicleLocation = Vehicle & {
@@ -25,9 +26,16 @@ type UseRealtimeTrackingOptions = {
 export function useRealtimeTracking(options: UseRealtimeTrackingOptions = {}) {
   const { enabled = true } = options;
   const [isActive, setIsActive] = useState(enabled);
+  const firestore = useFirestore();
 
-  // Obtener datos directamente de Firebase
-  const { data: firebaseVehicles, isLoading: isFirebaseLoading, error } = useDoc<VehicleLocation>('vehicles');
+  // Crear una consulta de Firestore válida
+  const vehiclesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "vehicles"));
+  }, [firestore]);
+
+  // Obtener datos directamente de Firebase usando la consulta
+  const { data: firebaseVehicles, isLoading: isFirebaseLoading, error } = useDoc<VehicleLocation>(vehiclesQuery);
 
   const vehicles = (firebaseVehicles || []).map(v => ({
     ...v,
