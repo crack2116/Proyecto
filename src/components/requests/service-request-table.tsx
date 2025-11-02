@@ -20,7 +20,7 @@ import {
   import { Button } from "../ui/button";
   import { MoreHorizontal, Loader2, AlertCircle, Copy, UserPlus, Edit, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useDoc } from "@/firebase";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import type { ServiceRequest } from "@/lib/types";
 import { 
   updateRequestStatus, 
@@ -28,10 +28,18 @@ import {
   cancelRequest, 
   deleteRequest 
 } from "@/lib/firebase-service-requests";
+import { collection, query } from "firebase/firestore";
   
   export function ServiceRequestTable() {
     const { toast } = useToast();
-    const { data: serviceRequests, isLoading, error } = useDoc<ServiceRequest>('serviceRequests');
+    const firestore = useFirestore();
+
+    const serviceRequestsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'serviceRequests'));
+    }, [firestore]);
+
+    const { data: serviceRequests, isLoading, error } = useDoc<ServiceRequest>(serviceRequestsQuery);
 
     const statusTranslations: { [key: string]: string } = {
         "Completed": "Completado",
@@ -211,4 +219,3 @@ import {
         </Card>
     );
   }
-  

@@ -18,7 +18,7 @@ import {
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
-  import { useDoc } from "@/firebase";
+  import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
   import type { Client } from "@/lib/types";
   import {
     Dialog,
@@ -37,13 +37,20 @@ import { TableFilters } from "@/components/ui/table-filters";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { Protected } from "@/components/permissions/protected";
 import { usePermissions } from "@/hooks/use-permissions";
-import { doc } from "firebase/firestore";
+import { doc, collection, query } from "firebase/firestore";
 
   
   export function ClientsTable() {
     const { toast } = useToast();
     const { canCreate, canUpdate, canDelete } = usePermissions();
-    const { data: clients, isLoading } = useDoc<Client>('clients');
+    const firestore = useFirestore();
+
+    const clientsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'clients'));
+    }, [firestore]);
+    
+    const { data: clients, isLoading } = useDoc<Client>(clientsQuery);
     
     const {
       paginatedData,

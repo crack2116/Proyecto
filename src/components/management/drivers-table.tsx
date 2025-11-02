@@ -18,7 +18,7 @@ import {
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
-  import { useDoc } from "@/firebase";
+  import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
   import type { Driver } from "@/lib/types";
   import {
     Dialog,
@@ -31,11 +31,18 @@ import {
   import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
   import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
   import { useToast } from "@/hooks/use-toast";
-  import { doc } from "firebase/firestore";
+  import { doc, collection, query } from "firebase/firestore";
   
   export function DriversTable() {
     const { toast } = useToast();
-    const { data: drivers, isLoading } = useDoc<Driver>('drivers');
+    const firestore = useFirestore();
+
+    const driversQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'drivers'));
+    }, [firestore]);
+
+    const { data: drivers, isLoading } = useDoc<Driver>(driversQuery);
 
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [editingDriver, setEditingDriver] = React.useState<Driver | null>(null);

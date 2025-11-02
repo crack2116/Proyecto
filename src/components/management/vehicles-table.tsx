@@ -18,7 +18,7 @@ import {
   } from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
   import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
-  import { useDoc } from "@/firebase";
+  import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
   import type { Vehicle } from "@/lib/types";
   import {
     Dialog,
@@ -33,11 +33,18 @@ import {
   import { useToast } from "@/hooks/use-toast";
   import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
-import { doc } from "firebase/firestore";
+import { doc, collection, query } from "firebase/firestore";
   
   export function VehiclesTable() {
     const { toast } = useToast();
-    const { data: vehicles, isLoading } = useDoc<Vehicle>('vehicles');
+    const firestore = useFirestore();
+
+    const vehiclesQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'vehicles'));
+    }, [firestore]);
+
+    const { data: vehicles, isLoading } = useDoc<Vehicle>(vehiclesQuery);
 
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [editingVehicle, setEditingVehicle] = React.useState<Vehicle | null>(null);
