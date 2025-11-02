@@ -74,12 +74,12 @@ const managementInsightsFlow = ai.defineFlow(
   async input => {
     const {output} = await ai.generate({
         model: googleAI.model('gemini-1.5-flash-latest'),
-        prompt: {
-            ...prompt,
-            input
-        }
+        prompt: prompt.prompt,
+        input: input,
+        output: {
+            schema: ManagementInsightsOutputSchema,
+        },
     });
-    // When an output schema is defined, Genkit returns a parsed object in the 'output' property.
     return output!;
   }
 );
