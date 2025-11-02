@@ -9,7 +9,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 
 const ManagementInsightsInputSchema = z.object({
   totalServices: z.number().describe('Cantidad total de servicios en el período.'),
@@ -40,11 +39,7 @@ export async function generateManagementInsights(input: ManagementInsightsInput)
   return managementInsightsFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'managementInsightsPrompt',
-  input: {schema: ManagementInsightsInputSchema},
-  output: {schema: ManagementInsightsOutputSchema},
-  prompt: `Eres un consultor de negocios experto en la industria del transporte y la logística, trabajando para "Mewing Transport Manager". Tu tarea es analizar los siguientes KPIs (Key Performance Indicators) y generar un reporte conciso y accionable para la gerencia.
+const prompt = `Eres un consultor de negocios experto en la industria del transporte y la logística, trabajando para "Mewing Transport Manager". Tu tarea es analizar los siguientes KPIs (Key Performance Indicators) y generar un reporte conciso y accionable para la gerencia.
 
 ### KPIs del Período Actual:
 - **Servicios Totales**: {{{totalServices}}}
@@ -62,8 +57,7 @@ Basándote en estos datos, genera el siguiente análisis en formato JSON:
 3.  **Áreas de Mejora**: Identifica 2 o 3 debilidades o áreas de oportunidad críticas. ¿Dónde hay problemas o potencial no explotado?
 4.  **Recomendaciones Accionables**: Proporciona 3 recomendaciones específicas que la gerencia pueda implementar. Para cada recomendación, incluye una justificación basada en los datos y el impacto esperado.
 
-Sé directo, profesional y enfócate en dar valor estratégico. Usa un lenguaje claro y de negocios.`,
-});
+Sé directo, profesional y enfócate en dar valor estratégico. Usa un lenguaje claro y de negocios.`;
 
 const managementInsightsFlow = ai.defineFlow(
   {
@@ -73,8 +67,8 @@ const managementInsightsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await ai.generate({
-        model: googleAI.model('gemini-1.5-flash-latest'),
-        prompt: prompt.prompt,
+        model: 'googleai/gemini-1.5-flash-latest',
+        prompt: prompt,
         input: input,
         output: {
             schema: ManagementInsightsOutputSchema,
